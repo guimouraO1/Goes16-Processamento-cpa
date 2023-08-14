@@ -15,6 +15,10 @@ import cartopy.io.shapereader as shpreader  # Utilitario para leitura de shapefi
 from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
 from libs.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
 from multiprocessing import Process  # Utilitario para multiprocessamento
+from shutil import copyfile  # Utilitario para copia de arquivos
+from shapely.geometry import Point
+import cartopy.feature as cfeature # features
+
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 
