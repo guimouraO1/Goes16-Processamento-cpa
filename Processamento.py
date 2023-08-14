@@ -5,19 +5,17 @@
 # ====================================================================================================== #
 # Manipulando imagens GOES-16 NetCDF's
 # ===================================# Bibliotecas necessarias ========================================= #
-
-import datetime  # Utilitario para datas e horas
+import datetime
 import logging  # Utilitario para criar os logs
 import time     
 from modulos.check_new_images import check_images # Checa as se há novas imagens para processamento
-from modulos.processing import process_gif, processing # Processa imagens
+from modulos.process import process_gif, processing # Processa imagens
 from modulos.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modulos.remove_images import remove_images
 from modulos.quantity_products import quantity_products
 from modulos.send_products import send_products
 
 # ===================================# Bibliotecas necessarias ========================================= #
-
 
 
 # ============================================# Variaveis ============================================== #
@@ -33,31 +31,31 @@ arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(dateti
 # ============================================# Variaveis ============================================== #
 
 
-# ============================================# Main ============================================== #
-
+# ============================================# Bands Dicionario ============================================== #
 
 # Dicionarios das bandas key : value
 bands = {}
 
-# Todas as bandas da 01 a 21 recebem False
+# Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
 for num in range(1, 22):
     b = str(num).zfill(2)
     bands[f'{b}'] = False
-
 br = True
 sp = True
 
+# ============================================# Bands Dicionario ============================================== #
+
+# ============================================# Main ============================================== #
 
 # configura o log
 conf_log(arq_log)
-# Pega a hora para fazer o calculo do tempo de processamento (log)
+# Log start time
 start = time.time()
-
-# Realizando a checagem de novas imagens para processamento
+# Retorna o dicionario de bandas recebendo key : value (True/False) para saber quais imagens são novas
 bands = check_images(bands, dir_in, dir_temp)
 
 # Realiza etapas de processamento se houver alguma nova imagem para todas as bandas
-if any(bands[key] for key in bands): # Se qualquer banda 'key': True   execute ->
+if any(bands[key] for key in bands): # Se qualquer banda 'key': True   execute o processamento da banda ->
     # Realiza processamento da imagens
     bands = processing(bands, br, sp)
     # Remove imagens processadas no caso o .nc
@@ -68,7 +66,6 @@ if any(bands[key] for key in bands): # Se qualquer banda 'key': True   execute -
     process_gif(bands, br, sp)
     # Envia as imagens para o site cpa.unicamp
     # send_products(s_br, s_sp, dir_our)
-
 else:
     logging.info("")
     logging.info("SEM NOVAS IMAGENS PARA PROCESSAMENTO")

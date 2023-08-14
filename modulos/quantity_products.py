@@ -3,7 +3,6 @@ import os
 import re
 
 def quantity_products(dir_out):
-
     logging.info("")
     logging.info("VERIFICANDO NUMERO DE PRODUTOS...")
     aux = False

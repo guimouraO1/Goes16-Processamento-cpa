@@ -12,16 +12,16 @@ import numpy as np  # Suporte para arrays e matrizes multidimensionais, com dive
 import cartopy  # Inserir mapas, shapefiles, paralelos, meridianos, latitudes, longitudes, etc.
 import cartopy.crs as ccrs  # Utilitario para sistemas de referência e coordenadas
 import cartopy.io.shapereader as shpreader  # Utilitario para leitura de shapefiles
-from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
-from libs.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
+from utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
+from utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
 from multiprocessing import Process  # Utilitario para multiprocessamento
 from shutil import copyfile  # Utilitario para copia de arquivos
 from shapely.geometry import Point
 import cartopy.feature as cfeature # features
-
+from multiprocessing import Process  # Utilitario para multiprocessamento
+from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
-
 
 dir_in = "/home/guimoura/download_amazon/goes/"
 dir_main = "/home/guimoura/download_amazon/"
@@ -33,6 +33,148 @@ dir_logos = dir_main + "logos/"
 dir_temp = dir_main + "temp/"
 arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(datetime.date.today()) + ".log"
 
+def process_band_cmi(file, ch, v_extent):
+    global dir_shapefiles, dir_colortables, dir_logos, dir_out
+    file_var = 'CMI'
+    # Captura a hora para contagem do tempo de processamento da imagem
+    processing_start_time = time.time()
+    # Area de interesse para recorte
+    if v_extent == 'br':
+        # Brasil
+        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
+        # Choose the image resolution (the higher the number the faster the processing is)
+        resolution = 4.0
+    elif v_extent == 'sp':
+        # São Paulo
+        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
+        # Choose the image resolution (the higher the number the faster the processing is)
+        resolution = 1.0
+    else:
+        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+        resolution = 2.0
+
+    # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
+    dtime, satellite, reproject_band = reproject(file, file_var, v_extent, resolution)
+
+    if 1 <= int(ch) <= 6:
+        data = reproject_band.ReadAsArray()
+    else:
+        data = reproject_band.ReadAsArray() - 273.15
+    reproject_band = None
+    del reproject_band
+
+    # Comprimentos de ondas do canais ABI
+    wavelenghts = ['[]', '[0.47 μm]', '[0.64 μm]', '[0.865 μm]', '[1.378 μm]', '[1.61 μm]', '[2.25 μm]', '[3.90 μm]', '[6.19 μm]',
+                   '[6.95 μm]', '[7.34 μm]', '[8.50 μm]', '[9.61 μm]', '[10.35 μm]', '[11.20 μm]', '[12.30 μm]', '[13.30 μm]']
+
+    # Formatando data para plotar na imagem e salvar o arquivo
+    date = (datetime.datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+
+    # Definindo unidade de medida da imagem de acordo com o canal
+    if 1 <= int(ch) <= 6:
+        unit = "Albedo (%)"
+    else:
+        unit = "Brightness Temperature [°C]"
+    # Formatando a descricao a ser plotada na imagem
+    description = f" GOES-{satellite} ABI CMI Band {ch} {wavelenghts[int(ch)]} {unit} {date_img}"
+    institution = "CEPAGRI - UNICAMP"
+
+    # Definindo tamanho da imagem de saida
+    d_p_i = 150
+    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+
+    # Utilizando projecao geoestacionaria no cartopy
+    ax = plt.axes(projection=ccrs.PlateCarree())
+
+    if v_extent == 'br':
+        # Adicionando o shapefile dos estados brasileiros
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+    elif v_extent == 'sp':
+        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+
+    # Adicionando  linhas dos litorais
+    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
+    # Adicionando  linhas das fronteiras
+    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
+    # Adicionando  paralelos e meridianos
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
+    gl.top_labels = False
+    gl.right_labels = False
+
+    # Definindo a paleta de cores da imagem de acordo com o canal
+    # Convertendo um arquivo CPT para ser usado em Python atraves da funcao loadCPT
+    # CPT archive: http://soliton.vm.bytemark.co.uk/pub/cpt-city/
+    if 1 <= int(ch) <= 6:
+        cpt = load_cpt(dir_colortables + 'Square Root Visible Enhancement.cpt')
+    elif int(ch) == 7:
+        cpt = load_cpt(dir_colortables + 'SVGAIR2_TEMP.cpt')
+    elif 8 <= int(ch) <= 10:
+        cpt = load_cpt(dir_colortables + 'SVGAWVX_TEMP.cpt')
+    else:
+        cpt = load_cpt(dir_colortables + 'IR4AVHRR6.cpt')
+    my_cmap = cm.colors.LinearSegmentedColormap('cpt', cpt)  # Criando uma paleta de cores personalizada
+
+    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
+
+    # Plotando a imagem
+    # Definindo os valores maximos e minimos da imagem de acordo com o canal e paleta de cores utilizada
+    if 1 <= int(ch) <= 6:
+        img = ax.imshow(data, origin='upper', vmin=0, vmax=1, cmap=my_cmap, extent=img_extent)
+    elif 7 <= int(ch) <= 10:
+        img = ax.imshow(data, origin='upper', vmin=-112.15, vmax=56.85, cmap=my_cmap, extent=img_extent)
+    else:
+        img = ax.imshow(data, origin='upper', vmin=-103, vmax=84, cmap=my_cmap, extent=img_extent)
+
+    # Adicionando barra da paleta de cores de acordo com o canal
+    # Criando novos eixos de acordo com a posicao da imagem
+    cax0 = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.01325, ax.get_position().width, 0.0125])
+    if 1 <= int(ch) <= 6:
+        cb = plt.colorbar(img, orientation="horizontal", cax=cax0, ticks=[0.2, 0.4, 0.6, 0.8])
+        cb.ax.set_xticklabels(['0.2', '0.4', '0.6', '0.8'])
+        cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+    elif 7 <= int(ch) <= 10:
+        cb = plt.colorbar(img, orientation="horizontal", cax=cax0)
+        cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+    else:
+        cb = plt.colorbar(img, orientation="horizontal", cax=cax0)
+        cb.ax.tick_params(axis='x', colors='gray', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+    cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
+    cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
+    cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
+
+    # Adicionando descricao da imagem
+    # Criando novos eixos de acordo com a posicao da imagem
+    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
+    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
+    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
+    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
+    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+
+    # Adicionando os logos
+    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
+    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
+    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
+    fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+
+    # Salvando a imagem de saida
+    plt.savefig(f'{dir_out}band{ch}/band{ch}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+    # Fecha a janela para limpar a memoria
+    plt.close()
+    # Realiza o log do calculo do tempo de processamento da imagem
+    logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 def process_gif(g_bands, g_br, g_sp):
     global dir_out
@@ -1186,149 +1328,6 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{fdcf} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
-def process_band_cmi(file, ch, v_extent):
-    global dir_shapefiles, dir_colortables, dir_logos, dir_out
-    file_var = 'CMI'
-    # Captura a hora para contagem do tempo de processamento da imagem
-    processing_start_time = time.time()
-    # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 4.0
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 1.0
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
-        resolution = 2.0
-
-    # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
-    dtime, satellite, reproject_band = reproject(file, file_var, v_extent, resolution)
-
-    if 1 <= int(ch) <= 6:
-        data = reproject_band.ReadAsArray()
-    else:
-        data = reproject_band.ReadAsArray() - 273.15
-    reproject_band = None
-    del reproject_band
-
-    # Comprimentos de ondas do canais ABI
-    wavelenghts = ['[]', '[0.47 μm]', '[0.64 μm]', '[0.865 μm]', '[1.378 μm]', '[1.61 μm]', '[2.25 μm]', '[3.90 μm]', '[6.19 μm]',
-                   '[6.95 μm]', '[7.34 μm]', '[8.50 μm]', '[9.61 μm]', '[10.35 μm]', '[11.20 μm]', '[12.30 μm]', '[13.30 μm]']
-
-    # Formatando data para plotar na imagem e salvar o arquivo
-    date = (datetime.datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
-    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
-    date_file = date.strftime('%Y%m%d_%H%M%S')
-
-    # Definindo unidade de medida da imagem de acordo com o canal
-    if 1 <= int(ch) <= 6:
-        unit = "Albedo (%)"
-    else:
-        unit = "Brightness Temperature [°C]"
-    # Formatando a descricao a ser plotada na imagem
-    description = f" GOES-{satellite} ABI CMI Band {ch} {wavelenghts[int(ch)]} {unit} {date_img}"
-    institution = "CEPAGRI - UNICAMP"
-
-    # Definindo tamanho da imagem de saida
-    d_p_i = 150
-    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
-
-    # Utilizando projecao geoestacionaria no cartopy
-    ax = plt.axes(projection=ccrs.PlateCarree())
-
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
-
-    # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
-
-    # Definindo a paleta de cores da imagem de acordo com o canal
-    # Convertendo um arquivo CPT para ser usado em Python atraves da funcao loadCPT
-    # CPT archive: http://soliton.vm.bytemark.co.uk/pub/cpt-city/
-    if 1 <= int(ch) <= 6:
-        cpt = load_cpt(dir_colortables + 'Square Root Visible Enhancement.cpt')
-    elif int(ch) == 7:
-        cpt = load_cpt(dir_colortables + 'SVGAIR2_TEMP.cpt')
-    elif 8 <= int(ch) <= 10:
-        cpt = load_cpt(dir_colortables + 'SVGAWVX_TEMP.cpt')
-    else:
-        cpt = load_cpt(dir_colortables + 'IR4AVHRR6.cpt')
-    my_cmap = cm.colors.LinearSegmentedColormap('cpt', cpt)  # Criando uma paleta de cores personalizada
-
-    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
-    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
-
-    # Plotando a imagem
-    # Definindo os valores maximos e minimos da imagem de acordo com o canal e paleta de cores utilizada
-    if 1 <= int(ch) <= 6:
-        img = ax.imshow(data, origin='upper', vmin=0, vmax=1, cmap=my_cmap, extent=img_extent)
-    elif 7 <= int(ch) <= 10:
-        img = ax.imshow(data, origin='upper', vmin=-112.15, vmax=56.85, cmap=my_cmap, extent=img_extent)
-    else:
-        img = ax.imshow(data, origin='upper', vmin=-103, vmax=84, cmap=my_cmap, extent=img_extent)
-
-    # Adicionando barra da paleta de cores de acordo com o canal
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax0 = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.01325, ax.get_position().width, 0.0125])
-    if 1 <= int(ch) <= 6:
-        cb = plt.colorbar(img, orientation="horizontal", cax=cax0, ticks=[0.2, 0.4, 0.6, 0.8])
-        cb.ax.set_xticklabels(['0.2', '0.4', '0.6', '0.8'])
-        cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
-    elif 7 <= int(ch) <= 10:
-        cb = plt.colorbar(img, orientation="horizontal", cax=cax0)
-        cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
-    else:
-        cb = plt.colorbar(img, orientation="horizontal", cax=cax0)
-        cb.ax.tick_params(axis='x', colors='gray', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
-    cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
-    cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
-    cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
-
-    # Adicionando descricao da imagem
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
-
-    # Adicionando os logos
-    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
-    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
-    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
-    fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
-
-    # Salvando a imagem de saida
-    plt.savefig(f'{dir_out}band{ch}/band{ch}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
-    # Fecha a janela para limpar a memoria
-    plt.close()
-    # Realiza o log do calculo do tempo de processamento da imagem
-    logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
-
 def read_process_file(banda):
     # Le o arquivo de processamento e retorna a lista
     with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
@@ -1344,6 +1343,8 @@ def processing(p_bands, p_br, p_sp):
     ndvi_diario = False
     # Perguntar ao joão
     ultima_diario = []
+
+# ============================================# bands 1-16 BR ============================================== #
 
     # Processando arquivos das bandas do ABI
     # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1392,6 +1393,12 @@ def processing(p_bands, p_br, p_sp):
             process.join()
         # Limpa lista vazia para controle do processamento paralelo
         process_br = []
+
+# ============================================# bands 1-16 BR ============================================== #
+
+
+# ============================================# bands 1-16 SP ============================================== #
+
     # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
     if p_sp:
         logging.info("")
@@ -1439,6 +1446,11 @@ def processing(p_bands, p_br, p_sp):
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
 
+# ============================================# bands 1-16 BR ============================================== #
+
+
+# ============================================# TrueColor BR ============================================== #
+
     # Checagem se e possivel gerar imagem TrueColor
     if p_bands["17"]:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1484,6 +1496,10 @@ def processing(p_bands, p_br, p_sp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_br = []
+# ============================================# TrueColor BR ============================================== #
+
+
+# ============================================# TrueColor SP ============================================== #
         # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
         if p_sp:
             logging.info("")
@@ -1527,7 +1543,10 @@ def processing(p_bands, p_br, p_sp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_sp = []
+# ============================================# TrueColor SP ============================================== #
 
+
+# ============================================# RRQPEF BR ============================================== #
     # Checagem se e possivel gerar imagem RRQPEF
     if p_bands["18"]:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1568,6 +1587,11 @@ def processing(p_bands, p_br, p_sp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_br = []
+
+# ============================================# RRQPEF BR ============================================== #
+
+
+# ============================================# RRQPEF SP ============================================== #
         # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
         if p_sp:
             logging.info("")
@@ -1606,6 +1630,11 @@ def processing(p_bands, p_br, p_sp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_sp = []
+
+# ============================================# RRQPEF SP ============================================== #
+
+
+# ============================================# GLM BR ============================================== #
 
     # Checagem se e possivel gerar imagem GLM
     if p_bands["19"]:
@@ -1651,6 +1680,11 @@ def processing(p_bands, p_br, p_sp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_br = []
+
+# ============================================# GLM BR ============================================== #
+
+
+# ============================================# NDVI BR ============================================== #
 
     # Checagem se e possivel gerar imagem NDVI
     if p_bands["20"]:
@@ -1808,6 +1842,9 @@ def processing(p_bands, p_br, p_sp):
     logging.info("")
     logging.info("PROCESSAMENTO ENCERRADO")
 
+
+# ============================================# NDVI BR ============================================== #
+
+
     # Retorna o dicionario de controle das bandas
     return p_bands
-
