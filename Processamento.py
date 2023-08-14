@@ -14,7 +14,6 @@ from modulos.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modulos.remove_images import remove_images
 from modulos.quantity_products import quantity_products
 from modulos.send_products import send_products
-
 # ===================================# Bibliotecas necessarias ========================================= #
 
 
@@ -32,7 +31,6 @@ arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(dateti
 
 
 # ============================================# Bands Dicionario ============================================== #
-
 # Dicionarios das bandas key : value
 bands = {}
 
@@ -42,11 +40,10 @@ for num in range(1, 22):
     bands[f'{b}'] = False
 br = True
 sp = True
-
 # ============================================# Bands Dicionario ============================================== #
 
-# ============================================# Main ============================================== #
 
+# ============================================# Main ============================================== #
 # configura o log
 conf_log(arq_log)
 # Log start time
@@ -73,5 +70,4 @@ else:
 
 # Finaliza o script
 finalize_log_time(start)
-
 # ============================================# Main ============================================== #

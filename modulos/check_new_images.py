@@ -13,7 +13,7 @@ def read_process_file(banda):
     # Le o arquivo de processamento e retorna a lista
     with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
         return fo.readlines()
-    
+
 # Checagem de imagens novas
 def check_images(c_bands, dir_in, dir_temp):
     logging.info("VERIFICANDO NOVAS IMAGENS")
@@ -53,8 +53,8 @@ def check_images(c_bands, dir_in, dir_temp):
         else:
             return False
 
-
 # ============================================# bands 1-16 ============================================== #
+
     # Contado para checagem de novas imagens nas 16 bandas
     for x in range(1, 17):
         # Transforma o inteiro contador em string e com 2 digitos
