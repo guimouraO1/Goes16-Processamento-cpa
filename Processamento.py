@@ -33,7 +33,6 @@ arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(dateti
 # ============================================# Bands Dicionario ============================================== #
 # Dicionarios das bandas key : value
 bands = {}
-
 # Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
 for num in range(1, 22):
     b = str(num).zfill(2)
@@ -50,12 +49,11 @@ conf_log(arq_log)
 start = time.time()
 # Retorna o dicionario de bandas recebendo key : value (True/False) para saber quais imagens são novas
 bands = check_images(bands, dir_in, dir_temp)
-
-# Realiza etapas de processamento se houver alguma nova imagem para todas as bandas
+# Realiza etapas de processamento se houver alguma nova imagem
 if any(bands[key] for key in bands): # Se qualquer banda 'key': True   execute o processamento da banda ->
     # Realiza processamento da imagens
     bands = processing(bands, br, sp)
-    # Remove imagens processadas no caso o .nc
+    # Remove imagens que já foram processadas
     remove_images(bands, br, sp, dir_temp, dir_in)
     # Controle de quantidade de produtos devemos manter para produção do gif
     quantity_products(dir_out)
@@ -66,8 +64,6 @@ if any(bands[key] for key in bands): # Se qualquer banda 'key': True   execute o
 else:
     logging.info("")
     logging.info("SEM NOVAS IMAGENS PARA PROCESSAMENTO")
-
-
 # Finaliza o script
 finalize_log_time(start)
 # ============================================# Main ============================================== #

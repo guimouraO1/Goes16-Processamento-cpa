@@ -13,48 +13,51 @@ def read_process_file(banda):
     # Le o arquivo de processamento e retorna a lista
     with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
         return fo.readlines()
+    
+
+def alphanumeric_key(text):
+    """Return a key based on letters and digits in `text`."""
+    return [c.lower() for c in text if c in ascii_letters + digits]
+
+
+# Ordena lista e cria novo arquivo new.txt em temp/
+def write_new_file(banda, file):
+    # Ordena de forma alfabetica a lista
+    file.sort(key=alphanumeric_key)
+    # Cria o arquivo com as novas imagens que estao na lista
+    with open(f'{dir_temp}{banda}_new.txt', 'w') as fo:
+        fo.writelines(map(lambda f: f + '\n', file))
+
+
+def write_process_file(banda):
+    # Cria o arquivo band??_old.txt se nao existe
+    if not os.path.isfile(f'{dir_temp}{banda}_old.txt'):
+        with open(f'{dir_temp}{banda}_old.txt', 'w') as fo:
+            fo.close()
+
+    # Le os arquivos band??_old.txt e band??_new.txt
+    with open(f'{dir_temp}{banda}_old.txt', 'r') as old, open(f'{dir_temp}{banda}_new.txt', 'r') as new:
+        differ = Differ()
+        # Realiza a comparacao entre os arquivos e cria uma lista de imagens que estao unicamente no arquivo band??_new.txt
+        process_list = [line.strip()[2::] for line in differ.compare(old.readlines(), new.readlines()) if line.startswith('+')]
+        print(process_list)
+
+    # Cria o arquivo band??_process.txt com as imagens para processamento
+    with open(f'{dir_temp}{banda}_process.txt', 'w') as process:
+        # Escreve as imagens da lista no arquivo, sendo cada uma em uma linha
+        process.writelines(map(lambda f: f + '\n', process_list))
+
+    # Se houveram imagens para processamento, retorna True, caso contrario retorna False
+    if process_list:
+        return True
+    else:
+        return False
 
 # Checagem de imagens novas
 def check_images(c_bands, dir_in, dir_temp):
     logging.info("VERIFICANDO NOVAS IMAGENS")
 
-    def alphanumeric_key(text):
-        """Return a key based on letters and digits in `text`."""
-        return [c.lower() for c in text if c in ascii_letters + digits]
-    # Ordena lista e cria novo arquivo new.txt em temp/
-    def write_new_file(banda, file):
-        # Ordena de forma alfabetica a lista
-        file.sort(key=alphanumeric_key)
-        # Cria o arquivo com as novas imagens que estao na lista
-        with open(f'{dir_temp}{banda}_new.txt', 'w') as fo:
-            fo.writelines(map(lambda f: f + '\n', file))
-
-    def write_process_file(banda):
-        # Cria o arquivo band??_old.txt se nao existe
-        if not os.path.isfile(f'{dir_temp}{banda}_old.txt'):
-            with open(f'{dir_temp}{banda}_old.txt', 'w') as fo:
-                fo.close()
-
-        # Le os arquivos band??_old.txt e band??_new.txt
-        with open(f'{dir_temp}{banda}_old.txt', 'r') as old, open(f'{dir_temp}{banda}_new.txt', 'r') as new:
-            differ = Differ()
-            # Realiza a comparacao entre os arquivos e cria uma lista de imagens que estao unicamente no arquivo band??_new.txt
-            process_list = [line.strip()[2::] for line in differ.compare(old.readlines(), new.readlines()) if line.startswith('+')]
-            print(process_list)
-
-        # Cria o arquivo band??_process.txt com as imagens para processamento
-        with open(f'{dir_temp}{banda}_process.txt', 'w') as process:
-            # Escreve as imagens da lista no arquivo, sendo cada uma em uma linha
-            process.writelines(map(lambda f: f + '\n', process_list))
-
-        # Se houveram imagens para processamento, retorna True, caso contrario retorna False
-        if process_list:
-            return True
-        else:
-            return False
-
 # ============================================# bands 1-16 ============================================== #
-
     # Contado para checagem de novas imagens nas 16 bandas
     for x in range(1, 17):
         # Transforma o inteiro contador em string e com 2 digitos
@@ -78,9 +81,9 @@ def check_images(c_bands, dir_in, dir_temp):
         else:
             c_bands[b] = False
             logging.info(f'Sem novas imagens Banda {b}')
-
 # ============================================# bands 1-16 ============================================== #
     
+
 # ============================================# truecolor ============================================== #
     # Checagem de novas imagens truecolor (Band 17)
     if c_bands["01"] and c_bands["02"] and c_bands["03"]:
@@ -118,6 +121,7 @@ def check_images(c_bands, dir_in, dir_temp):
         logging.info(f'Sem novas imagens TRUECOLOR')
 # ============================================# truecolor ============================================== #
 
+
 # ============================================# rrqpef ============================================== #
     # Checagem de novas imagens rrqpef (Band 18)
     if c_bands["13"]:
@@ -153,8 +157,8 @@ def check_images(c_bands, dir_in, dir_temp):
             logging.info(f'Sem novas imagens RRQPEF')
     else:
         logging.info(f'Sem novas imagens RRQPEF')
-
 # ============================================# rrqpef ============================================== #
+
 
 # ============================================# GLM ============================================== #
     # Checagem de novas imagens GLM (Band 19)
@@ -203,8 +207,8 @@ def check_images(c_bands, dir_in, dir_temp):
         logging.info(f'Sem novas imagens GLM')
 # ============================================# GLM ============================================== #
 
-# ============================================# NDVI ============================================== #
 
+# ============================================# NDVI ============================================== #
     # Checagem de novas imagens ndvi (Band 20)
     if c_bands["02"] and c_bands["03"]:
         # Carrega os arquivos de processamento das bandas para composicao do ndvi
