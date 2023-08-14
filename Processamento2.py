@@ -90,6 +90,7 @@ def check_images(c_bands):
         b = str(x).zfill(2)
         # Cria uma lista com os itens presentes no diretorio da banda que sao arquivo e terminam com ".nc"
         imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f)]
+
         # Se houver arquivos na lista, realiza o organizacao dos arquivos de controle e processamento, caso contrario aponta False no dicionario de controle das bandas
         if imagens:
             # Cria o arquivo com a nova lista de imagens
@@ -2395,7 +2396,7 @@ dir_logos = dir_main + "logos/"
 dir_temp = dir_main + "temp/"
 arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(datetime.date.today()) + ".log"
 
-bands = {"01": True, "02": False, "03": False, "04": False, "05": False, "06": False, "07": False, "08": False,
+bands = {"01": False, "02": False, "03": False, "04": False, "05": False, "06": False, "07": False, "08": False,
          "09": False, "10": False, "11": False, "12": False, "13": False, "14": False, "15": False, "16": False,
          "17": False,  # Band 17 = TrueColor
          "18": False,  # Band 18 = RRQPEF
@@ -2436,8 +2437,7 @@ if bands["01"] or bands["02"] or bands["03"] or bands["04"] or bands["05"] or ba
     quantity_products()
     # Realiza processamento do gif
     process_gif(bands, br, sp)
-    # Envia os produtos para o site
-    #send_products(br, sp)
+
     # Finaliza o script
     finalize(start)
 else:

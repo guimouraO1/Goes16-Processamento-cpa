@@ -31,7 +31,7 @@ import paramiko  # Utilitario para gerencia conexao SSH
 import scp  # Utilitario para envio de arquivos com SCP
 from shutil import copyfile  # Utilitario para copia de arquivos
 from shapely.geometry import Point
-
+import images
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 
 
@@ -43,7 +43,6 @@ def read_process_file(banda):
     # Le o arquivo de processamento e retorna a lista
     with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
         return fo.readlines()
-
 
 def check_images(c_bands):
     global dir_in, dir_temp
@@ -82,6 +81,34 @@ def check_images(c_bands):
             return True
         else:
             return False
+
+    # Contado para checagem de novas imagens nas 16 bandas
+    for x in range(1, 2):
+        # Transforma o inteiro contador em string e com 2 digitos
+        b = str(x).zfill(2)
+        # Cria uma lista com os itens presentes no diretorio da banda que sao arquivo e terminam com ".nc"
+        imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f)]
+
+        # Se houver arquivos na lista, realiza o organizacao dos arquivos de controle e processamento, caso contrario aponta False no dicionario de controle das bandas
+        if imagens:
+            # Cria o arquivo com a nova lista de imagens
+            write_new_file(f'band{b}', imagens)
+            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
+            c_bands[b] = write_process_file(f'band{b}')
+            
+            if c_bands[b]:
+                logging.info(f'Novas imagens Banda {b}')
+            else:
+                logging.info(f'Sem novas imagens Banda {b}')
+                os.remove(f'{dir_temp}band{b}_process.txt')
+            # Transforma o arquivo band??_new.txt para band??_old.txt
+            os.replace(f'{dir_temp}band{b}_new.txt', f'{dir_temp}band{b}_old.txt')
+        else:
+            c_bands[b] = False
+            logging.info(f'Sem novas imagens Banda {b}')
+
+    # Retorna o dicionario de controle das bandas
+    return c_band
 
     # Contado para checagem de novas imagens nas 16 bandas
     for x in range(1, 2):
