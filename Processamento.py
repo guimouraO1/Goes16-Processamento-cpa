@@ -31,7 +31,7 @@ arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(dateti
 
 
 # ============================================# Bands Dicionario ============================================== #
-# Dicionarios das bandas key : value
+# Dicionario das bandas key : value
 bands = {}
 # Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
 for num in range(1, 22):
