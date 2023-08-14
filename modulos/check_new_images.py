@@ -9,16 +9,15 @@ from utilities import download_prod
 dir_main = "/home/guimoura/download_amazon/"
 dir_temp = dir_main + "temp/"
 
+# ============================================# Funções ============================================== #
 def read_process_file(banda):
     # Le o arquivo de processamento e retorna a lista
     with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
         return fo.readlines()
     
-
 def alphanumeric_key(text):
     """Return a key based on letters and digits in `text`."""
     return [c.lower() for c in text if c in ascii_letters + digits]
-
 
 # Ordena lista e cria novo arquivo new.txt em temp/
 def write_new_file(banda, file):
@@ -27,7 +26,6 @@ def write_new_file(banda, file):
     # Cria o arquivo com as novas imagens que estao na lista
     with open(f'{dir_temp}{banda}_new.txt', 'w') as fo:
         fo.writelines(map(lambda f: f + '\n', file))
-
 
 def write_process_file(banda):
     # Cria o arquivo band??_old.txt se nao existe
@@ -52,6 +50,9 @@ def write_process_file(banda):
         return True
     else:
         return False
+# ============================================# Funções ============================================== #
+
+
 
 # Checagem de imagens novas
 def check_images(c_bands, dir_in, dir_temp):
