@@ -104,7 +104,7 @@ Requireds # Packages = conda create --name goes -c conda-forge matplotlib netcdf
 `from modules.check_new_images import check_images`     Checks for new images for processing <br>
 `from modules.process import process_gif, processing`   Processes images <br>
 `from modules.logs import conf_log, finalize_log_time`  Creates log files <br>
-`from modules.remove_images import remove_images`<br>   Remove Images
+`from modules.remove_images import remove_images`  Remove Images <br>
 `from modules.quantity_products import quantity_products` Quantity of products <br> 
 `from modules.send_products import send_products`  Send products for cpa.unicamp.br <br>
 `# ===================================# Necessary Libraries ==================================== #` <br>
