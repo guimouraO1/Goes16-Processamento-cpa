@@ -99,7 +99,7 @@ Requireds # Packages = conda create --name goes -c conda-forge matplotlib netcdf
 
 ´# ================================================================================================= #´
 ´# Manipulando imagens GOES-16 NetCDF's
-´# ===================================# Bibliotecas necessarias ==================================== #´
+´# ===================================# Bibliotecas necessarias ==================================== #´<br>
 ´import datetime´
 ´import logging´  - Utilitario para criar os logs
 ´import time´     
