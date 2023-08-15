@@ -58,15 +58,14 @@ The `vialactea` server does the last processing so that the `netCDF4` data becom
 
 where:
 
-On the `vialactea` server.
-Local `/Scripts/goes/`
+On the `vialactea` server `/Scripts/goes/`
 
 File folders:
 
-`colortable/` 
-`logos/` cepagri logos
-`Poocessamento.py` Script that processes images
-`libs/` contains utilities.py
-`output/` It is the output of processed images
-`shapefiles/` 
-`temp/`
+- `colortable/` 
+- `logos/` cepagri logos
+- `Poocessamento.py` Script that processes images
+- `libs/` contains utilities.py
+- `output/` It is the output of processed images
+- `shapefiles/` 
+- `temp/`
