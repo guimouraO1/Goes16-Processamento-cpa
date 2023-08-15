@@ -8,12 +8,12 @@
 import datetime
 import logging  # Utilitario para criar os logs
 import time     
-from modulos.check_new_images import check_images # Checa as se há novas imagens para processamento
-from modulos.process import process_gif, processing # Processa imagens
-from modulos.logs import conf_log, finalize_log_time # Cria os arquivos de logs
-from modulos.remove_images import remove_images
-from modulos.quantity_products import quantity_products
-from modulos.send_products import send_products
+from modules.check_new_images import check_images # Checa as se há novas imagens para processamento
+from modules.process import process_gif, processing # Processa imagens
+from modules.logs import conf_log, finalize_log_time # Cria os arquivos de logs
+from modules.remove_images import remove_images
+from modules.quantity_products import quantity_products
+from modules.send_products import send_products
 # ===================================# Bibliotecas necessarias ==================================== #
 
 

@@ -2,6 +2,7 @@ import logging
 import os
 import paramiko  # Utilitario para gerencia conexao SSH
 import scp  # Utilitario para envio de arquivos com SCP
+import re
 
 def send_products(s_br, s_sp, dir_out):
 

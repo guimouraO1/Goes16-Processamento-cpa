@@ -1,10 +1,7 @@
 import logging
 import os
 
-dir_main = "/home/guimoura/download_amazon/"
-dir_temp = dir_main + "temp/"
-
-def read_process_file(banda):
+def read_process_file(banda, dir_temp):
     # Le o arquivo de processamento e retorna a lista
     with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
         return fo.readlines()
@@ -21,7 +18,7 @@ def remove_images(r_bands, r_br, r_sp, dir_temp, dir_in):
         # Se o dicionario de controle das bandas apontar True para essa banda, remove a imagem
         if r_bands[b]:
             # Le o arquivo de processamento da banda
-            img = read_process_file(f'band{b}')
+            img = read_process_file(f'band{b}', dir_temp)
             logging.info(f'Removendo imagens banda {b}')
             # Para cada imagem no arquivo, realiza a remocao
             for i in img:
@@ -59,7 +56,7 @@ def remove_images(r_bands, r_br, r_sp, dir_temp, dir_in):
 
     if r_bands["18"]:
         # Le o arquivo de processamento da banda
-        img = read_process_file(f'band18')
+        img = read_process_file(f'band18', dir_temp)
         logging.info(f'Removendo imagens RRQPEF')
         for i in img:
             # Remove possiveis espacos vazios no inicio ou final da string
@@ -91,7 +88,7 @@ def remove_images(r_bands, r_br, r_sp, dir_temp, dir_in):
 
     if r_bands["19"]:
         # Le o arquivo de processamento da banda
-        img = read_process_file("band19")
+        img = read_process_file("band19", dir_temp)
         logging.info(f'Removendo imagens GLM')
         # Para cada imagem no arquivo, realiza a remocao
         for i in img:
@@ -118,7 +115,7 @@ def remove_images(r_bands, r_br, r_sp, dir_temp, dir_in):
 
     if r_bands["21"]:
         # Le o arquivo de processamento da banda
-        img = read_process_file(f'band21')
+        img = read_process_file(f'band21', dir_temp)
         logging.info(f'Removendo imagens FDCF')
         for i in img:
             # Remove possiveis espacos vazios no inicio ou final da string

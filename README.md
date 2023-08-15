@@ -88,3 +88,36 @@ File folders:
 `output/` It is the output of processed images
 `shapefiles/` 
 `temp/`
+`modulos/`
+
+## Sobre o Script
+
+
+Processamento.py - arquivo main
+
+Requireds # Packages = conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
+          # Packages = apt install ffmpeg
+
+´# ================================================================================================= #´
+´# Manipulando imagens GOES-16 NetCDF's
+´# ===================================# Bibliotecas necessarias ==================================== #´
+´import datetime´
+´import logging´  - Utilitario para criar os logs
+´import time´     
+´from modules.check_new_images import check_images - Checa as se há novas imagens para processamento
+´from modules.process import process_gif, processing´ - Processa imagens
+´from modules.logs import conf_log, finalize_log_time´ - Cria os arquivos de logs
+´from modules.remove_images import remove_images´
+´from modules.quantity_products import quantity_products´
+´from modules.send_products import send_products´
+´# ===================================# Bibliotecas necessarias ==================================== #´
+
+
+- O script começa com ´get_dirs´ que é responsável por selecionar as pastas de destinos
+
+- Se precisar modificar os diretórios vá em ´Processamento.py´ ->  ´get_dirs´
+
+- O script então cria um dicionário de dados python para alocar as bandas com chave valor {key: value}.
+
+- Todas as bandas da 01 a 21 recebem False   bands = {"01": False, "02": False......}
+
