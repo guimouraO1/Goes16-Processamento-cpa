@@ -97,21 +97,21 @@ Processamento.py - main file
 Requireds # Packages = conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
           # Packages = apt install ffmpeg
 
-´# ===================================# Necessary Libraries ==================================== #<br>
-´import datetime´   Utility to manipulate date<br>
-´import logging´    Utility to create logs<br>
-´import time´       Utility to manipulate time<br>
-´from modules.check_new_images import check_images´     Checks for new images for processing<br>
-´from modules.process import process_gif, processing´   Processes images<br>
-´from modules.logs import conf_log, finalize_log_time´  Creates log files<br>
-´from modules.remove_images import remove_images´<br>   Remove Images
-´from modules.quantity_products import quantity_products´<br> 
-´from modules.send_products import send_products´<br>   Send products for cpa.unicamp.br
-´# ===================================# Necessary Libraries ==================================== #´<br>
+`# ===================================# Necessary Libraries ==================================== #<br>
+`import datetime`   Utility to manipulate date<br>
+`import logging`    Utility to create logs<br>
+`import time`       Utility to manipulate time<br>
+`from modules.check_new_images import check_images`     Checks for new images for processing<br>
+`from modules.process import process_gif, processing`   Processes images<br>
+`from modules.logs import conf_log, finalize_log_time`  Creates log files<br>
+`from modules.remove_images import remove_images`<br>   Remove Images
+`from modules.quantity_products import quantity_products`<br> 
+`from modules.send_products import send_products`<br>   Send products for cpa.unicamp.br
+`# ===================================# Necessary Libraries ==================================== #`<br>
 
-The script starts with ´get_dirs´ which is responsible for selecting the destination folders.
+The script starts with `get_dirs` which is responsible for selecting the destination folders.
 
-If you need to modify the directories, go to ´Processamento.py´ ->  ´get_dirs´
+If you need to modify the directories, go to `Processamento.py` ->  `get_dirs`
 
 Then, the script creates a Python dictionary to store the bands with key-value pairs {key: value}.
 
