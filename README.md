@@ -62,7 +62,7 @@ On the `vialactea` server `/Scripts/goes/`
 
 File folders:
 
-- `colortable/` 
+- `colortable/`
 - `logos/` cepagri logos
 - `Poocessamento.py` Script that processes images
 - `libs/` contains utilities.py
