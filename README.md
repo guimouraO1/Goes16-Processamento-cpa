@@ -53,6 +53,24 @@ where:
 - `.nc` is netCDF file extension
 
 ## About Processing
+All data is processed on the `okul` server and transferred and copied to the `vialactea` server.
+The `vialactea` server does the last processing so that the `netCDF4` data becomes an image.
+
+where:
+
+On the `vialactea` server `/Scripts/goes/`
+
+File folders:
+
+- `colortable/`
+- `logos/` cepagri logos
+- `Poocessamento.py` Script that processes images
+- `libs/` contains utilities.py
+- `output/` It is the output of processed images
+- `shapefiles/` 
+- `temp/`
+
+## About Processing
 All data is processed on the okul server and transferred and copied to the vialactea server.
 The vialactea server does the last processing so that the netCDF4 data becomes an image.
 
