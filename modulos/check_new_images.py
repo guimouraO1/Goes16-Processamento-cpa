@@ -23,7 +23,7 @@ def alphanumeric_key(text):
 def write_new_file(banda, file):
     # Ordena de forma alfabetica a lista
     file.sort(key=alphanumeric_key)
-    # Cria o arquivo com as novas imagens que estao na lista
+    # Cria o arquivo _new.txt com as novas imagens que estao na lista
     with open(f'{dir_temp}{banda}_new.txt', 'w') as fo:
         fo.writelines(map(lambda f: f + '\n', file))
 
@@ -33,7 +33,7 @@ def write_process_file(banda):
         with open(f'{dir_temp}{banda}_old.txt', 'w') as fo:
             fo.close()
 
-    # Le os arquivos band??_old.txt e band??_new.txt
+    # Compara os arquivos band??_old.txt e band??_new.txt
     with open(f'{dir_temp}{banda}_old.txt', 'r') as old, open(f'{dir_temp}{banda}_new.txt', 'r') as new:
         differ = Differ()
         # Realiza a comparacao entre os arquivos e cria uma lista de imagens que estao unicamente no arquivo band??_new.txt
@@ -51,9 +51,6 @@ def write_process_file(banda):
     else:
         return False
 # ============================================# Funções ============================================== #
-
-
-
 # Checagem de imagens novas
 def check_images(c_bands, dir_in, dir_temp):
     logging.info("VERIFICANDO NOVAS IMAGENS")
@@ -61,7 +58,7 @@ def check_images(c_bands, dir_in, dir_temp):
 # ============================================# bands 1-16 ============================================== #
     # Contado para checagem de novas imagens nas 16 bandas
     for x in range(1, 17):
-        # Transforma o inteiro contador em string e com 2 digitos
+        # Transforma o inteiro co   ntador em string e com 2 digitos
         b = str(x).zfill(2)
         # Cria uma lista com os itens presentes no diretorio da banda que sao arquivo e terminam com ".nc"
         imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f)]
@@ -250,7 +247,6 @@ def check_images(c_bands, dir_in, dir_temp):
         logging.info(f'Sem novas imagens NDVI')
 
 # ============================================# NDVI perguntar para o joao ============================================== #
-
     # Checagem de novas imagens fdcf (Band 21)
     if c_bands["17"]:
         # Carrega os arquivos de processamento do truecolor

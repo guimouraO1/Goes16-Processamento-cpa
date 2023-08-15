@@ -17,17 +17,30 @@ from modulos.send_products import send_products
 # ===================================# Bibliotecas necessarias ==================================== #
 
 
-# ============================================# Variaveis ========================================= #
-dir_in = "/home/guimoura/download_amazon/goes/"
-dir_main = "/home/guimoura/download_amazon/"
-dir_out = dir_main + "output/"
-dir_libs = dir_main + "libs/"
-dir_shapefiles = dir_main + "shapefiles/"
-dir_colortables = dir_main + "colortables/"
-dir_logos = dir_main + "logos/"
-dir_temp = dir_main + "temp/"
-arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(datetime.date.today()) + ".log"
-# ============================================# Variaveis ========================================= #
+# ============================================# Diretórios ========================================= #
+def get_dirs():
+    dir_main = '/home/guimoura/download_amazon/'
+    dirs = {
+        'dir_in': '/home/guimoura/download_amazon/goes/',
+        'dir_main': dir_main,
+        'dir_out': dir_main + 'output/',
+        'dir_libs': dir_main + 'libs/',
+        'dir_shapefiles': dir_main + 'shapefiles/',
+        'dir_colortables': dir_main + 'colortables/',
+        'dir_logos': dir_main + 'logos/',
+        'dir_temp': dir_main + 'temp/',
+        'arq_log': '/home/guimoura/download_amazon/logs/Processamento-GOES_' + str(datetime.date.today()) + '.log'
+    }
+    
+    return dirs
+
+dirs = get_dirs()
+
+arq_log = dirs['arq_log']
+dir_in = dirs['dir_in']
+dir_temp = dirs['dir_temp']
+dir_out = dirs['dir_out']
+# ============================================# Diretórios ========================================= #
 
 
 # ============================================# Bands Dicionario ================================== #
@@ -52,7 +65,7 @@ bands = check_images(bands, dir_in, dir_temp)
 # Realiza etapas de processamento se houver alguma nova imagem
 if any(bands[key] for key in bands): # Se qualquer banda 'key': True -> execute o processamento da banda
     # Realiza processamento da imagens
-    bands = processing(bands, br, sp)
+    bands = processing(bands, br, sp, dir_in, dir_temp)
     # Remove imagens que já foram processadas
     remove_images(bands, br, sp, dir_temp, dir_in)
     # Controle de quantidade de produtos devemos manter para produção do gif

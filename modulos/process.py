@@ -20,18 +20,24 @@ from shapely.geometry import Point
 import cartopy.feature as cfeature # features
 from multiprocessing import Process  # Utilitario para multiprocessamento
 from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
+from Processamento import get_dirs
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 
-dir_in = "/home/guimoura/download_amazon/goes/"
-dir_main = "/home/guimoura/download_amazon/"
-dir_out = dir_main + "output/"
-dir_libs = dir_main + "libs/"
-dir_shapefiles = dir_main + "shapefiles/"
-dir_colortables = dir_main + "colortables/"
-dir_logos = dir_main + "logos/"
-dir_temp = dir_main + "temp/"
-arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(datetime.date.today()) + ".log"
+# ============================================# Diretórios ========================================= #
+dirs = get_dirs()
+
+# Acessando os diretórios usando as chaves do dicionário
+dir_in = dirs['dir_in']
+dir_main = dirs['dir_main']
+dir_out = dirs['dir_out']
+dir_libs = dirs['dir_libs']
+dir_shapefiles = dirs['dir_shapefiles']
+dir_colortables = dirs['dir_colortables']
+dir_logos = dirs['dir_logos']
+dir_temp = dirs['dir_temp']
+arq_log = dirs['arq_log']
+# ============================================# Diretórios ========================================= #
 
 def process_band_cmi(file, ch, v_extent):
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
@@ -1333,8 +1339,8 @@ def read_process_file(banda):
     with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
         return fo.readlines()
 
-def processing(p_bands, p_br, p_sp):
-    global dir_in, dir_temp
+def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
+
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
     # Cria lista vazia para controle processamento paralelo
