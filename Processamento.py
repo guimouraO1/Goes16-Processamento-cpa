@@ -14,26 +14,11 @@ from modules.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modules.remove_images import remove_images
 from modules.quantity_products import quantity_products
 from modules.send_products import send_products
+from modules.dirs import get_dirs
 # ===================================# Bibliotecas necessarias ==================================== #
 
 
 # ============================================# Diretórios ========================================= #
-def get_dirs():
-    dir_main = '/home/guimoura/download_amazon/'
-    dirs = {
-        'dir_in': '/home/guimoura/download_amazon/goes/',
-        'dir_main': dir_main,
-        'dir_out': dir_main + 'output/',
-        'dir_libs': dir_main + 'libs/',
-        'dir_shapefiles': dir_main + 'shapefiles/',
-        'dir_colortables': dir_main + 'colortables/',
-        'dir_logos': dir_main + 'logos/',
-        'dir_temp': dir_main + 'temp/',
-        'arq_log': '/home/guimoura/download_amazon/logs/Processamento-GOES_' + str(datetime.date.today()) + '.log'
-    }
-    
-    return dirs
-
 dirs = get_dirs()
 
 arq_log = dirs['arq_log']

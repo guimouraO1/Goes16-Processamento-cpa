@@ -4,8 +4,8 @@ import os
 from difflib import Differ  # Utilitario para verificar as diferencas entre dois arquivos
 import re  # Utilitario para trabalhar com expressoes regulares
 import datetime
-from utilities import download_prod
-from Processamento import get_dirs
+from modules.utilities import download_prod
+from modules.dirs import get_dirs
 
 
 # ============================================# Diretórios ========================================= #

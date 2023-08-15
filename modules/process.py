@@ -12,15 +12,15 @@ import numpy as np  # Suporte para arrays e matrizes multidimensionais, com dive
 import cartopy  # Inserir mapas, shapefiles, paralelos, meridianos, latitudes, longitudes, etc.
 import cartopy.crs as ccrs  # Utilitario para sistemas de referência e coordenadas
 import cartopy.io.shapereader as shpreader  # Utilitario para leitura de shapefiles
-from utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
-from utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
+from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
+from modules.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
 from multiprocessing import Process  # Utilitario para multiprocessamento
 from shutil import copyfile  # Utilitario para copia de arquivos
 from shapely.geometry import Point
 import cartopy.feature as cfeature # features
 from multiprocessing import Process  # Utilitario para multiprocessamento
 from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
-from Processamento import get_dirs
+from modules.dirs import get_dirs
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 

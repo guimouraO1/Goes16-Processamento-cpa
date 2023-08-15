@@ -52,7 +52,7 @@ where:
 - `c20171671156144`: is netCDF4 file creation time
 - `.nc` is netCDF file extension
 
-## About Processing
+## About Scripts
 All data is processed on the `okul` server and transferred and copied to the `vialactea` server.
 The `vialactea` server does the last processing so that the `netCDF4` data becomes an image.
 
