@@ -90,33 +90,31 @@ File folders:
 `temp/`
 `modulos/`
 
-## Sobre o Script
+## About the Script
 
-Processamento.py - arquivo main
+Processamento.py - main file
 
 Requireds # Packages = conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
           # Packages = apt install ffmpeg
 
 ´# ================================================================================================= #´<br>
-´# Manipulando imagens GOES-16 NetCDF's <br>
-´# ===================================# Bibliotecas necessarias ==================================== #´<br>
+´# Manipulating GOES-16 NetCDF Images <br>
+´# ===================================# Necessary Libraries ==================================== #´<br>
 ´import datetime´<br>
-´import logging´  - Utilitario para criar os logs<br>
+´import logging´  - Utility to create logs<br>
 ´import time´     <br>
-´from modules.check_new_images import check_images - Checa as se há novas imagens para processamento<br>
-´from modules.process import process_gif, processing´ Processa imagens<br>
-´from modules.logs import conf_log, finalize_log_time´  Cria os arquivos de logs<br>
+´from modules.check_new_images import check_images - Checks for new images for processing<br>
+´from modules.process import process_gif, processing´ Processes images<br>
+´from modules.logs import conf_log, finalize_log_time´  Creates log files<br>
 ´from modules.remove_images import remove_images´<br>
 ´from modules.quantity_products import quantity_products´<br>
 ´from modules.send_products import send_products´<br>
-´# ===================================# Bibliotecas necessarias ==================================== #´<br>
+´# ===================================# Necessary Libraries ==================================== #´<br>
 
+The script starts with ´get_dirs´ which is responsible for selecting the destination folders.
 
-O script começa com ´get_dirs´ que é responsável por selecionar as pastas de destinos
+If you need to modify the directories, go to ´Processamento.py´ ->  ´get_dirs´
 
-Se precisar modificar os diretórios vá em ´Processamento.py´ ->  ´get_dirs´
+Then, the script creates a Python dictionary to store the bands with key-value pairs {key: value}.
 
-O script então cria um dicionário de dados python para alocar as bandas com chave valor {key: value}.
-
-Todas as bandas da 01 a 21 recebem False   bands = {"01": False, "02": False......}
-
+All bands from 01 to 21 receive False   bands = {"01": False, "02": False......}
