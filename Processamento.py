@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # Packages = conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
 # Packages = apt install ffmpeg
-# ====================================================================================================== #
+# ================================================================================================= #
 # Manipulando imagens GOES-16 NetCDF's
-# ===================================# Bibliotecas necessarias ========================================= #
+# ===================================# Bibliotecas necessarias ==================================== #
 import datetime
 import logging  # Utilitario para criar os logs
 import time     
@@ -14,10 +14,10 @@ from modulos.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modulos.remove_images import remove_images
 from modulos.quantity_products import quantity_products
 from modulos.send_products import send_products
-# ===================================# Bibliotecas necessarias ========================================= #
+# ===================================# Bibliotecas necessarias ==================================== #
 
 
-# ============================================# Variaveis ============================================== #
+# ============================================# Variaveis ========================================= #
 dir_in = "/home/guimoura/download_amazon/goes/"
 dir_main = "/home/guimoura/download_amazon/"
 dir_out = dir_main + "output/"
@@ -27,10 +27,10 @@ dir_colortables = dir_main + "colortables/"
 dir_logos = dir_main + "logos/"
 dir_temp = dir_main + "temp/"
 arq_log = "/home/guimoura/download_amazon/logs/Processamento-GOES_" + str(datetime.date.today()) + ".log"
-# ============================================# Variaveis ============================================== #
+# ============================================# Variaveis ========================================= #
 
 
-# ============================================# Bands Dicionario ============================================== #
+# ============================================# Bands Dicionario ================================== #
 # Dicionarios das bandas key : value
 bands = {}
 # Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
@@ -39,7 +39,7 @@ for num in range(1, 22):
     bands[f'{b}'] = False
 br = True
 sp = True
-# ============================================# Bands Dicionario ============================================== #
+# ============================================# Bands Dicionario ================================== #
 
 
 # ============================================# Main ============================================== #
@@ -50,7 +50,7 @@ start = time.time()
 # Retorna o dicionario de bandas recebendo key : value (True/False) para saber quais imagens são novas
 bands = check_images(bands, dir_in, dir_temp)
 # Realiza etapas de processamento se houver alguma nova imagem
-if any(bands[key] for key in bands): # Se qualquer banda 'key': True   execute o processamento da banda ->
+if any(bands[key] for key in bands): # Se qualquer banda 'key': True -> execute o processamento da banda
     # Realiza processamento da imagens
     bands = processing(bands, br, sp)
     # Remove imagens que já foram processadas
