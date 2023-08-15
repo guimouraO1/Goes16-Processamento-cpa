@@ -53,8 +53,8 @@ where:
 - `.nc` is netCDF file extension
 
 ## About Processing
-All data is processed on the okul server and transferred and copied to the vialactea server.
-The vialactea server does the last processing so that the netCDF4 data becomes an image.
+All data is processed on the `okul` server and transferred and copied to the `vialactea` server.
+The `vialactea` server does the last processing so that the `netCDF4` data becomes an image.
 
 where:
 
