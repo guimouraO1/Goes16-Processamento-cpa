@@ -55,12 +55,14 @@ where:
 - `c20231671156144`: is netCDF4 file creation time
 - `.nc` is netCDF file extension
 
+---
 
 # GOES-16 NetCDF Image Manipulation
 
 This repository contains a Python script for manipulating images from the GOES-16 satellite in NetCDF format. 
 The script processes these NetCDF to generate images, GIFs and other products.
 
+---
 
 ## Table of Contents
 
@@ -71,6 +73,8 @@ The script processes these NetCDF to generate images, GIFs and other products.
 - [About code](#About-code)
 - [Contributing](#contributing)
 - [License](#license)
+
+---
 
 ## Prerequisites
 
@@ -84,6 +88,7 @@ You can create a Conda environment with required packages using the following co
 ```bash
 conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
 ```
+---
 
 ## Installation
 
@@ -98,16 +103,17 @@ git clone https://github.com/your-username/your-repo.git
 ```bash
 cd your-repo
 ```
-
+---
 
 ## Configuration
 
 You can configure the script behavior by modifying the variables in the `dirs.py` script:
 
 ```python
-
 dirs.py
+```
 
+```python
 dir_main = '/home/myDirs/'
 dirs = {
     'dir_in': '/home/myDirs/goes/',
@@ -164,6 +170,7 @@ To use the script, follow these steps:
 ```
 3. The script will process the images, generate GIFs, and perform other operations based on the configuration.
 
+---
 
 ## About code ```Processamento.py```
 
@@ -184,10 +191,13 @@ Features
 11. If there are no new images to process, messages are written to the log indicating that there are no images to process.
 12. The finalize_log_time function is called to close the log and record the end time of the script.
 
+---
 
 ## Acknowledgments
 
 This script is developed as part of an image processing project for the GOES-16 satellite data. It builds upon various open-source libraries and tools.
+
+---
 
 ## License
 
