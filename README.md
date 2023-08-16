@@ -65,7 +65,7 @@ The script processes these NetCDF to generate images, GIFs and other products.
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
-- [About code](#about-code )
+- [About code](#About-code)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -102,8 +102,9 @@ cd your-repo
 You can configure the script behavior by modifying the variables in the `dirs.py` script:
 
 ```python
-# dirs.py
-
+```bash
+dirs.py
+```
 dir_main = '/home/myDirs/'
 dirs = {
     'dir_in': '/home/myDirs/goes/',
@@ -121,9 +122,6 @@ dirs = {
 Make sure to update the paths in the `dirs` dictionary to match your file system structure and requirements.
 
 ---
-
-This configuration section provides you with insights into the customization options within the `dirs.py` script. You can adjust these paths to align with your directory structure and preferences.
-
 
 ## Usage
 
