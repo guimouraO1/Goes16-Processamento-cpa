@@ -53,7 +53,7 @@ where:
 - `.nc` is netCDF file extension
 
 
-```markdown
+
 # GOES-16 NetCDF Image Manipulation
 
 This repository contains a Python script for manipulating images from the GOES-16 satellite in NetCDF format. 
@@ -96,7 +96,7 @@ git clone https://github.com/your-username/your-repo.git
 cd your-repo
 ```
 
-```markdown
+
 ## Configuration
 
 You can configure the script behavior by modifying the variables in the `dirs.py` script:
