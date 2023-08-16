@@ -105,9 +105,9 @@ cd your-repo
 You can configure the script behavior by modifying the variables in the `dirs.py` script:
 
 ```python
-```bash
+
 dirs.py
-```
+
 dir_main = '/home/myDirs/'
 dirs = {
     'dir_in': '/home/myDirs/goes/',
