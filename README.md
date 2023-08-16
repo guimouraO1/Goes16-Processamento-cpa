@@ -1,6 +1,6 @@
 # NOAA GOES 16 on CEPAGRI 
 
-Data from NOAA's GOES-R series satellite is available on cpa.unicamp.br. The National Oceanic and Atmospheric Administration (NOAA) operates a constellation of Geostationary Operational Environmental Satellites (GOES) to provide continuous weather imagery and monitoring of meteorological and space environment data for the protection of life e outros fins.GOES satellites provide critical atmospheric, oceanic, climatic and space weather products supporting weather forecasting and warnings, climatologic analysis and prediction, ecosystems management, safe and efficient public and private transportation, and other.
+The National Oceanic and Atmospheric Administration (NOAA) operates a constellation of Geostationary Operational Environmental Satellites (GOES) to provide continuous weather imagery and monitoring of meteorological and space environment data for the protection of life e outros fins. GOES satellites provide critical atmospheric, oceanic, climatic and space weather products supporting weather forecasting and warnings, climatologic analysis and prediction, ecosystems management, safe and efficient public and private transportation, and other.
 
 The satellites provide advanced imaging with increased spatial resolution, 16 spectral channels, and up to 1 minute scan frequency for more accurate forecasts and timely warnings.
 
@@ -18,6 +18,9 @@ where:
 
   - ABI-L1b-RadF - Advanced Baseline Imager Level 1b Full Disk
   - ABI-L2-CMIPF - Advanced Baseline Imager Level 2 Cloud and Moisture Imagery Full Disk
+  - ABI-L2-FDCF  - Advanced Baseline Imager Level 2 Fire (Hot Spot Characterization) Full Disk
+  - ABI-L2-NDVI  - Normalized difference vegetation index
+  - ABI-L2-TC    - Natural True Color Level 2 (Band 01, Band 02, Band 03)
   - ABI-L2-RRQPEF - Advanced Baseline Imager Level 2 Rainfall Rate (Quantitative Precipitation Estimate) Full Disk
   - GLM-L2-LCFA - Geostationary Lightning Mapper Level 2 Lightning Detection 
   
@@ -28,7 +31,7 @@ where:
 
 A `<Filename>` is delineated by underscores '_' and looks like this:
 
-`OR_ABI-L1b-RadF-M3C02_G16_s20171671145342_e20171671156109_c20171671156144.nc`
+`OR_ABI-L1b-RadF-M3C02_G16_s20231671145342_e20231671156109_c20231671156144.nc`
 
 where:
 
@@ -41,23 +44,23 @@ where:
   - `M3`: is mode 3 (scan operation), M4 is mode 4 (only full disk scans every five minutes – no mesoscale or CONUS)
   - `C02`: is channel or band 02, There will be sixteen bands, 01-16
 - `G16`: is satellite id for GOES-16 (future G17)
-- `s20171671145342`: is start of scan time
+- `s20231671145342`: is start of scan time
   - 4 digit year
   - 3 digit day of year
   - 2 digit hour
   - 2 digit minute
   - 2 digit second
   - 1 digit tenth of second
-- `e20171671156109`: is end of scan time
-- `c20171671156144`: is netCDF4 file creation time
+- `e20231671156109`: is end of scan time
+- `c20231671156144`: is netCDF4 file creation time
 - `.nc` is netCDF file extension
-
 
 
 # GOES-16 NetCDF Image Manipulation
 
 This repository contains a Python script for manipulating images from the GOES-16 satellite in NetCDF format. 
 The script processes these NetCDF to generate images, GIFs and other products.
+
 
 ## Table of Contents
 
