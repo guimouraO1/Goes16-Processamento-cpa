@@ -20,7 +20,7 @@ from modules.dirs import get_dirs
 
 # ============================================# Diretórios ========================================= #
 dirs = get_dirs()
-
+# Importando dirs do modulo dirs.py
 arq_log = dirs['arq_log']
 dir_in = dirs['dir_in']
 dir_temp = dirs['dir_temp']

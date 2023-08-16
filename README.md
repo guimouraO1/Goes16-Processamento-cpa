@@ -52,67 +52,146 @@ where:
 - `c20171671156144`: is netCDF4 file creation time
 - `.nc` is netCDF file extension
 
-## About Scripts
-All data is processed on the `okul` server and transferred and copied to the `vialactea` server.
-The `vialactea` server does the last processing so that the `netCDF4` data becomes an image.
 
-where:
+```markdown
+# GOES-16 NetCDF Image Manipulation
 
-On the `vialactea` server `/Scripts/goes/`
+This repository contains a Python script for manipulating images from the GOES-16 satellite in NetCDF format. The script processes these NetCDF to generate images, GIFs and other products.
 
-File folders:
+## Table of Contents
 
-- `colortable/`
-- `logos/` cepagri logos
-- `Poocessamento.py` Script that processes images
-- `libs/` contains utilities.py
-- `output/` It is the output of processed images
-- `shapefiles/` 
-- `temp/`
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [About code](#about-code )
+- [Contributing](#contributing)
+- [License](#license)
 
-## About Processing
-All data is processed on the okul server and transferred and copied to the vialactea server.
-The vialactea server does the last processing so that the netCDF4 data becomes an image.
+## Prerequisites
 
-where:
+Before using the script, make sure you have the following packages and tools installed:
 
-On the `vialactea` server.
-Local `/Scripts/goes/`
+- [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+- [FFmpeg](https://ffmpeg.org/)
 
-File folders:
+You can create a Conda environment with required packages using the following command:
 
-`colortable/` 
-`logos/` cepagri logos
-`Poocessamento.py` Script that processes images
-`libs/` contains utilities.py
-`output/` It is the output of processed images
-`shapefiles/` 
-`temp/`
-`modulos/`
+```bash
+conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
+```
 
-## About the Script
+## Installation
 
-Processamento.py - main file
+1. Clone this repository to your local machine:
 
-Requireds # Packages = conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
-          # Packages = apt install ffmpeg
+```bash
+git clone https://github.com/your-username/your-repo.git
+```
 
-`# ===================================# Necessary Libraries ==================================== #` <br>
-`import datetime`   Utility to manipulate date <br>
-`import logging`    Utility to create logs <br>
-`import time`       Utility to manipulate time <br>
-`from modules.check_new_images import check_images`     Checks for new images for processing <br>
-`from modules.process import process_gif, processing`   Processes images <br>
-`from modules.logs import conf_log, finalize_log_time`  Creates log files <br>
-`from modules.remove_images import remove_images`  Remove Images <br>
-`from modules.quantity_products import quantity_products` Quantity of products <br> 
-`from modules.send_products import send_products`  Send products for cpa.unicamp.br <br>
-`# ===================================# Necessary Libraries ==================================== #` <br>
+2. Navigate to the project directory:
 
-The script starts with `get_dirs` which is responsible for selecting the destination folders.
+```bash
+cd your-repo
+```
 
-If you need to modify the directories, go to `Processamento.py` ->  `get_dirs`
+```markdown
+## Configuration
 
-Then, the script creates a Python dictionary to store the bands with key-value pairs {key: value}.
+You can configure the script behavior by modifying the variables in the `dirs.py` script:
 
-All bands from 01 to 21 receive False   bands = {"01": False, "02": False......}
+```python
+# dirs.py
+
+dir_main = '/home/myDirs/'
+dirs = {
+    'dir_in': '/home/myDirs/goes/',
+    'dir_main': dir_main,
+    'dir_out': dir_main + 'output/',
+    'dir_libs': dir_main + 'libs/',
+    'dir_shapefiles': dir_main + 'shapefiles/',
+    'dir_colortables': dir_main + 'colortables/',
+    'dir_logos': dir_main + 'logos/',
+    'dir_temp': dir_main + 'temp/',
+    'arq_log': '/home/myDirs/logs/Processamento-GOES_' + str(datetime.date.today()) + '.log'
+}
+```
+
+Make sure to update the paths in the `dirs` dictionary to match your file system structure and requirements.
+
+---
+
+This configuration section provides you with insights into the customization options within the `dirs.py` script. You can adjust these paths to align with your directory structure and preferences.
+
+
+## Usage
+
+The directory structure of this repository is as follows:
+
+```
+.
+├── temp
+├── shapefiles
+├── output
+├── colortables
+├── goes
+├── libs
+├── logos
+├── logs
+├── modules/
+│   ├── check_new_images.py
+│   ├── process.py
+│   ├── logs.py
+│   ├── remove_images.py
+│   ├── quantity_products.py
+│   ├── send_products.py
+│   ├── dirs.py
+│   └── utilities.py
+├── Processamento.py
+└── README.md
+```
+
+To use the script, follow these steps:
+
+1. Ensure you have the required NetCDF images in the input directory (`dir_in/band{0-16}`).
+
+2. Run the script:
+
+```bash
+/opt/miniconda3/envs/goes/bin/python3 script_name.py
+```
+3. The script will process the images, generate GIFs, and perform other operations based on the configuration.
+
+
+## About code ```Processamento.py```
+
+Features
+
+1. The file ```dirs.py``` defines input, output and temporary directories where images will be read, processed and stored.
+2. A dictionary called ```bands``` is created that represents the processing status of each image band. Initially, all bands are marked as unprocessed (False).
+3. The ```conf_log``` function is called to configure logging. Next, the start variable is initialized to record the moment the script starts.
+4. The ``` check_images```  function is called to check if there are new images to process. The band dictionary is updated to reflect this information.
+5. If there is at least one new image to process (any band with True value in the dictionary), the ```processing``` function is called to perform image processing.
+    - Image processing is performed, considering specific variables (`br` and `sp`).
+    - Which causes the band to be processed for both variables.
+6. Processed images will be stored in the output directory (`dir_out`).
+7. After processing, the function ```remove_images``` is called to remove images that have already been processed from the temporary images directory.
+8. The ```quantity_products``` function is called to control the quantity of products (images) to keep for producing an animated GIF.
+9. Then the ```process_gif``` function is called to create an animated GIF from the processed images.
+10. The ```send_products``` sends the processed images to a specific site (cpa.unicamp.br). 
+11. If there are no new images to process, messages are written to the log indicating that there are no images to process.
+12. The finalize_log_time function is called to close the log and record the end time of the script.
+
+
+## Acknowledgments
+
+This script is developed as part of an image processing project for the GOES-16 satellite data. It builds upon various open-source libraries and tools.
+
+## License
+
+This project is licensed under the []().
+
+---
+**Readme.md Author:** [Guilherme de Moura Oliveira]
+**Contact:** [guimoura@unicamp.br]
+**Last Updated:** [16/08/2023]
