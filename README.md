@@ -172,24 +172,24 @@ To use the script, follow these steps:
 
 ---
 
-## About code ```Processamento.py```
+## About code Processamento.py
 
 Features
 
-1. The file ```dirs.py``` defines input, output and temporary directories where images will be read, processed and stored.
-2. A dictionary called ```bands``` is created that represents the processing status of each image band. Initially, all bands are marked as unprocessed (False).
-3. The ```conf_log``` function is called to configure logging. Next, the start variable is initialized to record the moment the script starts.
-4. The ``` check_images```  function is called to check if there are new images to process. The band dictionary is updated to reflect this information.
-5. If there is at least one new image to process (any band with True value in the dictionary), the ```processing``` function is called to perform image processing.
-    - Image processing is performed, considering specific variables (`br` and `sp`).
-    - Which causes the band to be processed for both variables.
-6. Processed images will be stored in the output directory (`dir_out`).
-7. After processing, the function ```remove_images``` is called to remove images that have already been processed from the temporary images directory.
-8. The ```quantity_products``` function is called to control the quantity of products (images) to keep for producing an animated GIF.
-9. Then the ```process_gif``` function is called to create an animated GIF from the processed images.
-10. The ```send_products``` sends the processed images to a specific site (cpa.unicamp.br). 
-11. If there are no new images to process, messages are written to the log indicating that there are no images to process.
-12. The finalize_log_time function is called to close the log and record the end time of the script.
+- The file ```dirs.py``` defines input, output and temporary directories where images will be read, processed and stored.
+- A dictionary called ```bands``` is created that represents the processing status of each image band. Initially, all bands are marked as unprocessed (False).
+- The ```conf_log``` function is called to configure logging. Next, the start variable is initialized to record the moment the script starts.
+- The ``` check_images```  function is called to check if there are new images to process. The band dictionary is updated to reflect this information.
+- If there is at least one new image to process (any band with True value in the dictionary), the ```processing``` function is called to perform image processing.
+- Image processing is performed, considering specific variables (`br` and `sp`).
+- Which causes the band to be processed for both variables.
+- Processed images will be stored in the output directory (`dir_out`).
+- After processing, the function ```remove_images``` is called to remove images that have already been processed from the temporary images directory.
+- The ```quantity_products``` function is called to control the quantity of products (images) to keep for producing an animated GIF.
+- Then the ```process_gif``` function is called to create an animated GIF from the processed images.
+- The ```send_products``` sends the processed images to a specific site (cpa.unicamp.br). 
+- If there are no new images to process, messages are written to the log indicating that there are no images to process.
+- The finalize_log_time function is called to close the log and record the end time of the script.
 
 ---
 
