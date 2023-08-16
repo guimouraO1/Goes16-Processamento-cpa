@@ -40,11 +40,8 @@ dir_temp = dirs['dir_temp']
 arq_log = dirs['arq_log']
 # ============================================# Diretórios ========================================= #
 
-def process_band_cmi(file, ch, v_extent):
-    global dir_shapefiles, dir_colortables, dir_logos, dir_out
-    file_var = 'CMI'
-    # Captura a hora para contagem do tempo de processamento da imagem
-    processing_start_time = time.time()
+# Band CMI, RRQPF, FDCF utilizam a função  ---GUI
+def img_resolution(v_extent):
     # Area de interesse para recorte
     if v_extent == 'br':
         # Brasil
@@ -59,6 +56,36 @@ def process_band_cmi(file, ch, v_extent):
     else:
         extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
         resolution = 2.0
+        
+    return extent, resolution
+
+# Adicionando o shapefile dos estados brasileiros --GUI
+def shape(v_extent, ax):
+    if v_extent == 'br':
+        # Adicionando o shapefile dos estados brasileiros
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+
+    elif v_extent == 'sp':
+        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+    
+    return ax
+
+
+
+def process_band_cmi(file, ch, v_extent):
+    global dir_shapefiles, dir_colortables, dir_logos, dir_out
+    file_var = 'CMI'
+    # Captura a hora para contagem do tempo de processamento da imagem
+    processing_start_time = time.time()
+    # Area de interesse para recorte
+    extent, resolution = img_resolution(v_extent)
 
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
     dtime, satellite, reproject_band = reproject(file, file_var, v_extent, resolution)
@@ -95,18 +122,7 @@ def process_band_cmi(file, ch, v_extent):
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
 
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+    ax = shape(v_extent, ax)
 
     # Adicionando  linhas dos litorais
     ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
@@ -378,18 +394,7 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
 
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+    ax = shape(v_extent, ax)
 
     # Adicionando  linhas dos litorais
     ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
@@ -537,19 +542,7 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
     # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 4.0
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 1.0
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
-        resolution = 2.0
+    extent, resolution = img_resolution(v_extent)
 
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
     dtime, satellite, reproject_rrqpef = reproject(rrqpef, file_var, v_extent, resolution)
@@ -582,18 +575,7 @@ def process_rrqpef(rrqpef, ch13, v_extent):
 
     ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
 
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+    ax = shape(v_extent, ax)
 
     # Adicionando  linhas dos litorais
     ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
@@ -706,18 +688,7 @@ def process_glm(ch13, glm_list, v_extent):
     # Define the image extent
     ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
 
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+    ax = shape(v_extent, ax)
 
     # Adicionando  linhas dos litorais
     ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
@@ -1118,20 +1089,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
     # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 4.0
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 1.0
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
-        resolution = 2.0
-
+    extent, resolution = img_resolution(v_extent)
     # Lendo imagem FDCF
     fire_mask = Dataset(fdcf)
 

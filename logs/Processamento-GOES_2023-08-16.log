@@ -1,57 +1,232 @@
-16/08/2023 11:32:54 INFO 
-16/08/2023 11:32:54 INFO 
-16/08/2023 11:32:54 INFO =========================================================================================================
-16/08/2023 11:32:54 INFO =                             PROCESSANDO IMAGENS GOES AS 16/08/2023-11:32:54                           =
-16/08/2023 11:32:54 INFO =========================================================================================================
-16/08/2023 11:32:54 INFO 
-16/08/2023 11:32:54 INFO VERIFICANDO NOVAS IMAGENS
-16/08/2023 11:32:54 INFO Novas imagens Banda 01
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 02
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 03
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 04
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 05
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 06
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 07
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 08
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 09
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 10
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 11
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 12
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 13
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 14
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 15
-16/08/2023 11:32:54 INFO Sem novas imagens Banda 16
-16/08/2023 11:32:54 INFO Sem novas imagens TRUECOLOR
-16/08/2023 11:32:54 INFO Sem novas imagens RRQPEF
-16/08/2023 11:32:54 INFO Sem novas imagens GLM
-16/08/2023 11:32:54 INFO Sem novas imagens NDVI
-16/08/2023 11:32:54 INFO Sem novas imagens FDCF
-16/08/2023 11:32:54 INFO 
-16/08/2023 11:32:54 INFO PROCESSANDO IMAGENS "BR"...
-16/08/2023 11:33:01 INFO /home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584.nc - br - 6.9581 segundos
-16/08/2023 11:33:01 INFO 
-16/08/2023 11:33:01 INFO PROCESSANDO IMAGENS "SP"...
-16/08/2023 11:33:06 INFO /home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584.nc - sp - 5.2034 segundos
-16/08/2023 11:33:06 INFO 
-16/08/2023 11:33:06 INFO PROCESSAMENTO ENCERRADO
-16/08/2023 11:33:06 INFO 
-16/08/2023 11:33:06 INFO REMOVENDO IMAGENS PROCESSADAS
-16/08/2023 11:33:06 INFO Removendo imagens banda 01
-16/08/2023 11:33:06 INFO Removendo arquivo de processamento da banda 01
-16/08/2023 11:33:06 INFO 
-16/08/2023 11:33:06 INFO VERIFICANDO NUMERO DE PRODUTOS...
-16/08/2023 11:33:06 INFO Quantidade de produtos dentro do limite
-16/08/2023 11:33:06 INFO 
-16/08/2023 11:33:06 INFO CRIANDO GIF ANIMADO "BR"...
-16/08/2023 11:33:06 INFO Gif BR banda 01
-16/08/2023 11:33:07 INFO 
-16/08/2023 11:33:07 INFO CRIANDO GIF ANIMADO "SP"...
-16/08/2023 11:33:07 INFO Gif SP banda 01
-16/08/2023 11:33:07 INFO 
-16/08/2023 11:33:07 INFO Tempo gasto 12.407 segundos
-16/08/2023 11:33:07 INFO 
-16/08/2023 11:33:07 INFO =========================================================================================================
-16/08/2023 11:33:07 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 16/08/2023-11:33:07                           =
-16/08/2023 11:33:07 INFO =========================================================================================================
-16/08/2023 11:33:07 INFO 
-16/08/2023 11:33:07 INFO 
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO =========================================================================================================
+16/08/2023 11:51:53 INFO =                             PROCESSANDO IMAGENS GOES AS 16/08/2023-11:51:53                           =
+16/08/2023 11:51:53 INFO =========================================================================================================
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO VERIFICANDO NOVAS IMAGENS
+16/08/2023 11:51:53 INFO Novas imagens Banda 01
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 02
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 03
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 04
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 05
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 06
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 07
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 08
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 09
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 10
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 11
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 12
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 13
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 14
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 15
+16/08/2023 11:51:53 INFO Sem novas imagens Banda 16
+16/08/2023 11:51:53 INFO Sem novas imagens TRUECOLOR
+16/08/2023 11:51:53 INFO Sem novas imagens RRQPEF
+16/08/2023 11:51:53 INFO Sem novas imagens GLM
+16/08/2023 11:51:53 INFO Sem novas imagens NDVI
+16/08/2023 11:51:53 INFO Sem novas imagens FDCF
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO PROCESSANDO IMAGENS "BR"...
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO PROCESSANDO IMAGENS "SP"...
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO PROCESSAMENTO ENCERRADO
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO REMOVENDO IMAGENS PROCESSADAS
+16/08/2023 11:51:53 INFO Removendo imagens banda 01
+16/08/2023 11:51:53 INFO Erro Arquivo - FileNotFoundError - CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584_reproj_br.nc
+16/08/2023 11:51:53 INFO [Errno 2] No such file or directory: '/home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584_reproj_br.nc'
+16/08/2023 11:51:53 INFO Erro Arquivo - FileNotFoundError - CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584_reproj_sp.nc
+16/08/2023 11:51:53 INFO [Errno 2] No such file or directory: '/home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584_reproj_sp.nc'
+16/08/2023 11:51:53 INFO Removendo arquivo de processamento da banda 01
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO VERIFICANDO NUMERO DE PRODUTOS...
+16/08/2023 11:51:53 INFO Quantidade de produtos dentro do limite
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO CRIANDO GIF ANIMADO "BR"...
+16/08/2023 11:51:53 INFO Gif BR banda 01
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO CRIANDO GIF ANIMADO "SP"...
+16/08/2023 11:51:53 INFO Gif SP banda 01
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO Tempo gasto 0.1364 segundos
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO =========================================================================================================
+16/08/2023 11:51:53 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 16/08/2023-11:51:53                           =
+16/08/2023 11:51:53 INFO =========================================================================================================
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:51:53 INFO 
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO =========================================================================================================
+16/08/2023 11:52:11 INFO =                             PROCESSANDO IMAGENS GOES AS 16/08/2023-11:52:11                           =
+16/08/2023 11:52:11 INFO =========================================================================================================
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO VERIFICANDO NOVAS IMAGENS
+16/08/2023 11:52:11 INFO Novas imagens Banda 01
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 02
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 03
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 04
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 05
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 06
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 07
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 08
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 09
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 10
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 11
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 12
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 13
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 14
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 15
+16/08/2023 11:52:11 INFO Sem novas imagens Banda 16
+16/08/2023 11:52:11 INFO Sem novas imagens TRUECOLOR
+16/08/2023 11:52:11 INFO Sem novas imagens RRQPEF
+16/08/2023 11:52:11 INFO Sem novas imagens GLM
+16/08/2023 11:52:11 INFO Sem novas imagens NDVI
+16/08/2023 11:52:11 INFO Sem novas imagens FDCF
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO PROCESSANDO IMAGENS "BR"...
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO PROCESSANDO IMAGENS "SP"...
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO PROCESSAMENTO ENCERRADO
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO REMOVENDO IMAGENS PROCESSADAS
+16/08/2023 11:52:11 INFO Removendo imagens banda 01
+16/08/2023 11:52:11 INFO Erro Arquivo - FileNotFoundError - CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584_reproj_br.nc
+16/08/2023 11:52:11 INFO [Errno 2] No such file or directory: '/home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584_reproj_br.nc'
+16/08/2023 11:52:11 INFO Erro Arquivo - FileNotFoundError - CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584_reproj_sp.nc
+16/08/2023 11:52:11 INFO [Errno 2] No such file or directory: '/home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584_reproj_sp.nc'
+16/08/2023 11:52:11 INFO Removendo arquivo de processamento da banda 01
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO VERIFICANDO NUMERO DE PRODUTOS...
+16/08/2023 11:52:11 INFO Quantidade de produtos dentro do limite
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO CRIANDO GIF ANIMADO "BR"...
+16/08/2023 11:52:11 INFO Gif BR banda 01
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO CRIANDO GIF ANIMADO "SP"...
+16/08/2023 11:52:11 INFO Gif SP banda 01
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO Tempo gasto 0.143 segundos
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO =========================================================================================================
+16/08/2023 11:52:11 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 16/08/2023-11:52:11                           =
+16/08/2023 11:52:11 INFO =========================================================================================================
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:52:11 INFO 
+16/08/2023 11:54:34 INFO 
+16/08/2023 11:54:34 INFO 
+16/08/2023 11:54:34 INFO =========================================================================================================
+16/08/2023 11:54:34 INFO =                             PROCESSANDO IMAGENS GOES AS 16/08/2023-11:54:34                           =
+16/08/2023 11:54:34 INFO =========================================================================================================
+16/08/2023 11:54:34 INFO 
+16/08/2023 11:54:34 INFO VERIFICANDO NOVAS IMAGENS
+16/08/2023 11:54:34 INFO Novas imagens Banda 01
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 02
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 03
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 04
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 05
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 06
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 07
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 08
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 09
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 10
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 11
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 12
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 13
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 14
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 15
+16/08/2023 11:54:34 INFO Sem novas imagens Banda 16
+16/08/2023 11:54:34 INFO Sem novas imagens TRUECOLOR
+16/08/2023 11:54:34 INFO Sem novas imagens RRQPEF
+16/08/2023 11:54:34 INFO Sem novas imagens GLM
+16/08/2023 11:54:34 INFO Sem novas imagens NDVI
+16/08/2023 11:54:34 INFO Sem novas imagens FDCF
+16/08/2023 11:54:34 INFO 
+16/08/2023 11:54:34 INFO PROCESSANDO IMAGENS "BR"...
+16/08/2023 11:54:41 INFO /home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584.nc - br - 7.1681 segundos
+16/08/2023 11:54:41 INFO 
+16/08/2023 11:54:41 INFO PROCESSANDO IMAGENS "SP"...
+16/08/2023 11:54:46 INFO /home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584.nc - sp - 5.2409 segundos
+16/08/2023 11:54:46 INFO 
+16/08/2023 11:54:46 INFO PROCESSAMENTO ENCERRADO
+16/08/2023 11:54:46 INFO 
+16/08/2023 11:54:46 INFO REMOVENDO IMAGENS PROCESSADAS
+16/08/2023 11:54:46 INFO Removendo imagens banda 01
+16/08/2023 11:54:46 INFO Removendo arquivo de processamento da banda 01
+16/08/2023 11:54:46 INFO 
+16/08/2023 11:54:46 INFO VERIFICANDO NUMERO DE PRODUTOS...
+16/08/2023 11:54:46 INFO Quantidade de produtos dentro do limite
+16/08/2023 11:54:46 INFO 
+16/08/2023 11:54:46 INFO CRIANDO GIF ANIMADO "BR"...
+16/08/2023 11:54:46 INFO Gif BR banda 01
+16/08/2023 11:54:47 INFO 
+16/08/2023 11:54:47 INFO CRIANDO GIF ANIMADO "SP"...
+16/08/2023 11:54:47 INFO Gif SP banda 01
+16/08/2023 11:54:47 INFO 
+16/08/2023 11:54:47 INFO Tempo gasto 12.6472 segundos
+16/08/2023 11:54:47 INFO 
+16/08/2023 11:54:47 INFO =========================================================================================================
+16/08/2023 11:54:47 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 16/08/2023-11:54:47                           =
+16/08/2023 11:54:47 INFO =========================================================================================================
+16/08/2023 11:54:47 INFO 
+16/08/2023 11:54:47 INFO 
+16/08/2023 12:11:58 INFO 
+16/08/2023 12:11:58 INFO 
+16/08/2023 12:11:58 INFO =========================================================================================================
+16/08/2023 12:11:58 INFO =                             PROCESSANDO IMAGENS GOES AS 16/08/2023-12:11:58                           =
+16/08/2023 12:11:58 INFO =========================================================================================================
+16/08/2023 12:11:58 INFO 
+16/08/2023 12:11:58 INFO VERIFICANDO NOVAS IMAGENS
+16/08/2023 12:11:58 INFO Novas imagens Banda 01
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 02
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 03
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 04
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 05
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 06
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 07
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 08
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 09
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 10
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 11
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 12
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 13
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 14
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 15
+16/08/2023 12:11:58 INFO Sem novas imagens Banda 16
+16/08/2023 12:11:58 INFO Sem novas imagens TRUECOLOR
+16/08/2023 12:11:58 INFO Sem novas imagens RRQPEF
+16/08/2023 12:11:58 INFO Sem novas imagens GLM
+16/08/2023 12:11:58 INFO Sem novas imagens NDVI
+16/08/2023 12:11:58 INFO Sem novas imagens FDCF
+16/08/2023 12:11:58 INFO 
+16/08/2023 12:11:58 INFO PROCESSANDO IMAGENS "BR"...
+16/08/2023 12:12:05 INFO /home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584.nc - br - 6.9345 segundos
+16/08/2023 12:12:05 INFO 
+16/08/2023 12:12:05 INFO PROCESSANDO IMAGENS "SP"...
+16/08/2023 12:12:10 INFO /home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584.nc - sp - 4.9167 segundos
+16/08/2023 12:12:10 INFO 
+16/08/2023 12:12:10 INFO PROCESSAMENTO ENCERRADO
+16/08/2023 12:12:10 INFO 
+16/08/2023 12:12:10 INFO REMOVENDO IMAGENS PROCESSADAS
+16/08/2023 12:12:10 INFO Removendo imagens banda 01
+16/08/2023 12:12:10 INFO Removendo arquivo de processamento da banda 01
+16/08/2023 12:12:10 INFO 
+16/08/2023 12:12:10 INFO VERIFICANDO NUMERO DE PRODUTOS...
+16/08/2023 12:12:10 INFO Quantidade de produtos dentro do limite
+16/08/2023 12:12:10 INFO 
+16/08/2023 12:12:10 INFO CRIANDO GIF ANIMADO "BR"...
+16/08/2023 12:12:10 INFO Gif BR banda 01
+16/08/2023 12:12:10 INFO 
+16/08/2023 12:12:10 INFO CRIANDO GIF ANIMADO "SP"...
+16/08/2023 12:12:10 INFO Gif SP banda 01
+16/08/2023 12:12:10 INFO 
+16/08/2023 12:12:10 INFO Tempo gasto 12.1053 segundos
+16/08/2023 12:12:10 INFO 
+16/08/2023 12:12:10 INFO =========================================================================================================
+16/08/2023 12:12:10 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 16/08/2023-12:12:10                           =
+16/08/2023 12:12:10 INFO =========================================================================================================
+16/08/2023 12:12:10 INFO 
+16/08/2023 12:12:10 INFO 
