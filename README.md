@@ -189,7 +189,7 @@ Features
 - Then the ```process_gif``` function is called to create an animated GIF from the processed images.
 - The ```send_products``` sends the processed images to a specific site (cpa.unicamp.br). 
 - If there are no new images to process, messages are written to the log indicating that there are no images to process.
-- The finalize_log_time function is called to close the log and record the end time of the script.
+- The ```finalize_log_time``` function is called to close the log and record the end time of the script.
 
 ---
 
