@@ -21,6 +21,7 @@ import cartopy.feature as cfeature # features
 from multiprocessing import Process  # Utilitario para multiprocessamento
 from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
 from modules.dirs import get_dirs
+import re
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 

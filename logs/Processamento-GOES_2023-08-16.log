@@ -1,0 +1,57 @@
+16/08/2023 11:32:54 INFO 
+16/08/2023 11:32:54 INFO 
+16/08/2023 11:32:54 INFO =========================================================================================================
+16/08/2023 11:32:54 INFO =                             PROCESSANDO IMAGENS GOES AS 16/08/2023-11:32:54                           =
+16/08/2023 11:32:54 INFO =========================================================================================================
+16/08/2023 11:32:54 INFO 
+16/08/2023 11:32:54 INFO VERIFICANDO NOVAS IMAGENS
+16/08/2023 11:32:54 INFO Novas imagens Banda 01
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 02
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 03
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 04
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 05
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 06
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 07
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 08
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 09
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 10
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 11
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 12
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 13
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 14
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 15
+16/08/2023 11:32:54 INFO Sem novas imagens Banda 16
+16/08/2023 11:32:54 INFO Sem novas imagens TRUECOLOR
+16/08/2023 11:32:54 INFO Sem novas imagens RRQPEF
+16/08/2023 11:32:54 INFO Sem novas imagens GLM
+16/08/2023 11:32:54 INFO Sem novas imagens NDVI
+16/08/2023 11:32:54 INFO Sem novas imagens FDCF
+16/08/2023 11:32:54 INFO 
+16/08/2023 11:32:54 INFO PROCESSANDO IMAGENS "BR"...
+16/08/2023 11:33:01 INFO /home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584.nc - br - 6.9581 segundos
+16/08/2023 11:33:01 INFO 
+16/08/2023 11:33:01 INFO PROCESSANDO IMAGENS "SP"...
+16/08/2023 11:33:06 INFO /home/guimoura/download_amazon/goes/band01/CG_ABI-L2-CMIPF-M6C01_G16_s20232271009512_e20232240009512_c20232240009584.nc - sp - 5.2034 segundos
+16/08/2023 11:33:06 INFO 
+16/08/2023 11:33:06 INFO PROCESSAMENTO ENCERRADO
+16/08/2023 11:33:06 INFO 
+16/08/2023 11:33:06 INFO REMOVENDO IMAGENS PROCESSADAS
+16/08/2023 11:33:06 INFO Removendo imagens banda 01
+16/08/2023 11:33:06 INFO Removendo arquivo de processamento da banda 01
+16/08/2023 11:33:06 INFO 
+16/08/2023 11:33:06 INFO VERIFICANDO NUMERO DE PRODUTOS...
+16/08/2023 11:33:06 INFO Quantidade de produtos dentro do limite
+16/08/2023 11:33:06 INFO 
+16/08/2023 11:33:06 INFO CRIANDO GIF ANIMADO "BR"...
+16/08/2023 11:33:06 INFO Gif BR banda 01
+16/08/2023 11:33:07 INFO 
+16/08/2023 11:33:07 INFO CRIANDO GIF ANIMADO "SP"...
+16/08/2023 11:33:07 INFO Gif SP banda 01
+16/08/2023 11:33:07 INFO 
+16/08/2023 11:33:07 INFO Tempo gasto 12.407 segundos
+16/08/2023 11:33:07 INFO 
+16/08/2023 11:33:07 INFO =========================================================================================================
+16/08/2023 11:33:07 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 16/08/2023-11:33:07                           =
+16/08/2023 11:33:07 INFO =========================================================================================================
+16/08/2023 11:33:07 INFO 
+16/08/2023 11:33:07 INFO 
