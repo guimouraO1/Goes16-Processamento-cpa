@@ -56,7 +56,8 @@ where:
 ```markdown
 # GOES-16 NetCDF Image Manipulation
 
-This repository contains a Python script for manipulating images from the GOES-16 satellite in NetCDF format. The script processes these NetCDF to generate images, GIFs and other products.
+This repository contains a Python script for manipulating images from the GOES-16 satellite in NetCDF format. 
+The script processes these NetCDF to generate images, GIFs and other products.
 
 ## Table of Contents
 
