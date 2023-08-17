@@ -40,7 +40,7 @@ dir_temp = dirs['dir_temp']
 arq_log = dirs['arq_log']
 # ============================================# Diretórios ========================================= #
 
-# Band CMI, RRQPF, FDCF utilizam a função  ---GUI
+# Band CMI, RRQPF, FDCF utilizam a função 
 def img_resolution(v_extent):
     # Area de interesse para recorte
     if v_extent == 'br':
@@ -59,7 +59,7 @@ def img_resolution(v_extent):
         
     return extent, resolution
 
-# Adicionando o shapefile dos estados brasileiros --GUI
+# Adicionando o shapefile dos estados brasileiros
 def shape(v_extent, ax):
     if v_extent == 'br':
         # Adicionando o shapefile dos estados brasileiros
@@ -77,6 +77,7 @@ def shape(v_extent, ax):
     
     return ax
 
+# Adicionando  linhas dos litorais, fronteiras e meridianos
 def add_lines(ax):
     # Adicionando  linhas dos litorais
     ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
@@ -89,19 +90,18 @@ def add_lines(ax):
 
     return ax
 
-
+# Adicionando os logos
 def add_logos(fig):
-        # Adicionando os logos
+    # Adicionando os logos
     logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
     logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
     logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
     fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
     fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
     fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
-    
-    
+ 
+# Adicionando descricao da imagem
 def add_eixos(fig, description, institution, ax):
-    # Adicionando descricao da imagem
     # Criando novos eixos de acordo com a posicao da imagem
     cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
     cax1.patch.set_color('black')  # Alterando a cor do novo eixo
@@ -109,7 +109,6 @@ def add_eixos(fig, description, institution, ax):
     cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
     cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
     cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
-
 
 def process_band_cmi(file, ch, v_extent):
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
@@ -153,9 +152,11 @@ def process_band_cmi(file, ch, v_extent):
 
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
+    
     # Adicionando o shapefile dos estados brasileiros
     ax = shape(v_extent, ax)
-
+    
+    # Adicionando  linhas dos litorais, fronteiras e meridianos
     ax = add_lines(ax)
 
     # Definindo a paleta de cores da imagem de acordo com o canal
@@ -183,6 +184,7 @@ def process_band_cmi(file, ch, v_extent):
     else:
         img = ax.imshow(data, origin='upper', vmin=-103, vmax=84, cmap=my_cmap, extent=img_extent)
 
+
     # Adicionando barra da paleta de cores de acordo com o canal
     # Criando novos eixos de acordo com a posicao da imagem
     cax0 = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.01325, ax.get_position().width, 0.0125])
@@ -199,9 +201,12 @@ def process_band_cmi(file, ch, v_extent):
     cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
     cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
-
+    
+    # Adicionando descricao da imagem
+    # Criando novos eixos de acordo com a posicao da imagem
     add_eixos(fig, description, institution, ax)
 
+    # Adicionando os logos
     add_logos(fig)
 
     # Salvando a imagem de saida
@@ -210,7 +215,6 @@ def process_band_cmi(file, ch, v_extent):
     plt.close()
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
-
 
 def process_gif(g_bands, g_br, g_sp):
     global dir_out
@@ -320,15 +324,8 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
-    # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+    
+    extent = img_resolution(v_extent[0])
 
     if rgb_type == 'truecolor':
         # https://rammb.cira.colostate.edu/training/visit/quick_guides/
@@ -406,8 +403,10 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
 
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
+    
     # Adicionando o shapefile dos estados brasileiros
     ax = shape(v_extent, ax)
+    
     # Adicionando  linhas dos litorais, fronteiras e meridianos
     ax = add_lines(ax)
 
@@ -433,7 +432,8 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     fig.figimage(logo_noaa, 32, 203, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
     fig.figimage(logo_goes, 10, 120, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
     fig.figimage(logo_cepagri, 10, 40, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
-
+    
+    
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
     # Fecha a janela para limpar a memoria
@@ -580,8 +580,10 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     ax = plt.axes(projection=ccrs.PlateCarree())
 
     ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
+   
     # Adicionando o shapefile dos estados brasileiros
     ax = shape(v_extent, ax)
+   
     # Adicionando  linhas dos litorais, fronteiras e meridianos
     ax = add_lines(ax)
 
@@ -602,6 +604,8 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
 
+    # Adicionando descricao da imagem
+    # Criando novos eixos de acordo com a posicao da imagem
     add_eixos(fig, description, institution, ax)
 
     # Adicionando os logos
@@ -623,16 +627,9 @@ def process_glm(ch13, glm_list, v_extent):
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
-    # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
 
+    extent = img_resolution(v_extent[0])
+    
     # Lendo imagem CMI reprojetada
     reproject_ch13 = Dataset(ch13)
     data_ch13 = reproject_ch13.variables['Band1'][:]
@@ -679,8 +676,10 @@ def process_glm(ch13, glm_list, v_extent):
 
     # Define the image extent
     ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
+    
     # Adicionando o shapefile dos estados brasileiros
     ax = shape(v_extent, ax)
+    
     # Adicionando  linhas dos litorais, fronteiras e meridianos
     ax = add_lines(ax)
 
@@ -701,8 +700,11 @@ def process_glm(ch13, glm_list, v_extent):
     cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
 
+    # Adicionando descricao da imagem
+    # Criando novos eixos de acordo com a posicao da imagem
     add_eixos(fig, description, institution, ax)
 
+    # Adicionando os logos
     add_logos(fig)
 
     # Salvando a imagem de saida
@@ -716,15 +718,8 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
-    # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+    
+    extent = img_resolution(v_extent[0])
 
     # Lendo imagem CMI reprojetada
     reproject_ch02 = Dataset(ch02)
