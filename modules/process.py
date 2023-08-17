@@ -77,6 +77,38 @@ def shape(v_extent, ax):
     
     return ax
 
+def add_lines(ax):
+    # Adicionando  linhas dos litorais
+    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
+    # Adicionando  linhas das fronteiras
+    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
+    # Adicionando  paralelos e meridianos
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
+    gl.top_labels = False
+    gl.right_labels = False
+
+    return ax
+
+
+def add_logos(fig):
+        # Adicionando os logos
+    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
+    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
+    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
+    fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+    
+    
+def add_eixos(fig, description, institution, ax):
+    # Adicionando descricao da imagem
+    # Criando novos eixos de acordo com a posicao da imagem
+    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
+    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
+    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
+    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
+    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
 
 
 def process_band_cmi(file, ch, v_extent):
@@ -121,17 +153,10 @@ def process_band_cmi(file, ch, v_extent):
 
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
-
+    # Adicionando o shapefile dos estados brasileiros
     ax = shape(v_extent, ax)
 
-    # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
+    ax = add_lines(ax)
 
     # Definindo a paleta de cores da imagem de acordo com o canal
     # Convertendo um arquivo CPT para ser usado em Python atraves da funcao loadCPT
@@ -175,22 +200,9 @@ def process_band_cmi(file, ch, v_extent):
     cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
 
-    # Adicionando descricao da imagem
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+    add_eixos(fig, description, institution, ax)
 
-    # Adicionando os logos
-    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
-    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
-    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
-    fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+    add_logos(fig)
 
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}band{ch}/band{ch}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
@@ -198,6 +210,7 @@ def process_band_cmi(file, ch, v_extent):
     plt.close()
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
+
 
 def process_gif(g_bands, g_br, g_sp):
     global dir_out
@@ -393,17 +406,10 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
 
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
-
+    # Adicionando o shapefile dos estados brasileiros
     ax = shape(v_extent, ax)
-
-    # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
+    # Adicionando  linhas dos litorais, fronteiras e meridianos
+    ax = add_lines(ax)
 
     # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
@@ -574,17 +580,10 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     ax = plt.axes(projection=ccrs.PlateCarree())
 
     ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
-
+    # Adicionando o shapefile dos estados brasileiros
     ax = shape(v_extent, ax)
-
-    # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
+    # Adicionando  linhas dos litorais, fronteiras e meridianos
+    ax = add_lines(ax)
 
     # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
@@ -603,14 +602,7 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
 
-    # Adicionando descricao da imagem
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+    add_eixos(fig, description, institution, ax)
 
     # Adicionando os logos
     logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
@@ -687,17 +679,10 @@ def process_glm(ch13, glm_list, v_extent):
 
     # Define the image extent
     ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
-
+    # Adicionando o shapefile dos estados brasileiros
     ax = shape(v_extent, ax)
-
-    # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
+    # Adicionando  linhas dos litorais, fronteiras e meridianos
+    ax = add_lines(ax)
 
     # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
@@ -716,22 +701,9 @@ def process_glm(ch13, glm_list, v_extent):
     cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
 
-    # Adicionando descricao da imagem
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+    add_eixos(fig, description, institution, ax)
 
-    # Adicionando os logos
-    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
-    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
-    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
-    fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+    add_logos(fig)
 
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}glm/glm_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
