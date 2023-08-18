@@ -15,7 +15,6 @@ from modules.quantity_products import quantity_products
 from modules.send_products import send_products
 from modules.dirs import get_dirs
 from modules.process import process_gif, processing # Processa imagens
-from teste import checarImagens
 # ===================================# Bibliotecas necessarias ==================================== #
 
 
@@ -47,8 +46,7 @@ conf_log(arq_log)
 # Log start time
 start = time.time()
 # Retorna o dicionario de bandas recebendo key : value (True/False) para saber quais imagens são novas
-#bands = check_images(bands, dir_in, dir_temp)
-bands = checarImagens(bands, dir_in, dir_temp)
+bands = check_images(bands, dir_in, dir_temp)
 
 # Realiza etapas de processamento se houver alguma nova imagem
 if any(bands[key] for key in bands): # Se qualquer banda 'key': True -> execute o processamento da banda
