@@ -11,16 +11,12 @@ from osgeo import osr  # Utilitario para a biblioteca GDAL
 from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
 import numpy as np  # Suporte para arrays e matrizes multidimensionais, com diversas funções matemáticas para trabalhar com estas estruturas
 from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
-from modules.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
 import datetime  # Utilitario para datas e horas
 import time  # Utilitario para trabalhar com tempos
 import os  # Utilitario para trabalhar com chamadas de sistema
 import re  # Utilitario para trabalhar com expressoes regulares
 import logging  # Utilitario para criar os logs
 from multiprocessing import Process  # Utilitario para multiprocessamento
-from shutil import copyfile  # Utilitario para copia de arquivos
-from shapely.geometry import Point
-import cartopy.feature as cfeature # features
 from modules.dirs import get_dirs
 import re
 

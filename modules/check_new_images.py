@@ -75,6 +75,7 @@ def check_images(c_bands, dir_in, dir_temp):
             else:
                 logging.info(f'Sem novas imagens Banda {b}')
                 os.remove(f'{dir_temp}band{b}_process.txt')
+                
             # Transforma o arquivo band??_new.txt para band??_old.txt
             os.replace(f'{dir_temp}band{b}_new.txt', f'{dir_temp}band{b}_old.txt')
         else:
