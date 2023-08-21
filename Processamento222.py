@@ -1,151 +1,314 @@
-import os
-import logging
-import datetime
-from osgeo import gdal  # Utilitario para a biblioteca GDAL
-from osgeo import osr  # Utilitario para a biblioteca GDAL
-import time
-import matplotlib # Force matplotlib to not use any Xwindows backend.
+#!/opt/miniconda3/envs/goes/bin/python3
+# -*- coding: utf-8 -*-
+# Packages = conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
+# Packages = apt install ffmpeg
+# ======================================================================================================
+# Manipulando imagens GOES-16 NetCDF's
+# ===================================# Bibliotecas necessarias =========================================
+import matplotlib
+# Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # Plotagem de resultados, textos, logos, etc.
 from matplotlib import cm  # Utilitario para paletas de cores
-import numpy as np  # Suporte para arrays e matrizes multidimensionais, com diversas funções matemáticas para trabalhar com estas estruturas
 import cartopy  # Inserir mapas, shapefiles, paralelos, meridianos, latitudes, longitudes, etc.
 import cartopy.crs as ccrs  # Utilitario para sistemas de referência e coordenadas
 import cartopy.io.shapereader as shpreader  # Utilitario para leitura de shapefiles
-from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
-from modules.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
+from osgeo import gdal  # Utilitario para a biblioteca GDAL
+from osgeo import osr  # Utilitario para a biblioteca GDAL
+from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
+import numpy as np  # Suporte para arrays e matrizes multidimensionais, com diversas funções matemáticas para trabalhar com estas estruturas
+from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
+from libs.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
+import datetime  # Utilitario para datas e horas
+import time  # Utilitario para trabalhar com tempos
+import os  # Utilitario para trabalhar com chamadas de sistema
+import re  # Utilitario para trabalhar com expressoes regulares
+import logging  # Utilitario para criar os logs
+from difflib import Differ  # Utilitario para verificar as diferencas entre dois arquivos
+from string import ascii_letters, digits  # Utilitario para trabalhar com ascii
 from multiprocessing import Process  # Utilitario para multiprocessamento
+import paramiko  # Utilitario para gerencia conexao SSH
+import scp  # Utilitario para envio de arquivos com SCP
 from shutil import copyfile  # Utilitario para copia de arquivos
 from shapely.geometry import Point
 import cartopy.feature as cfeature # features
-from multiprocessing import Process  # Utilitario para multiprocessamento
-from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
-from modules.dirs import get_dirs
-import re
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 
-# ============================================# Diretórios ========================================= #
-dirs = get_dirs()
 
-# Acessando os diretórios usando as chaves do dicionário
-dir_in = dirs['dir_in']
-dir_main = dirs['dir_main']
-dir_out = dirs['dir_out']
-dir_libs = dirs['dir_libs']
-dir_shapefiles = dirs['dir_shapefiles']
-dir_colortables = dirs['dir_colortables']
-dir_logos = dirs['dir_logos']
-dir_temp = dirs['dir_temp']
-arq_log = dirs['arq_log']
-# ============================================# Diretórios ========================================= #
+# ======================================================================================================
 
-def process_gif(g_bands, g_br, g_sp):
-    global dir_out
-    # Cria lista vazia para controle do processamento paralelo
-    gif_br = []
-    # Cria lista vazia para controle do processamento paralelo
-    gif_sp = []
 
-    # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
-    def create_gif_cmi(banda, roi):
-        os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}band{banda}/band{banda}_*_*_{roi}.png" "{dir_out}band{banda}/band{banda}_{roi}.gif"')
+# =============================================# Funcoes ===============================================
+def read_process_file(banda):
+    # Le o arquivo de processamento e retorna a lista
+    with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
+        return fo.readlines()
 
-    # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
-    def create_gif(file_type, roi):
-        os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}{file_type}/{file_type}_*_*_{roi}.png" "{dir_out}{file_type}/{file_type}_{roi}.gif"')
 
-    # Se a variavel de controle de processamento do brasil for True, cria o gif
-    if g_br:
-        logging.info('')
-        logging.info('CRIANDO GIF ANIMADO "BR"...')
-        # Contador para gif nas 16 bandas
-        for x in range(1, 17):
-            # Transforma o inteiro contador em string e com 2 digitos
-            b = str(x).zfill(2)
-            # Se o dicionario de controle das bandas apontar True para essa banda, cria o gif
-            if g_bands[b]:
-                logging.info('Gif BR banda ' + b)
-                # Cria o processo com a funcao gif
-                process = Process(target=create_gif_cmi, args=(b, "br"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                gif_br.append(process)
-                # Inicia o processo
-                process.start()
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in gif_br:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
+def check_images(c_bands):
+    global dir_in, dir_temp
+    logging.info("VERIFICANDO NOVAS IMAGENS")
 
-    # Se a variavel de controle de processamento do estado de sao paulo for True, cria o gif
-    if g_sp:
-        logging.info('')
-        logging.info('CRIANDO GIF ANIMADO "SP"...')
-        # Contador para gif nas 16 bandas
-        for x in range(1, 17):
-            # Transforma o inteiro contador em string e com 2 digitos
-            b = str(x).zfill(2)
-            # Se o dicionario de controle das bandas apontar True para essa banda, cria o gif
-            if g_bands[b]:
-                logging.info('Gif SP banda ' + b)
-                # Cria o processo com a funcao gif
-                process = Process(target=create_gif_cmi, args=(b, "sp"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                gif_br.append(process)
-                # Inicia o processo
-                process.start()
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in gif_sp:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
+    def alphanumeric_key(text):
+        """Return a key based on letters and digits in `text`."""
+        return [c.lower() for c in text if c in ascii_letters + digits]
 
-    if g_bands["17"]:
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO TRUECOLOR "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("truecolor", "br")
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO TRUECOLOR "SP"...')
-            # Cria o processo com a funcao gif
-            create_gif("truecolor", "sp")
+    def write_new_file(banda, file):
+        # Ordena de forma alfabetica a lista
+        file.sort(key=alphanumeric_key)
+        # Cria o arquivo com as novas imagens que estao na lista
+        with open(f'{dir_temp}{banda}_new.txt', 'w') as fo:
+            fo.writelines(map(lambda f: f + '\n', file))
 
-    if g_bands["18"]:
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO RRQPEF "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("rrqpef", "br")
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO RRQPEF "SP"...')
-            # Cria o processo com a funcao gif
-            create_gif("rrqpef", "sp")
+    def write_process_file(banda):
+        # Cria o arquivo band??_old.txt se nao existe
+        if not os.path.isfile(f'{dir_temp}{banda}_old.txt'):
+            with open(f'{dir_temp}{banda}_old.txt', 'w') as fo:
+                fo.close()
 
-    if g_bands["19"]:
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO GLM "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("glm", "br")
+        # Le os arquivos band??_old.txt e band??_new.txt
+        with open(f'{dir_temp}{banda}_old.txt', 'r') as old, open(f'{dir_temp}{banda}_new.txt', 'r') as new:
+            differ = Differ()
+            # Realiza a comparacao entre os arquivos e cria uma lista de imagens que estao unicamente no arquivo band??_new.txt
+            process_list = [line.strip()[2::] for line in differ.compare(old.readlines(), new.readlines()) if line.startswith('+')]
 
-    if g_bands["20"]:
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO NDVI "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("ndvi", "br")
+        # Cria o arquivo band??_process.txt com as imagens para processamento
+        with open(f'{dir_temp}{banda}_process.txt', 'w') as process:
+            # Escreve as imagens da lista no arquivo, sendo cada uma em uma linha
+            process.writelines(map(lambda f: f + '\n', process_list))
 
-    if g_bands["21"]:
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("fdcf", "br")
+        # Se houveram imagens para processamento, retorna True, caso contrario retorna False
+        if process_list:
+            return True
+        else:
+            return False
+
+    # Contado para checagem de novas imagens nas 16 bandas
+    for x in range(1, 17):
+        # Transforma o inteiro contador em string e com 2 digitos
+        b = str(x).zfill(2)
+        # Cria uma lista com os itens presentes no diretorio da banda que sao arquivo e terminam com ".nc"
+        imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f)]
+        # Se houver arquivos na lista, realiza o organizacao dos arquivos de controle e processamento, caso contrario aponta False no dicionario de controle das bandas
+        if imagens:
+            # Cria o arquivo com a nova lista de imagens
+            write_new_file(f'band{b}', imagens)
+            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
+            c_bands[b] = write_process_file(f'band{b}')
+            if c_bands[b]:
+                logging.info(f'Novas imagens Banda {b}')
+            else:
+                logging.info(f'Sem novas imagens Banda {b}')
+                os.remove(f'{dir_temp}band{b}_process.txt')
+            # Transforma o arquivo band??_new.txt para band??_old.txt
+            os.replace(f'{dir_temp}band{b}_new.txt', f'{dir_temp}band{b}_old.txt')
+        else:
+            c_bands[b] = False
+            logging.info(f'Sem novas imagens Banda {b}')
+
+    # Checagem de novas imagens truecolor (Band 17)
+    if c_bands["01"] and c_bands["02"] and c_bands["03"]:
+        # Carrega os arquivos de processamento das bandas para composicao do truecolor
+        file_ch01 = read_process_file('band01')
+        file_ch02 = read_process_file('band02')
+        file_ch03 = read_process_file('band03')
+        # Cria lista vazia para adicionar os produtos que forem baixados
+        product_list = []
+        # Looping a partir dos arquivos da banda 01 que compoem o truecolor
+        for x in file_ch01:
+            # Verifica se ha arquivo correspondente na banda 02
+            matches_ch02 = [y for y in file_ch02 if y.startswith(x[0:43].replace('M6C01', 'M6C02'))]
+            # Verifica se ha arquivo correspondente na banda 03
+            matches_ch03 = [z for z in file_ch03 if z.startswith(x[0:43].replace('M6C01', 'M6C03'))]
+            # Se houver arquivos de mesma data nas 3 bandas
+            if x and matches_ch02 and matches_ch03:
+                product_list.append(f'{x.strip()};{matches_ch02[0].strip()};{matches_ch03[0].strip()}')
+        if product_list:
+            # Cria o arquivo com a nova lista de imagens
+            write_new_file("band17", product_list)
+            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
+            c_bands["17"] = write_process_file("band17")
+            if c_bands["17"]:
+                logging.info(f'Novas imagens TRUECOLOR')
+            else:
+                logging.info(f'Sem novas imagens TRUECOLOR')
+                os.remove(f'{dir_temp}band17_process.txt')
+            # Transforma o arquivo band??_new.txt para band??_old.txt
+            os.replace(f'{dir_temp}band17_new.txt', f'{dir_temp}band17_old.txt')
+        else:
+            c_bands["17"] = False
+            logging.info(f'Sem novas imagens TRUECOLOR')
+    else:
+        logging.info(f'Sem novas imagens TRUECOLOR')
+
+    # Checagem de novas imagens rrqpef (Band 18)
+    if c_bands["13"]:
+        # Carrega a banda 13 que sera utilizada para compor o fundo
+        base = read_process_file('band13')
+        # Cria lista vazia para adicionar os produtos que forem baixados
+        product_list = []
+        # Looping para fazer o download de cada arquivo RRQPEF correspondente ao arquivo da banda 13 existente
+        for f in base:
+            # Extrair o data/hora do arquivo da banda 13 para download do arquivo RRQPEF
+            ftime = (datetime.datetime.strptime(f[f.find("M6C13_G16_s") + 11:f.find("_e") - 1], '%Y%j%H%M%S'))
+            try:
+                # Download arquivo rrqpef
+                file_name = download_prod(datetime.datetime.strftime(ftime, '%Y%m%d%H%M'), 'ABI-L2-RRQPEF', f'{dir_in}rrqpef/')
+            except:
+                continue
+            # Adicona o nome do arquivo na lista
+            product_list.append(f'{file_name}.nc;{f.strip()}')
+        if product_list:
+            # Cria o arquivo com a nova lista de imagens
+            write_new_file("band18", product_list)
+            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
+            c_bands["18"] = write_process_file("band18")
+            if c_bands["18"]:
+                logging.info(f'Novas imagens RRQPEF')
+            else:
+                logging.info(f'Sem novas imagens RRQPEF')
+                os.remove(f'{dir_temp}band18_process.txt')
+            # Transforma o arquivo band??_new.txt para band??_old.txt
+            os.replace(f'{dir_temp}band18_new.txt', f'{dir_temp}band18_old.txt')
+        else:
+            c_bands["18"] = False
+            logging.info(f'Sem novas imagens RRQPEF')
+    else:
+        logging.info(f'Sem novas imagens RRQPEF')
+
+    # Checagem de novas imagens GLM (Band 19)
+    if c_bands["13"]:
+        # Carrega a banda 13 que sera utilizada para compor o fundo
+        base = read_process_file('band13')
+        # Cria uma lista com os itens presentes no diretorio da banda que sao arquivo e terminam com ".nc"
+        imagens = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
+        imagens.sort()
+        # Cria lista vazia para adicionar os produtos
+        product_list = []
+        aux_list = []
+        # Looping a partir dos arquivos da banda 13 que compoem o fundo
+        for f in base:
+            # Extrair o data/hora do arquivo da banda 13 para download do arquivo GLM
+            ftime = (datetime.datetime.strptime(f[f.find("M6C13_G16_s") + 11:f.find("_e") - 1], '%Y%j%H%M%S'))
+            date_ini = datetime.datetime(ftime.year, ftime.month, ftime.day, ftime.hour, ftime.minute)
+            date_end = datetime.datetime(ftime.year, ftime.month, ftime.day, ftime.hour, ftime.minute) + datetime.timedelta(minutes=9, seconds=59)
+            for x in imagens:
+                xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
+                if date_ini <= xtime <= date_end:
+                    aux_list.append(x.strip())
+                else:
+                    continue
+            if aux_list:
+                product_list.append(f'{f.strip()};{aux_list}')
+            else:
+                continue
+        # Se houver arquivos na lista, realiza o organizacao dos arquivos de controle e processamento, caso contrario aponta False no dicionario de controle das bandas
+        if product_list:
+            # Cria o arquivo com a nova lista de imagens
+            write_new_file("band19", product_list)
+            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
+            c_bands["19"] = write_process_file("band19")
+            if c_bands["19"]:
+                logging.info(f'Novas imagens GLM')
+            else:
+                logging.info(f'Sem novas imagens GLM')
+                os.remove(f'{dir_temp}band19_process.txt')
+            # Transforma o arquivo band??_new.txt para band??_old.txt
+            os.replace(f'{dir_temp}band19_new.txt', f'{dir_temp}band19_old.txt')
+        else:
+            c_bands["19"] = False
+            logging.info(f'Sem novas imagens GLM')
+    else:
+        logging.info(f'Sem novas imagens GLM')
+
+    # Checagem de novas imagens ndvi (Band 20)
+    if c_bands["02"] and c_bands["03"]:
+        # Carrega os arquivos de processamento das bandas para composicao do ndvi
+        file_ch02 = read_process_file('band02')
+        file_ch03 = read_process_file('band03')
+        # Cria lista vazia para adicionar os produtos que forem baixados
+        product_list = []
+        # Looping a partir dos arquivos da banda 02 que compoem o ndvi
+        for x in file_ch02:
+            date_now = datetime.datetime.now()
+            date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
+            date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00)) + datetime.timedelta(hours=5, minutes=1)
+            date_file = (datetime.datetime.strptime(x[x.find("M6C02_G16_s") + 11:x.find("_e") - 1], '%Y%j%H%M%S'))
+            if date_ini <= date_file <= date_end:
+                # Verifica se ha arquivo correspondente na banda 03
+                matches_ch03 = [z for z in file_ch03 if z.startswith(x[0:43].replace('M6C02', 'M6C03'))]
+                # Se houver arquivos de mesma data nas 2 bandas
+                if x and matches_ch03:
+                    product_list.append(f'{x.strip()};{matches_ch03[0].strip()}')
+            else:
+                continue
+        if product_list:
+            # Cria o arquivo com a nova lista de imagens
+            write_new_file("band20", product_list)
+            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
+            c_bands["20"] = write_process_file("band20")
+            if c_bands["20"]:
+                logging.info(f'Novas imagens NDVI')
+            else:
+                logging.info(f'Sem novas imagens NDVI')
+                os.remove(f'{dir_temp}band20_process.txt')
+            # Transforma o arquivo band??_new.txt para band??_old.txt
+            os.replace(f'{dir_temp}band20_new.txt', f'{dir_temp}band20_old.txt')
+        else:
+            c_bands["20"] = False
+            logging.info(f'Sem novas imagens NDVI')
+    else:
+        logging.info(f'Sem novas imagens NDVI')
+
+    # Checagem de novas imagens fdcf (Band 21)
+    if c_bands["17"]:
+        # Carrega os arquivos de processamento do truecolor
+        file_truecolor = read_process_file('band17')
+        # Cria lista vazia para adicionar os produtos que forem baixados
+        product_list = []
+        for i in file_truecolor:
+            # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
+            i = i.strip().split(';')
+            # Montando dicionario de argumentos
+            kwargs = {'ch01': f'{dir_in}band01/{i[0].replace(".nc", "_reproj_br.nc")}', 'ch02': f'{dir_in}band02/{i[1].replace(".nc", "_reproj_br.nc")}',
+                      'ch03': f'{dir_in}band03/{i[2].replace(".nc", "_reproj_br.nc")}'}
+            # Extrair o data/hora do arquivo para download do arquivo FDCF
+            f = kwargs["ch01"]
+            ftime = (datetime.datetime.strptime(f[f.find("M6C01_G16_s") + 11:f.find("_e") - 1], '%Y%j%H%M%S'))
+            try:
+                # Download arquivo fdcf
+                file_name = download_prod(datetime.datetime.strftime(ftime, '%Y%m%d%H%M'), "ABI-L2-FDCF", f'{dir_in}fdcf/')
+            except:
+                continue
+            # Adicona o nome do arquivo na lista
+            product_list.append(f'{dir_in}fdcf/{file_name}.nc;{kwargs["ch01"]};{kwargs["ch02"]};{kwargs["ch03"]}')
+
+        if product_list:
+            # Cria o arquivo com a nova lista de imagens
+            write_new_file("band21", product_list)
+            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
+            c_bands["21"] = write_process_file("band21")
+            if c_bands["21"]:
+                logging.info(f'Novas imagens FDCF')
+            else:
+                logging.info(f'Sem novas imagens FDCF')
+                os.remove(f'{dir_temp}band21_process.txt')
+            # Transforma o arquivo band??_new.txt para band??_old.txt
+            os.replace(f'{dir_temp}band21_new.txt', f'{dir_temp}band21_old.txt')
+        else:
+            c_bands["21"] = False
+            logging.info(f'Sem novas imagens FDCF')
+    else:
+        logging.info(f'Sem novas imagens FDCF')
+
+    # Retorna o dicionario de controle das bandas
+    return c_bands
+
 
 def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     global dir_in
+
     def get_geot(ex, nlines, ncols):
         # Compute resolution based on data dimension
         resx = (ex[2] - ex[0]) / ncols
@@ -245,10 +408,6 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
 
     return file_dtime, file_satellite, grid
 
-def read_process_file(banda):
-    # Le o arquivo de processamento e retorna a lista
-    with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
-        return fo.readlines()
 
 def process_band_cmi(file, ch, v_extent):
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
@@ -393,6 +552,7 @@ def process_band_cmi(file, ch, v_extent):
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
+
 def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
     # Captura a hora para contagem do tempo de processamento da imagem
@@ -535,6 +695,8 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     plt.close()
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{ch01[0:59].replace("M6C01", "M6C0*")} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
+
+
 def process_rrqpef(rrqpef, ch13, v_extent):
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
     file_var = 'RRQPE'
@@ -1341,18 +1503,17 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{fdcf} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
-def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
 
+
+def processing(p_bands, p_br, p_sp):
+    global dir_in, dir_temp
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
     # Variavel de processamento diario do NDVI
     ndvi_diario = False
-    # Perguntar ao joão
     ultima_diario = []
-
-# ============================================# bands 1-16 BR ============================================== #
 
     # Processando arquivos das bandas do ABI
     # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1401,12 +1562,6 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
             process.join()
         # Limpa lista vazia para controle do processamento paralelo
         process_br = []
-
-# ============================================# bands 1-16 BR ============================================== #
-
-
-# ============================================# bands 1-16 SP ============================================== #
-
     # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
     if p_sp:
         logging.info("")
@@ -1454,11 +1609,6 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
 
-# ============================================# bands 1-16 BR ============================================== #
-
-
-# ============================================# TrueColor BR ============================================== #
-
     # Checagem se e possivel gerar imagem TrueColor
     if p_bands["17"]:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1504,10 +1654,6 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_br = []
-# ============================================# TrueColor BR ============================================== #
-
-
-# ============================================# TrueColor SP ============================================== #
         # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
         if p_sp:
             logging.info("")
@@ -1551,10 +1697,7 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_sp = []
-# ============================================# TrueColor SP ============================================== #
 
-
-# ============================================# RRQPEF BR ============================================== #
     # Checagem se e possivel gerar imagem RRQPEF
     if p_bands["18"]:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1595,11 +1738,6 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_br = []
-
-# ============================================# RRQPEF BR ============================================== #
-
-
-# ============================================# RRQPEF SP ============================================== #
         # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
         if p_sp:
             logging.info("")
@@ -1638,11 +1776,6 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_sp = []
-
-# ============================================# RRQPEF SP ============================================== #
-
-
-# ============================================# GLM BR ============================================== #
 
     # Checagem se e possivel gerar imagem GLM
     if p_bands["19"]:
@@ -1688,11 +1821,6 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_br = []
-
-# ============================================# GLM BR ============================================== #
-
-
-# ============================================# NDVI BR ============================================== #
 
     # Checagem se e possivel gerar imagem NDVI
     if p_bands["20"]:
@@ -1850,9 +1978,667 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
     logging.info("")
     logging.info("PROCESSAMENTO ENCERRADO")
 
-
-# ============================================# NDVI BR ============================================== #
-
-
     # Retorna o dicionario de controle das bandas
     return p_bands
+
+
+def remove_images(r_bands, r_br, r_sp):
+    global dir_temp, dir_in
+    logging.info("")
+    logging.info('REMOVENDO IMAGENS PROCESSADAS')
+
+    # Contador para remover imagens nas 16 bandas
+    for x in range(1, 17):
+        # Transforma o inteiro contador em string e com 2 digitos
+        b = str(x).zfill(2)
+        # Se o dicionario de controle das bandas apontar True para essa banda, remove a imagem
+        if r_bands[b]:
+            # Le o arquivo de processamento da banda
+            img = read_process_file(f'band{b}')
+            logging.info(f'Removendo imagens banda {b}')
+            # Para cada imagem no arquivo, realiza a remocao
+            for i in img:
+                # Remove possiveis espacos vazios no inicio ou final da string
+                i = i.strip()
+                try:
+                    # Remove a imagem
+                    os.remove(f'{dir_in}band{b}/{i}')
+                except FileNotFoundError as fnfe:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - FileNotFoundError - {i}')
+                    logging.info(str(fnfe))
+                try:
+                    if r_br:
+                        os.remove(f'{dir_in}band{b}/{i.replace(".nc", "_reproj_br.nc")}')
+                except FileNotFoundError as fnfe:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - FileNotFoundError - {i.replace(".nc", "_reproj_br.nc")}')
+                    logging.info(str(fnfe))
+                try:
+                    if r_sp:
+                        os.remove(f'{dir_in}band{b}/{i.replace(".nc", "_reproj_sp.nc")}')
+                except FileNotFoundError as fnfe:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - FileNotFoundError - {i.replace(".nc", "_reproj_sp.nc")}')
+                    logging.info(str(fnfe))
+            logging.info(f'Removendo arquivo de processamento da banda {b}')
+            # Remove o arquivo de processamento
+            os.remove(f'{dir_temp}band{b}_process.txt')
+
+    if r_bands["17"]:
+        logging.info(f'Removendo arquivo de processamento TRUECOLOR')
+        # Remove o arquivo de processamento truecolor
+        os.remove(f'{dir_temp}band17_process.txt')
+
+    if r_bands["18"]:
+        # Le o arquivo de processamento da banda
+        img = read_process_file(f'band18')
+        logging.info(f'Removendo imagens RRQPEF')
+        for i in img:
+            # Remove possiveis espacos vazios no inicio ou final da string
+            i = i.strip().split(';')
+            try:
+                # Remove a imagem
+                os.remove(f'{dir_in}rrqpef/{i[0]}')
+            except FileNotFoundError as fnfe:
+                # Realiza o log do erro
+                logging.info(f'Erro Arquivo - FileNotFoundError - {i[0]}')
+                logging.info(str(fnfe))
+            try:
+                if r_br:
+                    os.remove(f'{dir_in}rrqpef/{i[0].replace(".nc", "_reproj_br.nc")}')
+            except FileNotFoundError as fnfe:
+                # Realiza o log do erro
+                logging.info(f'Erro Arquivo - FileNotFoundError - {i[0].replace(".nc", "_reproj_br.nc")}')
+                logging.info(str(fnfe))
+            try:
+                if r_sp:
+                    os.remove(f'{dir_in}rrqpef/{i[0].replace(".nc", "_reproj_sp.nc")}')
+            except FileNotFoundError as fnfe:
+                # Realiza o log do erro
+                logging.info(f'Erro Arquivo - FileNotFoundError - {i[0].replace(".nc", "_reproj_sp.nc")}')
+                logging.info(str(fnfe))
+        logging.info(f'Removendo arquivo de processamento RRQPEF')
+        # Remove o arquivo de processamento rrqpef
+        os.remove(f'{dir_temp}band18_process.txt')
+
+    if r_bands["19"]:
+        # Le o arquivo de processamento da banda
+        img = read_process_file("band19")
+        logging.info(f'Removendo imagens GLM')
+        # Para cada imagem no arquivo, realiza a remocao
+        for i in img:
+            # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
+            i = i.strip().split(';')
+            # Coletando lista de GLM no indice 1
+            j = i[1].replace("'", "").strip('][').split(', ')
+            for g in j:
+                try:
+                    # Remove a imagem
+                    os.remove(f'{dir_in}glm/{g}')
+                except FileNotFoundError as fnfe:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - FileNotFoundError - {g}')
+                    logging.info(str(fnfe))
+        logging.info(f'Removendo arquivo de processamento do GLM')
+        # Remove o arquivo de processamento
+        os.remove(f'{dir_temp}band19_process.txt')
+
+    if r_bands["20"]:
+        logging.info(f'Removendo arquivo de processamento NDVI')
+        # Remove o arquivo de processamento ndvi
+        os.remove(f'{dir_temp}band20_process.txt')
+
+    if r_bands["21"]:
+        # Le o arquivo de processamento da banda
+        img = read_process_file(f'band21')
+        logging.info(f'Removendo imagens FDCF')
+        for i in img:
+            # Remove possiveis espacos vazios no inicio ou final da string
+            i = i.strip().split(';')
+            try:
+                # Remove a imagem
+                os.remove(f'{i[0]}')
+            except FileNotFoundError as fnfe:
+                # Realiza o log do erro
+                logging.info(f'Erro Arquivo - FileNotFoundError - {i[0]}')
+                logging.info(str(fnfe))
+        logging.info(f'Removendo arquivo de processamento FDCF')
+        # Remove o arquivo de processamento fdcf
+        os.remove(f'{dir_temp}band21_process.txt')
+
+
+def quantity_products():
+    global dir_out
+    logging.info("")
+    logging.info("VERIFICANDO NUMERO DE PRODUTOS...")
+    aux = False
+
+    # Contador para verificar produtos nas 16 bandas
+    for x in range(1, 17):
+        # Transforma o inteiro contador em string e com 2 digitos
+        b = str(x).zfill(2)
+        # Verifica a quantidade de itens no diretorio dos produtos da banda que sao arquivos e se encaixa na expressao regular "^band[0-1][0-9]_.+_.+_br.png$"
+        result_br = len([name for name in os.listdir(f'{dir_out}band{b}') if os.path.isfile(os.path.join(f'{dir_out}band{b}', name)) and re.match('^band[0-1][0-9]_.+_.+_br.png$', name)])
+        # Verifica a quantidade de itens no diretorio dos produtos da banda que sao arquivos e se encaixa na expressao regular "^band[0-1][0-9]_.+_.+_sp.png$"
+        result_sp = len([name for name in os.listdir(f'{dir_out}band{b}') if os.path.isfile(os.path.join(f'{dir_out}band{b}', name)) and re.match('^band[0-1][0-9]_.+_.+_sp.png$', name)])
+        # Subtrai o limite de imagens BR
+        result_br -= 48
+        # Subtrai o limite de imagens SP
+        result_sp -= 48
+        # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+        if result_br > 0:
+            aux = True
+            # Cria uma lista com os itens no diretorio dos produtos da banda que sao arquivos e se encaixa na expressao regular "^band[0-1][0-9]_.+_.+_br.png$"
+            prod_br = [name for name in os.listdir(f'{dir_out}band{b}') if os.path.isfile(os.path.join(f'{dir_out}band{b}', name)) and re.match('^band[0-1][0-9]_.+_.+_br.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            prod_br.sort()
+            # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+            for y in range(0, result_br):
+                # Remove arquivo em excesso
+                os.remove(f'{dir_out}band{b}/{prod_br[y]}')
+        # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+        if result_sp > 0:
+            aux = True
+            # Cria uma lista com os itens no diretorio dos produtos da banda que sao arquivos e se encaixa na expressao regular "^band[0-1][0-9]_.+_.+_sp.png$"
+            prod_sp = [name for name in os.listdir(f'{dir_out}band{b}') if os.path.isfile(os.path.join(f'{dir_out}band{b}', name)) and re.match('^band[0-1][0-9]_.+_.+_sp.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            prod_sp.sort()
+            # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+            for y in range(0, result_sp):
+                # Remove arquivo em excesso
+                os.remove(f'{dir_out}band{b}/{prod_sp[y]}')
+
+    # Verificar produtos truecolor
+    # Verifica a quantidade de itens no diretorio dos produtos truecolor que sao arquivos e se encaixa na expressao regular "^truecolor_.+_.+_br.png$"
+    result_br = len([name for name in os.listdir(f'{dir_out}truecolor') if os.path.isfile(os.path.join(f'{dir_out}truecolor', name)) and re.match('^truecolor_.+_.+_br.png$', name)])
+    # Verifica a quantidade de itens no diretorio dos produtos truecolor que sao arquivos e se encaixa na expressao regular "^truecolor_.+_.+_sp.png$"
+    result_sp = len([name for name in os.listdir(f'{dir_out}truecolor') if os.path.isfile(os.path.join(f'{dir_out}truecolor', name)) and re.match('^truecolor_.+_.+_sp.png$', name)])
+    # Subtrai o limite de imagens BR
+    result_br -= 48
+    # Subtrai o limite de imagens SP
+    result_sp -= 48
+    # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+    if result_br > 0:
+        aux = True
+        # Cria uma lista com os itens no diretorio dos produtos truecolor que sao arquivos e se encaixa na expressao regular "^truecolor_.+_.+_br.png$"
+        prod_br = [name for name in os.listdir(f'{dir_out}truecolor') if os.path.isfile(os.path.join(f'{dir_out}truecolor', name)) and re.match('^truecolor_.+_.+_br.png$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        prod_br.sort()
+        # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+        for y in range(0, result_br):
+            # Remove arquivo em excesso
+            os.remove(f'{dir_out}truecolor/{prod_br[y]}')
+    # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+    if result_sp > 0:
+        aux = True
+        # Cria uma lista com os itens no diretorio dos produtos truecolor que sao arquivos e se encaixa na expressao regular "^truecolor_.+_.+_sp.png$"
+        prod_sp = [name for name in os.listdir(f'{dir_out}truecolor') if os.path.isfile(os.path.join(f'{dir_out}truecolor', name)) and re.match('^truecolor_.+_.+_sp.png$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        prod_sp.sort()
+        # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+        for y in range(0, result_sp):
+            # Remove arquivo em excesso
+            os.remove(f'{dir_out}truecolor/{prod_sp[y]}')
+
+    # Verificar produtos rrqpef
+    # Verifica a quantidade de itens no diretorio dos produtos rrqpef que sao arquivos e se encaixa na expressao regular "^rrqpef_.+_.+_br.png$"
+    result_br = len([name for name in os.listdir(f'{dir_out}rrqpef') if os.path.isfile(os.path.join(f'{dir_out}rrqpef', name)) and re.match('^rrqpef_.+_.+_br.png$', name)])
+    # Verifica a quantidade de itens no diretorio dos produtos rrqpef que sao arquivos e se encaixa na expressao regular "^rrqpef_.+_.+_sp.png$"
+    result_sp = len([name for name in os.listdir(f'{dir_out}rrqpef') if os.path.isfile(os.path.join(f'{dir_out}rrqpef', name)) and re.match('^rrqpef_.+_.+_sp.png$', name)])
+    # Subtrai o limite de imagens BR
+    result_br -= 48
+    # Subtrai o limite de imagens SP
+    result_sp -= 48
+    # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+    if result_br > 0:
+        aux = True
+        # Cria uma lista com os itens no diretorio dos produtos rrqpef que sao arquivos e se encaixa na expressao regular "^rrqpef_.+_.+_br.png$"
+        prod_br = [name for name in os.listdir(f'{dir_out}rrqpef') if os.path.isfile(os.path.join(f'{dir_out}rrqpef', name)) and re.match('^rrqpef_.+_.+_br.png$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        prod_br.sort()
+        # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+        for y in range(0, result_br):
+            # Remove arquivo em excesso
+            os.remove(f'{dir_out}rrqpef/{prod_br[y]}')
+    # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+    if result_sp > 0:
+        aux = True
+        # Cria uma lista com os itens no diretorio dos produtos rrqpef que sao arquivos e se encaixa na expressao regular "^rrqpef_.+_.+_sp.png$"
+        prod_sp = [name for name in os.listdir(f'{dir_out}rrqpef') if os.path.isfile(os.path.join(f'{dir_out}rrqpef', name)) and re.match('^rrqpef_.+_.+_sp.png$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        prod_sp.sort()
+        # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+        for y in range(0, result_sp):
+            # Remove arquivo em excesso
+            os.remove(f'{dir_out}rrqpef/{prod_sp[y]}')
+
+    # Verificar produtos glm
+    # Verifica a quantidade de itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_br.png$"
+    result_br = len([name for name in os.listdir(f'{dir_out}glm') if os.path.isfile(os.path.join(f'{dir_out}glm', name)) and re.match('^glm_.+_.+_br.png$', name)])
+    # Verifica a quantidade de itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_sp.png$"
+    result_sp = len([name for name in os.listdir(f'{dir_out}glm') if os.path.isfile(os.path.join(f'{dir_out}glm', name)) and re.match('^glm_.+_.+_sp.png$', name)])
+    # Subtrai o limite de imagens BR
+    result_br -= 48
+    # Subtrai o limite de imagens SP
+    result_sp -= 48
+    # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+    if result_br > 0:
+        aux = True
+        # Cria uma lista com os itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_br.png$"
+        prod_br = [name for name in os.listdir(f'{dir_out}glm') if os.path.isfile(os.path.join(f'{dir_out}glm', name)) and re.match('^glm_.+_.+_br.png$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        prod_br.sort()
+        # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+        for y in range(0, result_br):
+            # Remove arquivo em excesso
+            os.remove(f'{dir_out}glm/{prod_br[y]}')
+    # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+    if result_sp > 0:
+        aux = True
+        # Cria uma lista com os itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_sp.png$"
+        prod_sp = [name for name in os.listdir(f'{dir_out}glm') if os.path.isfile(os.path.join(f'{dir_out}glm', name)) and re.match('^glm_.+_.+_sp.png$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        prod_sp.sort()
+        # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+        for y in range(0, result_sp):
+            # Remove arquivo em excesso
+            os.remove(f'{dir_out}glm/{prod_sp[y]}')
+
+    # Verificar produtos ndvi
+    # Verifica a quantidade de itens no diretorio dos produtos ndvi que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.png$"
+    result_br = len([name for name in os.listdir(f'{dir_out}ndvi') if os.path.isfile(os.path.join(f'{dir_out}ndvi', name)) and re.match('^ndvi_.+_.+_br.png$', name)])
+    # Subtrai o limite de imagens BR
+    result_br -= 48
+    # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+    if result_br > 0:
+        aux = True
+        # Cria uma lista com os itens no diretorio dos produtos ndvi que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.png$"
+        prod_br = [name for name in os.listdir(f'{dir_out}ndvi') if os.path.isfile(os.path.join(f'{dir_out}ndvi', name)) and re.match('^ndvi_.+_.+_br.png$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        prod_br.sort()
+        # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+        for y in range(0, result_br):
+            # Remove arquivo em excesso
+            os.remove(f'{dir_out}ndvi/{prod_br[y]}')
+
+    # Verificar produtos fdcf
+    # Verifica a quantidade de itens no diretorio dos produtos fdcf que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.png$"
+    result_br = len([name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match('^fdcf_.+_.+_br.png$', name)])
+    # Subtrai o limite de imagens BR
+    result_br -= 48
+    # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+    if result_br > 0:
+        aux = True
+        # Cria uma lista com os itens no diretorio dos produtos fdcf que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.png$"
+        prod_br = [name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match('^fdcf_.+_.+_br.png$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        prod_br.sort()
+        # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+        for y in range(0, result_br):
+            # Remove arquivo em excesso
+            os.remove(f'{dir_out}fdcf/{prod_br[y]}')
+
+    if aux:
+        logging.info("Produtos em excesso removidos com sucesso")
+    else:
+        logging.info("Quantidade de produtos dentro do limite")
+
+
+def process_gif(g_bands, g_br, g_sp):
+    global dir_out
+    # Cria lista vazia para controle do processamento paralelo
+    gif_br = []
+    # Cria lista vazia para controle do processamento paralelo
+    gif_sp = []
+
+    # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
+    def create_gif_cmi(banda, roi):
+        os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}band{banda}/band{banda}_*_*_{roi}.png" "{dir_out}band{banda}/band{banda}_{roi}.gif"')
+
+    # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
+    def create_gif(file_type, roi):
+        os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}{file_type}/{file_type}_*_*_{roi}.png" "{dir_out}{file_type}/{file_type}_{roi}.gif"')
+
+    # Se a variavel de controle de processamento do brasil for True, cria o gif
+    if g_br:
+        logging.info('')
+        logging.info('CRIANDO GIF ANIMADO "BR"...')
+        # Contador para gif nas 16 bandas
+        for x in range(1, 17):
+            # Transforma o inteiro contador em string e com 2 digitos
+            b = str(x).zfill(2)
+            # Se o dicionario de controle das bandas apontar True para essa banda, cria o gif
+            if g_bands[b]:
+                logging.info('Gif BR banda ' + b)
+                # Cria o processo com a funcao gif
+                process = Process(target=create_gif_cmi, args=(b, "br"))
+                # Adiciona o processo na lista de controle do processamento paralelo
+                gif_br.append(process)
+                # Inicia o processo
+                process.start()
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in gif_br:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+
+    # Se a variavel de controle de processamento do estado de sao paulo for True, cria o gif
+    if g_sp:
+        logging.info('')
+        logging.info('CRIANDO GIF ANIMADO "SP"...')
+        # Contador para gif nas 16 bandas
+        for x in range(1, 17):
+            # Transforma o inteiro contador em string e com 2 digitos
+            b = str(x).zfill(2)
+            # Se o dicionario de controle das bandas apontar True para essa banda, cria o gif
+            if g_bands[b]:
+                logging.info('Gif SP banda ' + b)
+                # Cria o processo com a funcao gif
+                process = Process(target=create_gif_cmi, args=(b, "sp"))
+                # Adiciona o processo na lista de controle do processamento paralelo
+                gif_br.append(process)
+                # Inicia o processo
+                process.start()
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in gif_sp:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+
+    if g_bands["17"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO TRUECOLOR "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("truecolor", "br")
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO TRUECOLOR "SP"...')
+            # Cria o processo com a funcao gif
+            create_gif("truecolor", "sp")
+
+    if g_bands["18"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO RRQPEF "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("rrqpef", "br")
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO RRQPEF "SP"...')
+            # Cria o processo com a funcao gif
+            create_gif("rrqpef", "sp")
+
+    if g_bands["19"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO GLM "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("glm", "br")
+
+    if g_bands["20"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO NDVI "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("ndvi", "br")
+
+    if g_bands["21"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("fdcf", "br")
+
+
+def send_products(s_br, s_sp):
+    global dir_out
+    logging.info('')
+    logging.info('ENVIANDO PRODUTOS PARA O SITE')
+    try:
+        # Criar objeto cliente SSH
+        ssh = paramiko.SSHClient()
+        # Carrega as chaves disponiveis no sistema
+        ssh.load_system_host_keys()
+        # Cria a conexao com o endereco informando, na porta informada e com o usuario informado
+        ssh.connect('143.106.227.94', username="cpaunicamp", port=22000)
+        # Cria o objeto cliente SCP com a conexao SSH
+        scp_client = scp.SCPClient(ssh.get_transport())
+
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if s_br:
+            logging.info('')
+            logging.info('Enviando produtos "BR"')
+            # Contador para envio nas 16 bandas
+            for x in range(1, 17):
+                # Transforma o inteiro contador em string e com 2 digitos
+                b = str(x).zfill(2)
+                # Cria uma lista com os itens no diretorio dos produtos da banda que sao arquivos e se encaixa na expressao regular "^band[0-1][0-9]_.+_.+_br.png$"
+                ultima_br = [name for name in os.listdir(f'{dir_out}band{b}') if os.path.isfile(os.path.join(f'{dir_out}band{b}', name)) and re.match('^band[0-1][0-9]_.+_.+_br.png$', name)]
+                # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+                ultima_br.sort()
+                # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+                ultima_br.reverse()
+                # Envia o arquivo "png" mais recente para o site, renomeando no destino
+                scp_client.put(f'{dir_out}band{b}/{ultima_br[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/band{b}/band{b}_br.png')
+                # Cria um arquivo menor do arquivo "png" mais recente
+                os.system(f'/usr/bin/ffmpeg -y -v warning -i {dir_out}band{b}/{ultima_br[0]} -vf scale=448:321 {dir_out}band{b}/band{b}.png')
+                # Envia o arquivo menor do "png" mais recente para o site
+                scp_client.put(f'{dir_out}band{b}/band{b}.png', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/band{b}/band{b}.png')
+                # Envia o arquivo "gif" para o site
+                scp_client.put(f'{dir_out}band{b}/band{b}_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/band{b}/band{b}_br.gif')
+
+            # Envio TrueColor
+            # Cria uma lista com os itens no diretorio dos produtos truecolor que sao arquivos e se encaixa na expressao regular "^truecolor_.+_.+_br.png$"
+            ultima_br = [name for name in os.listdir(f'{dir_out}truecolor') if os.path.isfile(os.path.join(f'{dir_out}truecolor', name)) and re.match('^truecolor_.+_.+_br.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_br.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_br.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}truecolor/{ultima_br[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/truecolor/truecolor_br.png')
+            # Cria um arquivo menor do arquivo "png" mais recente
+            os.system(f'/usr/bin/ffmpeg -y -v warning -i {dir_out}truecolor/{ultima_br[0]} -vf scale=448:321 {dir_out}truecolor/truecolor.png')
+            # Envia o arquivo menor do "png" mais recente para o site
+            scp_client.put(f'{dir_out}truecolor/truecolor.png', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/truecolor/truecolor.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}truecolor/truecolor_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/truecolor/truecolor_br.gif')
+
+            # Envio RRQPEF
+            # Cria uma lista com os itens no diretorio dos produtos rrqpef que sao arquivos e se encaixa na expressao regular "^rrqpef_.+_.+_br.png$"
+            ultima_br = [name for name in os.listdir(f'{dir_out}rrqpef') if os.path.isfile(os.path.join(f'{dir_out}rrqpef', name)) and re.match('^rrqpef_.+_.+_br.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_br.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_br.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}rrqpef/{ultima_br[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/rrqpef/rrqpef_br.png')
+            # Cria um arquivo menor do arquivo "png" mais recente
+            os.system(f'/usr/bin/ffmpeg -y -v warning -i {dir_out}rrqpef/{ultima_br[0]} -vf scale=448:321 {dir_out}rrqpef/rrqpef.png')
+            # Envia o arquivo menor do "png" mais recente para o site
+            scp_client.put(f'{dir_out}rrqpef/rrqpef.png', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/rrqpef/rrqpef.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}rrqpef/rrqpef_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/rrqpef/rrqpef_br.gif')
+
+            # Envio GLM
+            # Cria uma lista com os itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_br.png$"
+            ultima_br = [name for name in os.listdir(f'{dir_out}glm') if os.path.isfile(os.path.join(f'{dir_out}glm', name)) and re.match('^glm_.+_.+_br.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_br.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_br.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}glm/{ultima_br[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/glm/glm_br.png')
+            # Cria um arquivo menor do arquivo "png" mais recente
+            os.system(f'/usr/bin/ffmpeg -y -v warning -i {dir_out}glm/{ultima_br[0]} -vf scale=448:321 {dir_out}glm/glm.png')
+            # Envia o arquivo menor do "png" mais recente para o site
+            scp_client.put(f'{dir_out}glm/glm.png', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/glm/glm.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}glm/glm_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/glm/glm_br.gif')
+
+            # Envio NDVI
+            # Cria uma lista com os itens no diretorio dos produtos ndvi que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.png$"
+            ultima_br = [name for name in os.listdir(f'{dir_out}ndvi') if os.path.isfile(os.path.join(f'{dir_out}ndvi', name)) and re.match('^ndvi_.+_.+_br.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_br.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_br.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}ndvi/{ultima_br[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/ndvi/ndvi_br.png')
+            # Cria um arquivo menor do arquivo "png" mais recente
+            os.system(f'/usr/bin/ffmpeg -y -v warning -i {dir_out}ndvi/{ultima_br[0]} -vf scale=448:321 {dir_out}ndvi/ndvi.png')
+            # Envia o arquivo menor do "png" mais recente para o site
+            scp_client.put(f'{dir_out}ndvi/ndvi.png', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/ndvi/ndvi.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}ndvi/ndvi_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/ndvi/ndvi_br.gif')
+
+            # Envio FDCF
+            # Cria uma lista com os itens no diretorio dos produtos fdcf que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.png$"
+            ultima_br = [name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match('^fdcf_.+_.+_br.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_br.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_br.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}fdcf/{ultima_br[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/fdcf/fdcf_br.png')
+            # Cria um arquivo menor do arquivo "png" mais recente
+            os.system(f'/usr/bin/ffmpeg -y -v warning -i {dir_out}fdcf/{ultima_br[0]} -vf scale=448:321 {dir_out}fdcf/fdcf.png')
+            # Envia o arquivo menor do "png" mais recente para o site
+            scp_client.put(f'{dir_out}fdcf/fdcf.png', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/fdcf/fdcf.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}fdcf/fdcf_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/fdcf/fdcf_br.gif')
+
+        # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
+        if s_sp:
+            logging.info('')
+            logging.info('Enviando produtos "SP"')
+            # Contador para envio nas 16 bandas
+            for x in range(1, 17):
+                # Transforma o inteiro contador em string e com 2 digitos
+                b = str(x).zfill(2)
+                # Cria uma lista com os itens no diretorio dos produtos da banda que sao arquivos e se encaixa na expressao regular "^band[0-1][0-9]_.+_.+_sp.png$"
+                ultima_sp = [name for name in os.listdir(f'{dir_out}band{b}') if os.path.isfile(os.path.join(f'{dir_out}band{b}', name)) and re.match('^band[0-1][0-9]_.+_.+_sp.png$', name)]
+                # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+                ultima_sp.sort()
+                # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+                ultima_sp.reverse()
+                # Envia o arquivo "png" mais recente para o site, renomeando no destino
+                scp_client.put(f'{dir_out}band{b}/{ultima_sp[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/band{b}/band{b}_sp.png')
+                # Envia o arquivo "gif" para o site
+                scp_client.put(f'{dir_out}band{b}/band{b}_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/band{b}/band{b}_sp.gif')
+
+            # Envio TrueColor
+            # Cria uma lista com os itens no diretorio dos produtos truecolor que sao arquivos e se encaixa na expressao regular "^truecolor_.+_.+_br.png$"
+            ultima_sp = [name for name in os.listdir(f'{dir_out}truecolor') if os.path.isfile(os.path.join(f'{dir_out}truecolor', name)) and re.match('^truecolor_.+_.+_sp.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_sp.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_sp.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}truecolor/{ultima_sp[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/truecolor/truecolor_sp.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}truecolor/truecolor_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/truecolor/truecolor_sp.gif')
+
+            # Envio RRQPEF
+            # Cria uma lista com os itens no diretorio dos produtos rrqpef que sao arquivos e se encaixa na expressao regular "^rrqpef_.+_.+_sp.png$"
+            ultima_sp = [name for name in os.listdir(f'{dir_out}rrqpef') if os.path.isfile(os.path.join(f'{dir_out}rrqpef', name)) and re.match('^rrqpef_.+_.+_sp.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_sp.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_sp.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}rrqpef/{ultima_sp[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/rrqpef/rrqpef_sp.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}rrqpef/rrqpef_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/rrqpef/rrqpef_sp.gif')
+
+    except TimeoutError as e_timeout:
+        logging.info('')
+        logging.info(f'FALHA AO ENVIAR PRODUTOS PARA O SITE - {e_timeout}')
+    except paramiko.SSHException as e_ssh:
+        logging.info('')
+        logging.info(f'FALHA AO ENVIAR PRODUTOS PARA O SITE - {e_ssh}')
+    except scp.SCPException as e_scp:
+        logging.info('')
+        logging.info(f'FALHA AO ENVIAR PRODUTOS PARA O SITE - {e_scp}')
+
+
+def finalize(s):
+    # Capturando data/hora final
+    fim = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
+    # Realiza o log do calculo do tempo de execucao
+    logging.info("")
+    logging.info("Tempo gasto " + str(round(time.time() - s, 4)) + ' segundos')
+    logging.info("")
+    logging.info("=========================================================================================================")
+    logging.info("=                         PROCESSAMENTO ENCERRADO GOES AS " + fim + "                           =")
+    logging.info("=========================================================================================================")
+    logging.info("")
+    logging.info("")
+
+
+# ======================================================================================================
+
+
+# ============================================# Variaveis ==============================================
+dir_in = "/home/goes/"
+# dir_main = "/home/bruno/IdeaProjects/goes/"
+dir_main = "/Scripts/goes/"
+dir_out = dir_main + "output/"
+dir_libs = dir_main + "libs/"
+dir_shapefiles = dir_main + "shapefiles/"
+dir_colortables = dir_main + "colortables/"
+dir_logos = dir_main + "logos/"
+dir_temp = dir_main + "temp/"
+# arq_log = "/tmp/Processamento-GOES_" + str(datetime.date.today()) + ".log"
+arq_log = "/var/log/goes/Processamento-GOES_" + str(datetime.date.today()) + ".log"
+
+bands = {"01": False, "02": False, "03": False, "04": False, "05": False, "06": False, "07": False, "08": False,
+         "09": False, "10": False, "11": False, "12": False, "13": False, "14": False, "15": False, "16": False,
+         "17": False,  # Band 17 = TrueColor
+         "18": False,  # Band 18 = RRQPEF
+         "19": False,  # Band 19 = GLM
+         "20": False,  # Band 20 = NDVI
+         "21": False}  # Band 21 = FDCF
+br = True
+sp = True
+
+# ======================================================================================================
+
+
+# ===============================================# Main ================================================
+# Configurando log
+logging.basicConfig(filename=arq_log, level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%d/%m/%Y %H:%M:%S")
+# Capturando data/hora inicio
+inicio = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
+logging.info("")
+logging.info("")
+logging.info("=========================================================================================================")
+logging.info("=                             PROCESSANDO IMAGENS GOES AS " + inicio + "                           =")
+logging.info("=========================================================================================================")
+logging.info("")
+
+# Captura a hora para contagem do tempo de execucao
+start = time.time()
+# Realizando a checagem de novas imagens para processamento
+bands = check_images(bands)
+
+# Realiza etapas de processamento se houver alguma nova imagem
+if bands["01"] or bands["02"] or bands["03"] or bands["04"] or bands["05"] or bands["06"] or bands["07"] or bands["08"] or \
+        bands["09"] or bands["10"] or bands["11"] or bands["12"] or bands["13"] or bands["14"] or bands["15"] or bands["16"]:
+    # Realiza processamento da imagens
+    bands = processing(bands, br, sp)
+    # Remove imagens processadas
+    remove_images(bands, br, sp)
+    # Controle de quantidade de produtos devemos manter para produção do gif
+    quantity_products()
+    # Realiza processamento do gif
+    process_gif(bands, br, sp)
+    # Envia os produtos para o site
+    send_products(br, sp)
+    # Finaliza o script
+    finalize(start)
+else:
+    logging.info("")
+    logging.info("SEM NOVAS IMAGENS PARA PROCESSAMENTO")
+    # Finaliza o script
+    finalize(start)
+# ======================================================================================================
