@@ -66,8 +66,6 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     
     # Abrindo imagem com a biblioteca GDAL
     raw = gdal.Open(f'NETCDF:{reproj_file}:' + reproj_var, gdal.GA_ReadOnly)
-
-    print('aqui?2')
     
     # Lendo os metadados do cabecalho
     if reproj_var == 'BCM':  ### O arquivo Clear Sky não possui sacale e offset é um arquivo binário
@@ -85,20 +83,26 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
         undef = float(metadata.get(reproj_var + '#_FillValue'))
         file_dtime = metadata.get('NC_GLOBAL#time_coverage_start')
         file_satellite = metadata.get('NC_GLOBAL#platform_ID')[1:3]
-    print('aqui?3')
+    
+   
+    
     # Setup projection and geo-transformation
     raw.SetProjection(source_prj.ExportToWkt())
     # raw.SetGeoTransform(raw.GetGeoTransform())
     GOES16_EXTENT = [-5434894.885056, -5434894.885056, 5434894.885056, 5434894.885056]
     raw.SetGeoTransform(get_geot(GOES16_EXTENT, raw.RasterYSize, raw.RasterXSize))
-
+    
+    
     # Compute grid dimension
     KM_PER_DEGREE = 111.32
     sizex = int(((r_extent[2] - r_extent[0]) * KM_PER_DEGREE) / reproj_resolution)
     sizey = int(((r_extent[3] - r_extent[1]) * KM_PER_DEGREE) / reproj_resolution)
 
+
+
     # Get memory driver
     driver = gdal.GetDriverByName('MEM')
+
 
     # Create grid
     grid = driver.Create('grid', sizex, sizey, 1, gdal.GDT_Float32)
@@ -140,8 +144,9 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     reproj_file.reverse()
     r_file = reproj_file[0].replace('.nc', f'_reproj_{reproj_extent}.nc')
     gdal.Warp(f'{dir_in}{reproj_file[1]}/{r_file}', grid, **kwargs)
-
+    print('aqui8')
     return file_dtime, file_satellite, grid
+
 
 
 def process_band_cmi(file, ch, v_extent):
@@ -167,7 +172,7 @@ def process_band_cmi(file, ch, v_extent):
 
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
     dtime, satellite, reproject_band = reproject(file, file_var, v_extent, resolution)
-
+    print('aqui9')
     if 1 <= int(ch) <= 6:
         data = reproject_band.ReadAsArray()
     else:
@@ -183,7 +188,7 @@ def process_band_cmi(file, ch, v_extent):
     date = (datetime.datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
     date_file = date.strftime('%Y%m%d_%H%M%S')
-
+    print('aqu10')
     # Definindo unidade de medida da imagem de acordo com o canal
     if 1 <= int(ch) <= 6:
         unit = "Albedo (%)"
@@ -192,14 +197,14 @@ def process_band_cmi(file, ch, v_extent):
     # Formatando a descricao a ser plotada na imagem
     description = f" GOES-{satellite} ABI CMI Band {ch} {wavelenghts[int(ch)]} {unit} {date_img}"
     institution = "CEPAGRI - UNICAMP"
-
+    print('aqui11')
     # Definindo tamanho da imagem de saida
     d_p_i = 150
     fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
 
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
-
+    print('aqui12')
     if v_extent == 'br':
         # Adicionando o shapefile dos estados brasileiros
         # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
@@ -287,6 +292,7 @@ def process_band_cmi(file, ch, v_extent):
     plt.close()
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
+    print('aquiF')
 
 
 def openOld():
@@ -332,23 +338,23 @@ def processing(p_br, p_sp, dir_in):
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except OSError as ose:
                 # Realiza o log do erro
-                logging.info(f'Erro Arquivo - OSError - {i}')
+                logging.info(f'Erro Arquivo - OSError - {old_bands[b]}')
                 logging.info(str(ose))
                 # Remove a imagem com erro de processamento
-                os.remove(f'{dir_in}band{b}/{i}')
+                os.remove(f'{dir_in}band{b}/{old_bands[b]}')
             except AttributeError as ae:
                 # Realiza o log do erro
-                logging.info(f'Erro Arquivo - AttributeError - {i}')
+                logging.info(f'Erro Arquivo - AttributeError - {old_bands[b]}')
                 logging.info(str(ae))
                 # Remove a imagem com erro de processamento
-                os.remove(f'{dir_in}band{b}/{i}')
+                os.remove(f'{dir_in}band{b}/{old_bands[b]}')
 
-    # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-    for process in process_br:
-        # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-        process.join()
-    # Limpa lista vazia para controle do processamento paralelo
-    process_br = []
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_br:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa lista vazia para controle do processamento paralelo
+        process_br = []
 
 # ============================================# bands 1-16 BR ============================================== #
 
@@ -356,6 +362,7 @@ def processing(p_br, p_sp, dir_in):
 # ============================================# bands 1-16 SP ============================================== #
 
     if p_sp:
+        print('SP')
         logging.info("")
         logging.info('PROCESSANDO IMAGENS "BR"...')
         # Contador para processamento nas 16 bandas
@@ -367,11 +374,13 @@ def processing(p_br, p_sp, dir_in):
             # Tentando Processar
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{old_bands[b]}', b, "br"))
+                process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{old_bands[b]}', b, 'sp'))
+                print('ENTROU NO TRY')
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_sp.append(process)
                 # Inicia o processo
                 process.start()
+                
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except OSError as ose:
                 # Realiza o log do erro
@@ -386,12 +395,12 @@ def processing(p_br, p_sp, dir_in):
                 # Remove a imagem com erro de processamento
                 os.remove(f'{dir_in}band{b}/{old_bands[b]}')
 
-    # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-    for process in process_sp:
-        # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-        process.join()
-    # Limpa lista vazia para controle do processamento paralelo
-    process_sp = []
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_sp:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa lista vazia para controle do processamento paralelo
+        process_sp = []
 
 # ============================================# bands 1-16 BR ============================================== #
 

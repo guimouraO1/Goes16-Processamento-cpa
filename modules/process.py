@@ -123,7 +123,8 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
 
     # Abrindo imagem com a biblioteca GDAL
     raw = gdal.Open(f'NETCDF:{reproj_file}:' + reproj_var, gdal.GA_ReadOnly)
-
+    print(reproj_file)
+    print(raw)
     # Lendo os metadados do cabecalho
     if reproj_var == 'BCM':  ### O arquivo Clear Sky não possui sacale e offset é um arquivo binário
         metadata = raw.GetMetadata()

@@ -53,7 +53,7 @@ if any(bands[key] for key in bands): # Se qualquer banda 'key': True -> execute 
     # Realiza processamento da imagens
     bands = processing(bands, br, sp, dir_in, dir_temp)
     # Remove imagens que já foram processadas
-    remove_images(bands, br, sp, dir_temp, dir_in)
+    # remove_images(bands, br, sp, dir_temp, dir_in)
     # Controle de quantidade de produtos devemos manter para produção do gif
     quantity_products(dir_out)
     # Realiza processamento do gif

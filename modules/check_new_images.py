@@ -58,7 +58,7 @@ def check_images(c_bands, dir_in, dir_temp):
     logging.info("VERIFICANDO NOVAS IMAGENS")
 
     # Contado para checagem de novas imagens nas 16 bandas
-    for x in range(1, 17):
+    for x in range(1, 2):
         # Transforma o inteiro contador em string e com 2 digitos
         b = str(x).zfill(2)
         # Cria uma lista com os itens presentes no diretorio da banda que sao arquivo e terminam com ".nc"
