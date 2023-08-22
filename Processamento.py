@@ -54,7 +54,8 @@ try:
         processing(bands, br, sp, dir_in)
         print('Removendo arquivos.nc....\n')
         removeImagens(bands, dir_in)
-
+    else:
+        print('Sem arquivos para processamento. \n')
 except:
     print('Sem imagens novas \n')
 # ============================================# Main ============================================== #
