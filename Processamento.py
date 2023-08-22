@@ -10,7 +10,7 @@ from modules.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modules.quantity_products import quantity_products
 from modules.send_products import send_products
 from modules.dirs import get_dirs
-from processamentoBands import processing
+from process import processing
 from checarImagens import checarImagens
 from remove import removeImagens
 # ===================================# Bibliotecas necessarias ==================================== #
