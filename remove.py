@@ -7,7 +7,7 @@ def openOld():
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
     
-def remove_images(dir_in):
+def remove_images(bands, dir_in):
 
     logging.info("")
     logging.info('REMOVENDO IMAGENS PROCESSADAS')
@@ -16,11 +16,16 @@ def remove_images(dir_in):
     for x in range(1, 17):
         # Transforma o inteiro contador em string e com 2 digitos
         b = str(x).zfill(2)
-        oldBands = openOld()        
-        try:
-            # Remove a imagem
-            os.remove(f'{dir_in}/band{b}/{oldBands[b]}')
-            logging.info(f'imagem {oldBands[b]} removida com sucesso!')
-        except:
-            print(f'Sem imagens para remover {oldBands[b]}')
-
+        oldBands = openOld()
+        if bands[b] == True:       
+            try:
+                reprojbr = str(oldBands[b])
+                reprojsp = str(oldBands[b])
+                # Remove a imagem
+                os.remove(f'{dir_in}/band{b}/{oldBands[b]}')
+                os.remove(f'{dir_in}band{b}/{reprojbr.replace(".nc", "_reproj_br.nc")}')
+                os.remove(f'{dir_in}band{b}/{reprojsp.replace(".nc", "_reproj_sp.nc")}')
+                
+                logging.info(f'Arquivo nc {oldBands[b]} removida com sucesso!')
+            except:
+                print(f'Sem imagens para remover {oldBands[b]}')
