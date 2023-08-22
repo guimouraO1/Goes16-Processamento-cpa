@@ -92,17 +92,13 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     GOES16_EXTENT = [-5434894.885056, -5434894.885056, 5434894.885056, 5434894.885056]
     raw.SetGeoTransform(get_geot(GOES16_EXTENT, raw.RasterYSize, raw.RasterXSize))
     
-    
     # Compute grid dimension
     KM_PER_DEGREE = 111.32
     sizex = int(((r_extent[2] - r_extent[0]) * KM_PER_DEGREE) / reproj_resolution)
     sizey = int(((r_extent[3] - r_extent[1]) * KM_PER_DEGREE) / reproj_resolution)
 
-
-
     # Get memory driver
     driver = gdal.GetDriverByName('MEM')
-
 
     # Create grid
     grid = driver.Create('grid', sizex, sizey, 1, gdal.GDT_Float32)
@@ -146,7 +142,6 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     gdal.Warp(f'{dir_in}{reproj_file[1]}/{r_file}', grid, **kwargs)
 
     return file_dtime, file_satellite, grid
-
 
 
 def process_band_cmi(file, ch, v_extent):
@@ -305,8 +300,6 @@ def processing(bands, p_br, p_sp, dir_in):
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
 
-# ============================================# bands 1-16 BR ============================================== #
-
     # Processando arquivos das bandas do ABI
     # Se a variavel de controle de processamento do brasil for True, realiza o processamento
     if p_br:
@@ -352,13 +345,8 @@ def processing(bands, p_br, p_sp, dir_in):
         # Limpa lista vazia para controle do processamento paralelo
         process_br = []
 
-# ============================================# bands 1-16 BR ============================================== #
-
-
-# ============================================# bands 1-16 SP ============================================== #
 
     if p_sp:
-
         logging.info("")
         logging.info('PROCESSANDO IMAGENS "BR"...')
 
@@ -404,7 +392,4 @@ def processing(bands, p_br, p_sp, dir_in):
             # Limpa lista vazia para controle do processamento paralelo
             process_sp = []
 
-# ============================================# bands 1-16 BR ============================================== #
-
-# ============================================# bands 1-16 BR ============================================== #
 

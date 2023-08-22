@@ -5,15 +5,14 @@
 # ================================================================================================= #
 # Manipulando imagens GOES-16 NetCDF's
 # ===================================# Bibliotecas necessarias ==================================== #
-import time     
-from modules.check_new_images import check_images # Checa as se há novas imagens para processamento
+import time    
 from modules.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modules.quantity_products import quantity_products
 from modules.send_products import send_products
 from modules.dirs import get_dirs
 from processamentoBands import processing
 from checarImagens import checarImagens
-from remove import remove_images
+from remove import removeImagens
 # ===================================# Bibliotecas necessarias ==================================== #
 
 
@@ -54,7 +53,7 @@ try:
         print('Processando imagens....\n')
         processing(bands, br, sp, dir_in)
         print('Removendo arquivos.nc....\n')
-        remove_images(bands, dir_in)
+        removeImagens(bands, dir_in)
 
 except:
     print('Sem imagens novas \n')

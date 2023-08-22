@@ -7,7 +7,7 @@ def openOld():
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
     
-def remove_images(bands, dir_in):
+def removeImagens(bands, dir_in):
 
     logging.info("")
     logging.info('REMOVENDO IMAGENS PROCESSADAS')
