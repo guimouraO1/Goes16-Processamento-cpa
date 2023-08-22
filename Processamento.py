@@ -58,4 +58,7 @@ try:
         print('Sem arquivos para processamento. \n')
 except:
     print('Sem imagens novas \n')
+    
+    
+finalize_log_time(start)
 # ============================================# Main ============================================== #

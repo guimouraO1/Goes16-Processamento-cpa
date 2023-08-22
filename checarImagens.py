@@ -49,7 +49,7 @@ def checarImagens(bands, dir_in):
                 if len(imagens) > 1:  # Se houver mais de uma imagem na pasta:
                     removerTodosExceto(latestBand, f'{dir_in}band{b}/')  # Remove todas as imagens, exceto a mais recente.
                 else:
-                    logging.info(f'Nenhum arquivo para exclusão (removerTodosExceto) band{b}')  # Registra se não houver imagens para exclusão.
+                    continue 
                 
                 modificarKeyOldBands('oldBands.json', b, latestBand)  # Modifica o arquivo JSON com a imagem mais recente.
                 bands[b] = True  # Atualiza o dicionário "bands" com a imagem mais recente.
