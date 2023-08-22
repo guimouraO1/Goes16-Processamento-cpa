@@ -71,7 +71,7 @@ The script processes these NetCDF to generate images, GIFs and other products.
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [About code](#About-code)
-- [Contributing](#contributing)
+- [Processamento.py](#Processamento.py)
 - [License](#license)
 
 ---
@@ -172,7 +172,7 @@ To use the script, follow these steps:
 
 ---
 
-## About code Processamento.py
+## Processamento.py
 
 Features
 

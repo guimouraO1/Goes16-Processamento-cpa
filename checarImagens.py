@@ -29,14 +29,12 @@ def modificarKeyOldBands(caminho_arquivo, chave, novo_valor):
 def checarImagens(bands, dir_in):
     logging.info("VERIFICANDO NOVAS IMAGENS")  # Registra uma mensagem informativa.
     for x in range(1, 17):  # Loop de 1 a 16.
-        
         band = []  # Cria uma lista vazia chamada "band".
         b = str(x).zfill(2)  # Formata o número para ter dois dígitos (01, 02, ..., 16).
         # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
         imagens = list(filter(lambda f: os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f), os.listdir(f'{dir_in}band{b}')))
-        
+    
         if imagens:  # Se houver imagens na lista:
-            
             for image in imagens:  # Loop através das imagens.
                 band.append(image)  # Adiciona a imagem à lista "band".
             
@@ -45,7 +43,6 @@ def checarImagens(bands, dir_in):
             
             if latestBand and latestBand != old_bands[b]:  # Se houver uma imagem mais recente e ela for diferente das antigas:
                 logging.info(f'Novas imagens para o dia band{b}')  # Registra informações sobre as novas imagens.
-                
                 if len(imagens) > 1:  # Se houver mais de uma imagem na pasta:
                     removerTodosExceto(latestBand, f'{dir_in}band{b}/')  # Remove todas as imagens, exceto a mais recente.
                 else:

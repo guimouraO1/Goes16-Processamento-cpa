@@ -391,5 +391,3 @@ def processing(bands, p_br, p_sp, dir_in):
                 process.join()
             # Limpa lista vazia para controle do processamento paralelo
             process_sp = []
-
-
