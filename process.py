@@ -348,7 +348,7 @@ def processing(bands, p_br, p_sp, dir_in):
 
     if p_sp:
         logging.info("")
-        logging.info('PROCESSANDO IMAGENS "BR"...')
+        logging.info('PROCESSANDO IMAGENS "SP"...')
 
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
