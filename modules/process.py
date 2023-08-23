@@ -62,7 +62,6 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     target_prj = osr.SpatialReference()
     target_prj.ImportFromProj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     
-    
     # Abrindo imagem com a biblioteca GDAL
     raw = gdal.Open(f'NETCDF:{reproj_file}:' + reproj_var, gdal.GA_ReadOnly)
     
@@ -82,8 +81,6 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
         undef = float(metadata.get(reproj_var + '#_FillValue'))
         file_dtime = metadata.get('NC_GLOBAL#time_coverage_start')
         file_satellite = metadata.get('NC_GLOBAL#platform_ID')[1:3]
-    
-   
     
     # Setup projection and geo-transformation
     raw.SetProjection(source_prj.ExportToWkt())
@@ -145,9 +142,11 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
 
 def process_band_cmi(file, ch, v_extent):
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
+    
     file_var = 'CMI'
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
+    
     # Area de interesse para recorte
     if v_extent == 'br':
         # Brasil
@@ -286,6 +285,7 @@ def process_band_cmi(file, ch, v_extent):
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
+# Função para abrir o arquivo.json
 def openOld():
     with open('oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
@@ -303,7 +303,6 @@ def processing(bands, p_br, p_sp, dir_in):
     if p_br:
         logging.info("")
         logging.info('PROCESSANDO IMAGENS "BR"...')
-        
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
             # Transforma o inteiro contador em string e com 2 digitos
@@ -315,11 +314,11 @@ def processing(bands, p_br, p_sp, dir_in):
                 try:
                     # Cria o processo com a funcao de processamento
                     process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{old_bands[b]}', b, "br"))
-                    
                     # Adiciona o processo na lista de controle do processamento paralelo
                     process_br.append(process)
                     # Inicia o processo
                     process.start()
+                    
                 # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
                 except OSError as ose:
                     # Realiza o log do erro
@@ -347,7 +346,6 @@ def processing(bands, p_br, p_sp, dir_in):
     if p_sp:
         logging.info("")
         logging.info('PROCESSANDO IMAGENS "SP"...')
-
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
             # Transforma o inteiro contador em string e com 2 digitos
