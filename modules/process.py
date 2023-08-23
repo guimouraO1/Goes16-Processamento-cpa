@@ -291,15 +291,14 @@ def openOld():
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 
-def processing(bands, p_br, p_sp, dir_in):
-    
+
+def processing(bands, p_br, p_sp, dir_in): 
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
-
-    # Processando arquivos das bandas do ABI 1-16
-    # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+    
+    # Se a variavel de controle de processamento do brasil for True, realiza o processamento das bandas do ABI 1-16
     if p_br:
         logging.info('')
         logging.info('PROCESSANDO IMAGENS "BR"...')
@@ -326,14 +325,12 @@ def processing(bands, p_br, p_sp, dir_in):
                     os.remove(f'{dir_in}band{b}/{old_bands[b]}')
             else:
                 continue
-
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in process_br:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
         # Limpa lista vazia para controle do processamento paralelo
         process_br = []
-
 
     if p_sp:
         logging.info('')
