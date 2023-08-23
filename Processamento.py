@@ -10,9 +10,10 @@ from modules.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modules.quantity_products import quantity_products
 from modules.send_products import send_products
 from modules.dirs import get_dirs
-from process import processing
-from checarImagens import checarImagens
-from remove import removeImagens
+from modules.process import processing
+from modules.check_images import checarImagens
+from modules.remove import removeImagens
+from modules.process_gif import process_gif
 # ===================================# Bibliotecas necessarias ==================================== #
 
 
@@ -45,7 +46,7 @@ conf_log(arq_log)
 start = time.time()
 
 try:
-    print('Checando arquivos.nc...\n')
+    print('\nChecando arquivos.nc...\n')
     # Chama a função checarImagens para verificar a existência de novas imagens.
     bands = checarImagens(bands, dir_in)
 
@@ -54,6 +55,10 @@ try:
         processing(bands, br, sp, dir_in)
         print('Removendo arquivos.nc....\n')
         removeImagens(bands, dir_in)
+        print('quantity prod....\n')
+        quantity_products(dir_out)
+        print('Processando gif...\n')
+        process_gif(bands, br, sp, dir_out)
     else:
         print('Sem arquivos para processamento. \n')
 except:

@@ -23,6 +23,6 @@ def removeImagens(bands, dir_in):
                 os.remove(f'{dir_in}/band{b}/{oldBands[b]}')
                 os.remove(f'{dir_in}band{b}/{reprojbr.replace(".nc", "_reproj_br.nc")}')
                 os.remove(f'{dir_in}band{b}/{reprojsp.replace(".nc", "_reproj_sp.nc")}')
-                logging.info(f'Arquivo nc {oldBands[b]} removida com sucesso!')
+                logging.info(f'Arquivo {oldBands[b]} removido com sucesso!')
             except:
                 print(f'Sem imagens para remover {oldBands[b]}')

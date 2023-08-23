@@ -14,11 +14,11 @@ from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de
 import datetime  # Utilitario para datas e horas
 import time  # Utilitario para trabalhar com tempos
 import os  # Utilitario para trabalhar com chamadas de sistema
-import re  # Utilitario para trabalhar com expressoes regulares
 import logging  # Utilitario para criar os logs
 from multiprocessing import Process  # Utilitario para multiprocessamento
 from modules.dirs import get_dirs
-import re
+import re # Utilitario para trabalhar com expressoes regulares
+import json
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 
@@ -36,65 +36,6 @@ dir_logos = dirs['dir_logos']
 dir_temp = dirs['dir_temp']
 arq_log = dirs['arq_log']
 # ============================================# Diretórios ========================================= #
-
-def process_gif(g_bands, g_br, g_sp):
-    global dir_out
-    # Cria lista vazia para controle do processamento paralelo
-    gif_br = []
-    # Cria lista vazia para controle do processamento paralelo
-    gif_sp = []
-
-    # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
-    def create_gif_cmi(banda, roi):
-        os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}band{banda}/band{banda}_*_*_{roi}.png" "{dir_out}band{banda}/band{banda}_{roi}.gif"')
-
-    # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
-    def create_gif(file_type, roi):
-        os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}{file_type}/{file_type}_*_*_{roi}.png" "{dir_out}{file_type}/{file_type}_{roi}.gif"')
-
-    # Se a variavel de controle de processamento do brasil for True, cria o gif
-    if g_br:
-        logging.info('')
-        logging.info('CRIANDO GIF ANIMADO "BR"...')
-        # Contador para gif nas 16 bandas
-        for x in range(1, 17):
-            # Transforma o inteiro contador em string e com 2 digitos
-            b = str(x).zfill(2)
-            # Se o dicionario de controle das bandas apontar True para essa banda, cria o gif
-            if g_bands[b]:
-                logging.info('Gif BR banda ' + b)
-                # Cria o processo com a funcao gif
-                process = Process(target=create_gif_cmi, args=(b, "br"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                gif_br.append(process)
-                # Inicia o processo
-                process.start()
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in gif_br:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-
-    # Se a variavel de controle de processamento do estado de sao paulo for True, cria o gif
-    if g_sp:
-        logging.info('')
-        logging.info('CRIANDO GIF ANIMADO "SP"...')
-        # Contador para gif nas 16 bandas
-        for x in range(1, 17):
-            # Transforma o inteiro contador em string e com 2 digitos
-            b = str(x).zfill(2)
-            # Se o dicionario de controle das bandas apontar True para essa banda, cria o gif
-            if g_bands[b]:
-                logging.info('Gif SP banda ' + b)
-                # Cria o processo com a funcao gif
-                process = Process(target=create_gif_cmi, args=(b, "sp"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                gif_br.append(process)
-                # Inicia o processo
-                process.start()
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in gif_sp:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
 
 
 def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
@@ -120,11 +61,11 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     # Lat/lon WSG84 Spatial Reference System
     target_prj = osr.SpatialReference()
     target_prj.ImportFromProj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-
+    
+    
     # Abrindo imagem com a biblioteca GDAL
     raw = gdal.Open(f'NETCDF:{reproj_file}:' + reproj_var, gdal.GA_ReadOnly)
-    print(reproj_file)
-    print(raw)
+    
     # Lendo os metadados do cabecalho
     if reproj_var == 'BCM':  ### O arquivo Clear Sky não possui sacale e offset é um arquivo binário
         metadata = raw.GetMetadata()
@@ -141,13 +82,15 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
         undef = float(metadata.get(reproj_var + '#_FillValue'))
         file_dtime = metadata.get('NC_GLOBAL#time_coverage_start')
         file_satellite = metadata.get('NC_GLOBAL#platform_ID')[1:3]
-
+    
+   
+    
     # Setup projection and geo-transformation
     raw.SetProjection(source_prj.ExportToWkt())
     # raw.SetGeoTransform(raw.GetGeoTransform())
     GOES16_EXTENT = [-5434894.885056, -5434894.885056, 5434894.885056, 5434894.885056]
     raw.SetGeoTransform(get_geot(GOES16_EXTENT, raw.RasterYSize, raw.RasterXSize))
-
+    
     # Compute grid dimension
     KM_PER_DEGREE = 111.32
     sizex = int(((r_extent[2] - r_extent[0]) * KM_PER_DEGREE) / reproj_resolution)
@@ -199,10 +142,6 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
 
     return file_dtime, file_satellite, grid
 
-def read_process_file(banda):
-    # Le o arquivo de processamento e retorna a lista
-    with open(f'{dir_temp}{banda}_process.txt', 'r') as fo:
-        return fo.readlines()
 
 def process_band_cmi(file, ch, v_extent):
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
@@ -347,56 +286,57 @@ def process_band_cmi(file, ch, v_extent):
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
-def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
+def openOld():
+    with open('oldBands.json', 'r') as jsonOld:
+        oldImages = json.load(jsonOld)['oldImagesName']
+        return oldImages
 
+
+def processing(bands, p_br, p_sp, dir_in):
+    
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
-
-# ============================================# bands 1-16 BR ============================================== #
 
     # Processando arquivos das bandas do ABI
     # Se a variavel de controle de processamento do brasil for True, realiza o processamento
     if p_br:
         logging.info("")
         logging.info('PROCESSANDO IMAGENS "BR"...')
+        
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
             # Transforma o inteiro contador em string e com 2 digitos
             b = str(x).zfill(2)
-            # Se o dicionario de controle das bandas apontar True para essa banda, realiza o processamento
-            if p_bands[b]:
-                # Le o arquivo de processamento da banda
-                img = read_process_file(f'band{b}')
-                # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
-                for i in img:
-                    # Remove possiveis espacos vazios no inicio ou final da string
-                    i = i.strip()
-                    # Tenta realizar o processamento da imagem
-                    try:
-                        # Cria o processo com a funcao de processamento
-                        process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{i}', b, "br"))
-                        # Adiciona o processo na lista de controle do processamento paralelo
-                        process_br.append(process)
-                        # Inicia o processo
-                        process.start()
-                    # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                    except OSError as ose:
-                        # Realiza o log do erro
-                        logging.info(f'Erro Arquivo - OSError - {i}')
-                        logging.info(str(ose))
-                        # Remove a imagem com erro de processamento
-                        os.remove(f'{dir_in}band{b}/{i}')
-                    except AttributeError as ae:
-                        # Realiza o log do erro
-                        logging.info(f'Erro Arquivo - AttributeError - {i}')
-                        logging.info(str(ae))
-                        # Remove a imagem com erro de processamento
-                        os.remove(f'{dir_in}band{b}/{i}')
-            # Se o dicionario de controle das bandas apontar False para essa banda, nao realiza o processamento e continua a tentativa nas outras bandas
+            if bands[b] == True:
+                # Imagens para processamento
+                old_bands = openOld()
+                # Tentando Processar
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{old_bands[b]}', b, "br"))
+                    
+                    # Adiciona o processo na lista de controle do processamento paralelo
+                    process_br.append(process)
+                    # Inicia o processo
+                    process.start()
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except OSError as ose:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - OSError - {old_bands[b]}')
+                    logging.info(str(ose))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band{b}/{old_bands[b]}')
+                except AttributeError as ae:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - AttributeError - {old_bands[b]}')
+                    logging.info(str(ae))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band{b}/{old_bands[b]}')
             else:
                 continue
+
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in process_br:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
@@ -404,59 +344,49 @@ def processing(p_bands, p_br, p_sp, dir_in, dir_temp):
         # Limpa lista vazia para controle do processamento paralelo
         process_br = []
 
-# ============================================# bands 1-16 BR ============================================== #
 
-
-# ============================================# bands 1-16 SP ============================================== #
-
-    # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
     if p_sp:
         logging.info("")
         logging.info('PROCESSANDO IMAGENS "SP"...')
+
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
             # Transforma o inteiro contador em string e com 2 digitos
             b = str(x).zfill(2)
-            # Se o dicionario de controle das bandas apontar True para essa banda, realiza o processamento
-            if p_bands[b]:
-                # Le o arquivo de processamento da banda
-                img = read_process_file(f'band{b}')
-                # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
-                for i in img:
-                    # Remove possiveis espacos vazios no inicio ou final da string
-                    i = i.strip()
-                    # Tenta realizar o processamento da imagem
+            if bands[b] == True:
+                # Imagens para processamento
+                old_bands = openOld()
+                
+                if bands[b] == True:
+                    # Tentando Processar
                     try:
                         # Cria o processo com a funcao de processamento
-                        process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{i}', b, "sp"))
+                        process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{old_bands[b]}', b, 'sp'))
+
                         # Adiciona o processo na lista de controle do processamento paralelo
                         process_sp.append(process)
                         # Inicia o processo
                         process.start()
+                        
                     # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
                     except OSError as ose:
                         # Realiza o log do erro
-                        logging.info("Erro Arquivo - OSError")
+                        logging.info(f'Erro Arquivo - OSError - {old_bands[b]}')
                         logging.info(str(ose))
                         # Remove a imagem com erro de processamento
-                        os.remove(f'{dir_in}band{b}/{i}')
+                        os.remove(f'{dir_in}band{b}/{old_bands[b]}')
                     except AttributeError as ae:
                         # Realiza o log do erro
-                        logging.info(f'Erro Arquivo - AttributeError - {i}')
+                        logging.info(f'Erro Arquivo - AttributeError - {old_bands[b]}')
                         logging.info(str(ae))
                         # Remove a imagem com erro de processamento
-                        os.remove(f'{dir_in}band{b}/{i}')
-            # Se o dicionario de controle das bandas apontar False para essa banda, nao realiza o processamento e continua a tentativa nas outras bandas
-            else:
-                continue
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in process_sp:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-        # Limpa lista vazia para controle do processamento paralelo
-        process_sp = []
-
-# ============================================# bands 1-16 BR ============================================== #
-
-    # Retorna o dicionario de controle das bandas
-    return p_bands
+                        os.remove(f'{dir_in}band{b}/{old_bands[b]}')
+                else:
+                    continue
+                
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_sp:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+            # Limpa lista vazia para controle do processamento paralelo
+            process_sp = []
