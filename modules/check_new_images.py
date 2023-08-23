@@ -2,6 +2,7 @@ import os  # Importa a biblioteca os para operações de sistema.
 import re  # Importa a biblioteca re para expressões regulares.
 import json  # Importa a biblioteca json para manipulação de arquivos JSON.
 import logging  # Importa a biblioteca logging para registrar informações.
+import shutil
 
 # Função para remover todos os arquivos de uma pasta, exceto um específico.
 def removerTodosExceto(nome_arquivo, pasta):
@@ -28,6 +29,7 @@ def modificarKeyOldBands(caminho_arquivo, chave, novo_valor):
 # Função para verificar a existência de novas imagens.
 def checarImagens(bands, dir_in):
     logging.info("VERIFICANDO NOVAS IMAGENS")
+    # Chegagem imagens ABI 1-16
     for x in range(1, 17): 
         b = str(x).zfill(2) # Formata o número para ter dois dígitos (01, 02, ..., 16).
         # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
@@ -49,5 +51,15 @@ def checarImagens(bands, dir_in):
         else:
             logging.info(f'Sem imagens para o dia band{b}')  # Registra se não houver imagens na pasta.
             bands[b] = False  # Define a banda como False.
-
+    
+    
+    # Checagem de novas imagens truecolor (Band 17) if bands 1,2,3
+    if all(bands[str(x).zfill(2)] for x in range(1, 4)):
+        # Se Todas as três bandas são True
+        bands['17'] = True
+        logging.info(f'Novas imagens TRUECOLOR')
+    else:
+        bands["17"] = False
+        logging.info(f'Sem novas imagens TRUECOLOR')
+            
     return bands  # Retorna o dicionário "bands".
