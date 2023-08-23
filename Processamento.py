@@ -5,13 +5,14 @@
 # ================================================================================================= #
 # Manipulando imagens GOES-16 NetCDF's
 # ===================================# Bibliotecas necessarias ==================================== #
-import time    
+import time
+import logging 
 from modules.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modules.quantity_products import quantity_products
 from modules.send_products import send_products
 from modules.dirs import get_dirs
 from modules.process import processing
-from modules.check_images import checarImagens
+from modules.check_new_images import checarImagens
 from modules.remove import removeImagens
 from modules.process_gif import process_gif
 # ===================================# Bibliotecas necessarias ==================================== #
@@ -46,24 +47,23 @@ conf_log(arq_log)
 start = time.time()
 
 try:
-    print('\nChecando arquivos.nc...\n')
     # Chama a função checarImagens para verificar a existência de novas imagens.
+    logging.info('\nChecando novas imagens...\n')
     bands = checarImagens(bands, dir_in)
-
+    # Se tiver novas imagens para processamento:
     if any(bands[key] for key in bands):
-        print('Processando imagens....\n')
+        logging.info('Processando novas imagens...\n')
         processing(bands, br, sp, dir_in)
-        print('Removendo arquivos.nc....\n')
+        logging.info('Removendo arquivos.nc...\n')
         removeImagens(bands, dir_in)
-        print('quantity prod....\n')
+        logging.info('Verificando para processamento dos gifs\n')
         quantity_products(dir_out)
-        print('Processando gif...\n')
+        logging.info('Processando gifs...\n')
         process_gif(bands, br, sp, dir_out)
     else:
         print('Sem arquivos para processamento. \n')
-except:
-    print('Sem imagens novas \n')
-    
-    
+except Exception as error:
+    print('ERROR : ' + str(error))
+
 finalize_log_time(start)
 # ============================================# Main ============================================== #

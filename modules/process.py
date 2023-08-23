@@ -291,7 +291,6 @@ def openOld():
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 
-
 def processing(bands, p_br, p_sp, dir_in):
     
     # Cria lista vazia para controle do processamento paralelo
@@ -299,7 +298,7 @@ def processing(bands, p_br, p_sp, dir_in):
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
 
-    # Processando arquivos das bandas do ABI
+    # Processando arquivos das bandas do ABI 1-16
     # Se a variavel de controle de processamento do brasil for True, realiza o processamento
     if p_br:
         logging.info("")
@@ -356,13 +355,12 @@ def processing(bands, p_br, p_sp, dir_in):
             if bands[b] == True:
                 # Imagens para processamento
                 old_bands = openOld()
-                
+                # Se a banda tiver novas imagens:
                 if bands[b] == True:
                     # Tentando Processar
                     try:
                         # Cria o processo com a funcao de processamento
                         process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{old_bands[b]}', b, 'sp'))
-
                         # Adiciona o processo na lista de controle do processamento paralelo
                         process_sp.append(process)
                         # Inicia o processo

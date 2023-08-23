@@ -2,11 +2,12 @@ import logging
 import os
 import json
 
+# Abre o json para pegar o nome dos arquivos
 def openOld():
     with open('oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
-    
+# Remove os arquivos netCDF que foram processados
 def removeImagens(bands, dir_in):
     logging.info("")
     logging.info('REMOVENDO IMAGENS PROCESSADAS')
