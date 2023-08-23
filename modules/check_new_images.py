@@ -29,7 +29,6 @@ def modificarKeyOldBands(caminho_arquivo, chave, novo_valor):
 def checarImagens(bands, dir_in):
     logging.info("VERIFICANDO NOVAS IMAGENS")
     for x in range(1, 17): 
-        band = []  # Cria uma lista vazia.
         b = str(x).zfill(2) # Formata o número para ter dois dígitos (01, 02, ..., 16).
         # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
         imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f)]

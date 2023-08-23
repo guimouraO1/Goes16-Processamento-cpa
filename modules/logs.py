@@ -14,8 +14,6 @@ def conf_log(arq_log):
         logging.info("=========================================================================================================")
         logging.info("")
 
-
-
 def finalize_log_time(s):
     # Capturando data/hora final
     fim = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
