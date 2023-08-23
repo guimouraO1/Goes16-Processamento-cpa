@@ -60,9 +60,9 @@ try:
         # Processa o gif
         process_gif(bands, br, sp, dir_out)
     else:
-        print('Sem arquivos para processamento. \n')
+        logging.info('Sem arquivos para processamento. \n')
 except Exception as error:
-    print('ERROR : ' + str(error))
+    logging.info('ERROR : ' + str(error))
 
 finalize_log_time(start)
 # ============================================# Main ============================================== #
