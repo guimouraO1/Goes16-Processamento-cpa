@@ -48,17 +48,16 @@ start = time.time()
 
 try:
     # Chama a função checarImagens para verificar a existência de novas imagens.
-    logging.info('\nChecando novas imagens...\n')
     bands = checarImagens(bands, dir_in)
     # Se tiver novas imagens para processamento:
     if any(bands[key] for key in bands):
-        logging.info('Processando novas imagens...\n')
+        # Processa as imagens
         processing(bands, br, sp, dir_in)
-        logging.info('Removendo arquivos.nc...\n')
+        # Remove os arquivos .nc que já foram processados
         removeImagens(bands, dir_in)
-        logging.info('Verificando para processamento dos gifs\n')
+        # A função é chamada para controlar a quantidade de produtos (imagens) a serem mantidos para a produção de um GIF animado.
         quantity_products(dir_out)
-        logging.info('Processando gifs...\n')
+        # Processa o gif
         process_gif(bands, br, sp, dir_out)
     else:
         print('Sem arquivos para processamento. \n')
