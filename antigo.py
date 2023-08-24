@@ -1623,6 +1623,7 @@ def processing(p_bands, p_br, p_sp):
                 # Montando dicionario de argumentos
                 kwargs = {'ch01': f'{dir_in}band01/{i[0].replace(".nc", "_reproj_br.nc")}', 'ch02': f'{dir_in}band02/{i[1].replace(".nc", "_reproj_br.nc")}',
                           'ch03': f'{dir_in}band03/{i[2].replace(".nc", "_reproj_br.nc")}'}
+                
                 # Tenta realizar o processamento da imagem
                 try:
                     # Cria o processo com a funcao de processamento
