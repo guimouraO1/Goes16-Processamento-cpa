@@ -338,17 +338,16 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
         B = np.clip(B, 0, 1)
         
         gamma = 2.2
+        
         R = np.power(R, 1/gamma)
         G = np.power(G, 1/gamma)
         B = np.power(B, 1/gamma)
-        
 
         G_true = (0.45 * R) + (0.1 * G) + (0.45 * B)
         G_true = np.clip(G_true, 0, 1)  # apply limits again, just in case.
         
         # Create the RGB
         RGB = np.dstack([R, G_true, B])
-
 
     else:
         return False
@@ -532,7 +531,6 @@ def processing(bands, p_br, p_sp, dir_in):
         # Limpa lista vazia para controle do processamento paralelo
         process_br = []
         
-        
         # Se a variavel de controle de processamento sp for True, realiza o processamento
         if p_sp:
             logging.info("")
@@ -545,7 +543,6 @@ def processing(bands, p_br, p_sp, dir_in):
             # Montando dicionario de argumentos
             kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_sp.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_sp.nc")}', 
                       'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_sp.nc")}'}
-            
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
