@@ -427,10 +427,10 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     fig.figimage(logo_noaa, 32, 203, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
     fig.figimage(logo_goes, 10, 120, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
     fig.figimage(logo_cepagri, 10, 40, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
-
+    
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
-
+    
     # Fecha a janela para limpar a memoria
     plt.close()
     # Realiza o log do calculo do tempo de processamento da imagem
@@ -564,7 +564,6 @@ def processing(bands, p_br, p_sp, dir_in):
             try:
                 # Cria o processo com a funcao de processamento
                 process = Process(target=process_band_rgb, args=("truecolor", "sp"), kwargs=kwargs)
-                print('erro aqu8')
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_sp.append(process)
                 # Inicia o processo
