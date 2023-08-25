@@ -330,39 +330,25 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
 
         # RGB Components
         R = data_ch02
-        G = 0.45 * data_ch02 + 0.1 * data_ch03 + 0.45 * data_ch01
+        G = data_ch03
         B = data_ch01
 
-        # Minimuns, Maximuns and Gamma
-        Rmin = 0.0
-        Rmax = 1.0
-        Gmin = 0.0
-        Gmax = 1.0
-        Bmin = 0.0
-        Bmax = 1.0
+        R = np.clip(R, 0, 1)
+        G = np.clip(G, 0, 1)
+        B = np.clip(B, 0, 1)
+        
+        gamma = 2.2
+        R = np.power(R, 1/gamma)
+        G = np.power(G, 1/gamma)
+        B = np.power(B, 1/gamma)
+        
 
-        R[R > Rmax] = Rmax
-        R[R < Rmin] = Rmin
-        G[G > Gmax] = Gmax
-        G[G < Gmin] = Gmin
-        B[B > Bmax] = Bmax
-        B[B < Bmin] = Bmin
-
-        gamma_R = 1
-        gamma_G = 1
-        gamma_B = 1
-
-        # Normalize the data
-        R = ((R - Rmin) / (Rmax - Rmin)) ** (1 / gamma_R)
-        G = ((G - Gmin) / (Gmax - Gmin)) ** (1 / gamma_G)
-        B = ((B - Bmin) / (Bmax - Bmin)) ** (1 / gamma_B)
-
+        G_true = (0.45 * R) + (0.1 * G) + (0.45 * B)
+        G_true = np.clip(G_true, 0, 1)  # apply limits again, just in case.
+        
         # Create the RGB
-        RGB = np.stack([R, G, B], axis=2)
+        RGB = np.dstack([R, G_true, B])
 
-        # Eliminate values outside the globe
-        mask = (RGB == [R[0, 0], G[0, 0], B[0, 0]]).all(axis=2)
-        RGB[mask] = np.nan
 
     else:
         return False
