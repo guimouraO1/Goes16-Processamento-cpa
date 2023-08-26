@@ -143,7 +143,6 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
 
 def process_band_cmi(file, ch, v_extent):
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
-    
     file_var = 'CMI'
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
