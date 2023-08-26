@@ -41,6 +41,7 @@ arq_log = dirs['arq_log']
 def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     global dir_in
     def get_geot(ex, nlines, ncols):
+        
         # Compute resolution based on data dimension
         resx = (ex[2] - ex[0]) / ncols
         resy = (ex[3] - ex[1]) / nlines
@@ -495,13 +496,14 @@ def processing(bands, p_br, p_sp, dir_in):
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
 
-# Checagem se e possivel gerar imagem TrueColor
+    # Checagem se e possivel gerar imagem TrueColor
     if bands['17']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS TRUECOLOR "BR"...')
             
+            # Pegando nome das bandas 01, 02, 03
             ch01 = old_bands['01']
             ch02 = old_bands['02']
             ch03 = old_bands['03']
@@ -536,6 +538,7 @@ def processing(bands, p_br, p_sp, dir_in):
             logging.info("")
             logging.info('PROCESSANDO IMAGENS TRUECOLOR "SP"...')
             
+            # Pegando nome das bandas 01, 02, 03
             ch01 = old_bands['01']
             ch02 = old_bands['02']
             ch03 = old_bands['03']

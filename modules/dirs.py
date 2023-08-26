@@ -1,5 +1,6 @@
 import datetime
 
+# Modifique aqui os diretórios para uso
 def get_dirs():
     dir_main = '/home/guimoura/download_amazon/'
     dirs = {
