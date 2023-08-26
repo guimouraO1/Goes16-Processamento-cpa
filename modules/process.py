@@ -292,6 +292,7 @@ def openOld():
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 
+
 def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
     # Captura a hora para contagem do tempo de processamento da imagem
@@ -496,6 +497,7 @@ def processing(bands, p_br, p_sp, dir_in):
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
 
+
     # Checagem se e possivel gerar imagem TrueColor
     if bands['17']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -521,10 +523,11 @@ def processing(bands, p_br, p_sp, dir_in):
                 # Inicia o processo
                 process.start()
                 
-            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-            except:
-                # Realiza o log do erro
-                logging.info("Erro Arquivo  truecolor")
+            # Caso seja retornado algum erro do processamento, realiza o log 
+            except Exception as e:
+                # Registra detalhes da exceção, como mensagem e tipo
+                logging.error(f"Erro ao criar processo: {e}")
+                # Aqui, você pode tomar medidas específicas com base no tipo de erro, se necessário
                 
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in process_br:
@@ -555,10 +558,12 @@ def processing(bands, p_br, p_sp, dir_in):
                 # Inicia o processo
                 process.start()
                 
-            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-            except:
-                # Realiza o log do erro
-                logging.info("Erro Arquivo  truecolor")
+            # Caso seja retornado algum erro do processamento, realiza o log 
+            except Exception as e:
+                # Registra detalhes da exceção, como mensagem e tipo
+                logging.error(f"Erro ao criar processo: {e}")
+                # Aqui, você pode tomar medidas específicas com base no tipo de erro, se necessário
+
                 
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in process_sp:
