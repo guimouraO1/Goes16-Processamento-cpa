@@ -355,12 +355,11 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
         B = np.clip(B, 0, 1)
         
         gamma = 2.2
-        
         R = np.power(R, 1/gamma)
         G = np.power(G, 1/gamma)
         B = np.power(B, 1/gamma)
 
-        G_true = (0.45 * R) + (0.1 * G) + (0.45 * B)
+        G_true = 0.48358168 * R + 0.45706946 * B + 0.06038137 * G
         G_true = np.clip(G_true, 0, 1)  # apply limits again, just in case.
         
         # Create the RGB
