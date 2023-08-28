@@ -38,6 +38,13 @@ arq_log = dirs['arq_log']
 # ============================================# Diretórios ========================================= #
 
 
+# Função para abrir o arquivo.json
+def openOld():
+    with open('oldBands.json', 'r') as jsonOld:
+        oldImages = json.load(jsonOld)['oldImagesName']
+        return oldImages
+
+
 def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
     global dir_in
     def get_geot(ex, nlines, ncols):
@@ -285,12 +292,6 @@ def process_band_cmi(file, ch, v_extent):
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
-# Função para abrir o arquivo.json
-def openOld():
-    with open('oldBands.json', 'r') as jsonOld:
-        oldImages = json.load(jsonOld)['oldImagesName']
-        return oldImages
-
 
 def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
@@ -449,9 +450,8 @@ def processing(bands, p_br, p_sp, dir_in):
                     # Inicia o processo
                     process.start()
                 # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except:
-                    # Realiza o log do erro
-                    logging.info(f'Erro Arquivo - {old_bands[b]}')
+                except Exception as e:
+                    logging.info(f'Erro {e} no Arquivo - {old_bands[b]}')
                     # Remove a imagem com erro de processamento
                     os.remove(f'{dir_in}band{b}/{old_bands[b]}')
             else:
@@ -482,9 +482,8 @@ def processing(bands, p_br, p_sp, dir_in):
                     # Inicia o processo
                     process.start()
                 # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except:
-                    # Realiza o log do erro
-                    logging.info(f'Erro Arquivo - {old_bands[b]}')
+                except Exception as e:
+                    logging.info(f'Erro {e} no Arquivo - {old_bands[b]}')
                     # Remove a imagem com erro de processamento
                     os.remove(f'{dir_in}band{b}/{old_bands[b]}')
             else:
@@ -499,20 +498,18 @@ def processing(bands, p_br, p_sp, dir_in):
 
     # Checagem se e possivel gerar imagem TrueColor
     if bands['17']:
+        
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS TRUECOLOR "BR"...')
-            
             # Pegando nome das bandas 01, 02, 03
             ch01 = old_bands['01']
             ch02 = old_bands['02']
             ch03 = old_bands['03']
-            
             # Montando dicionario de argumentos
             kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', 
                       'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}'}
-            
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
@@ -521,13 +518,10 @@ def processing(bands, p_br, p_sp, dir_in):
                 process_br.append(process)
                 # Inicia o processo
                 process.start()
-                
             # Caso seja retornado algum erro do processamento, realiza o log 
             except Exception as e:
                 # Registra detalhes da exceção, como mensagem e tipo
                 logging.error(f"Erro ao criar processo: {e}")
-                # Aqui, você pode tomar medidas específicas com base no tipo de erro, se necessário
-                
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in process_br:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
@@ -539,12 +533,10 @@ def processing(bands, p_br, p_sp, dir_in):
         if p_sp:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS TRUECOLOR "SP"...')
-            
             # Pegando nome das bandas 01, 02, 03
             ch01 = old_bands['01']
             ch02 = old_bands['02']
             ch03 = old_bands['03']
-            
             # Montando dicionario de argumentos
             kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_sp.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_sp.nc")}', 
                       'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_sp.nc")}'}
@@ -556,17 +548,16 @@ def processing(bands, p_br, p_sp, dir_in):
                 process_sp.append(process)
                 # Inicia o processo
                 process.start()
-                
             # Caso seja retornado algum erro do processamento, realiza o log 
             except Exception as e:
                 # Registra detalhes da exceção, como mensagem e tipo
                 logging.error(f"Erro ao criar processo: {e}")
-                # Aqui, você pode tomar medidas específicas com base no tipo de erro, se necessário
-
-                
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in process_sp:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
+        
+    
+    
