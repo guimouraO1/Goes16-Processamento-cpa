@@ -3,7 +3,8 @@ import re  # Importa a biblioteca re para expressões regulares.
 import json  # Importa a biblioteca json para manipulação de arquivos JSON.
 import logging  # Importa a biblioteca logging para registrar informações.
 import shutil
-
+import datetime
+from libs.utilities import download_prod
 
 # Função para remover todos os arquivos de uma pasta, exceto um específico.
 def remover_todos_exceto(nome_arquivo, pasta):
@@ -39,7 +40,6 @@ def checar_imagens(bands, dir_in):
         b = str(x).zfill(2)
         # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
         imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f)]
-       
         # Se houver imagens na pasta:
         if imagens:
             # Encontra a imagem mais recente na lista.
@@ -80,6 +80,21 @@ def checar_imagens(bands, dir_in):
         bands["17"] = False
         logging.info(f'Sem novas imagens TRUECOLOR')
 
-    
+
+    # Checagem de novas imagens rrqpef (Band 18)
+    if bands['13']:
+        ch13 = old_bands['13']
+        # Extrair o data/hora do arquivo da banda 13 para download do arquivo RRQPEF
+        ftime = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
+        try:
+            # Download arquivo rrqpef
+            download_prod(datetime.datetime.strftime(ftime, '%Y%m%d%H%M'), 'ABI-L2-RRQPEF', f'{dir_in}rrqpef/')
+            bands['18'] = True
+            logging.info(f'Novas imagens RRQPEF')
+        except:
+            logging.info(f'Sem novas imagens RRQPEF')
+
+
+
     # Retorna o dicionário "bands".      
     return bands  

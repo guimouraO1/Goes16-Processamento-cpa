@@ -424,6 +424,122 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     logging.info(f'{ch01[0:59].replace("M6C01", "M6C0*")} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
+def process_rrqpef(rrqpef, ch13, v_extent):
+    
+    global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
+    file_var = 'RRQPE'
+    # Captura a hora para contagem do tempo de processamento da imagem
+    processing_start_time = time.time()
+    # Area de interesse para recorte
+    if v_extent == 'br':
+        # Brasil
+        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
+        # Choose the image resolution (the higher the number the faster the processing is)
+        resolution = 4.0
+    elif v_extent == 'sp':
+        # São Paulo
+        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
+        # Choose the image resolution (the higher the number the faster the processing is)
+        resolution = 1.0
+    else:
+        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+        resolution = 2.0
+
+    # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
+    dtime, satellite, reproject_rrqpef = reproject(rrqpef, file_var, v_extent, resolution)
+    data = reproject_rrqpef.ReadAsArray()
+    reproject_rrqpef = None
+    del reproject_rrqpef
+    # Convert from int16 to uint16
+    data = data.astype(np.float64)
+    data[data == max(data[0])] = np.nan
+    data[data == min(data[0])] = np.nan
+
+    reproject_ch13 = Dataset(ch13)
+    data_ch13 = reproject_ch13.variables['Band1'][:]
+
+    # Formatando data para plotar na imagem e salvar o arquivo
+    date = (datetime.datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+
+    # Formatando a descricao a ser plotada na imagem
+    description = f' GOES-{satellite} Rainfall Rate (Quantitative Precipitation Estimate) mm/h {date_img}'
+    institution = "CEPAGRI - UNICAMP"
+
+    # Definindo tamanho da imagem de saida
+    d_p_i = 150
+    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+
+    # Utilizando projecao geoestacionaria no cartopy
+    ax = plt.axes(projection=ccrs.PlateCarree())
+
+    ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
+
+    if v_extent == 'br':
+        # Adicionando o shapefile dos estados brasileiros
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+    elif v_extent == 'sp':
+        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+
+    # Adicionando  linhas dos litorais
+    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
+    # Adicionando  linhas das fronteiras
+    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
+    # Adicionando  paralelos e meridianos
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
+    gl.top_labels = False
+    gl.right_labels = False
+
+    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
+
+    # Plotando base
+    ax.imshow(data_ch13, origin='upper', cmap='gray_r', extent=img_extent)
+
+    # Plotando a imagem
+    img = ax.imshow(data, vmin=0, vmax=150, cmap='jet', origin='upper', extent=img_extent)
+
+    # Criando novos eixos de acordo com a posicao da imagem
+    cax0 = fig.add_axes([ax.get_position().x0 + 0.0025, ax.get_position().y0 - 0.01325, ax.get_position().width - 0.0025, 0.0125])
+    cb = plt.colorbar(img, orientation="horizontal", cax=cax0)
+    cb.ax.tick_params(axis='x', colors='white', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+    cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
+    cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
+    cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
+
+    # Adicionando descricao da imagem
+    # Criando novos eixos de acordo com a posicao da imagem
+    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
+    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
+    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
+    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
+    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+
+    # Adicionando os logos
+    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
+    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
+    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
+    fig.figimage(logo_noaa, 32, 223, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_goes, 10, 140, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_cepagri, 10, 60, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+
+    # Salvando a imagem de saida
+    plt.savefig(f'{dir_out}rrqpef/rrqpef_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+    # Fecha a janela para limpar a memoria
+    plt.close()
+    # Realiza o log do calculo do tempo de processamento da imagem
+    logging.info(f'{rrqpef} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
+
+
 def processing(bands, p_br, p_sp, dir_in): 
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
@@ -560,4 +676,71 @@ def processing(bands, p_br, p_sp, dir_in):
         process_sp = []
         
     
+     # Checagem se e possivel gerar imagem RRQPEF
+    
+    
+    if bands['18']:
+        
+        # Pega o nome netCDF da banda 13
+        ch13 = old_bands['13']
+        # Pega a lista de arquivos baixados rrqpef
+        rrqpef_list = os.listdir(f'{dir_in}rrqpef/')
+        # Pega só o primeiro arquivo para enviar de argumento
+        rrqpef = f'{dir_in}rrqpef/{rrqpef_list[0]}'
+
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS RRQPEF "BR"...')
+
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process = Process(target=process_rrqpef, args=(f'{rrqpef}', f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', "br"))
+                # Adiciona o processo na lista de controle do processamento paralelo
+                process_br.append(process)
+                # Inicia o processo
+                process.start()
+            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+            except:
+                # Realiza o log do erro
+                logging.info(f'Erro Arquivo - {rrqpef}')
+                # Remove a imagem com erro de processamento
+                os.remove(f'{rrqpef}')
+                os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
+            
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_br:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa lista vazia para controle do processamento paralelo
+        process_br = []
+        
+                # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_sp:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS RRQPEF "SP"...')
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process = Process(target=process_rrqpef, args=(f'{rrqpef}', f'{dir_in}band13/{ch13.replace(".nc", "_reproj_sp.nc")}', "sp"))
+                # Adiciona o processo na lista de controle do processamento paralelo
+                process_sp.append(process)
+                # Inicia o processo
+                process.start()
+            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+            except:
+                # Realiza o log do erro
+                logging.info(f'Erro Arquivo - {rrqpef}')
+                # Remove a imagem com erro de processamento
+                os.remove(f'{rrqpef}')
+                os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_sp.nc")}')
+            
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_sp:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa lista vazia para controle do processamento paralelo
+        process_sp = []
+        
     
