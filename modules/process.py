@@ -84,6 +84,16 @@ def adicionando_linhas(ax):
     gl.right_labels = False
 
 
+def adicionando_logos(fig):
+    # Adicionando os logos
+    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
+    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
+    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
+    fig.figimage(logo_noaa, 32, 240, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_goes, 10, 160, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_cepagri, 10, 80, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+
+
 def openOld():
     # Função para abrir o arquivo.json
     with open('oldBands.json', 'r') as jsonOld:
@@ -295,12 +305,7 @@ def process_band_cmi(file, ch, v_extent):
     cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
 
     # Adicionando os logos
-    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
-    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
-    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
-    fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+    adicionando_logos(fig)
 
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}band{ch}/band{ch}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
@@ -402,12 +407,7 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     cax0.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
 
     # Adicionando os logos
-    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
-    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
-    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
-    fig.figimage(logo_noaa, 32, 203, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_goes, 10, 120, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_cepagri, 10, 40, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+    adicionando_logos(fig)
     
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
@@ -491,12 +491,7 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
 
     # Adicionando os logos
-    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
-    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
-    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
-    fig.figimage(logo_noaa, 32, 223, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_goes, 10, 140, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_cepagri, 10, 60, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+    adicionando_logos(fig)
 
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}rrqpef/rrqpef_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
@@ -706,5 +701,3 @@ def processing(bands, p_br, p_sp, dir_in):
             process.join()
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
-        
-    
