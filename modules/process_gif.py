@@ -74,4 +74,15 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
             logging.info('CRIANDO GIF ANIMADO TRUECOLOR "SP"...')
             # Cria o processo com a funcao gif
             create_gif("truecolor", "sp")
-            
+    
+    if g_bands['18']:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO RRQPEF "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("rrqpef", "br")
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO RRQPEF "SP"...')
+            # Cria o processo com a funcao gif
+            create_gif("rrqpef", "sp")

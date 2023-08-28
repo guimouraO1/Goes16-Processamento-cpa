@@ -38,8 +38,54 @@ arq_log = dirs['arq_log']
 # ============================================# Diretórios ========================================= #
 
 
-# Função para abrir o arquivo.json
+
+def area_para_recorte(v_extent):
+    
+    # Area de interesse para recorte
+    if v_extent == 'br':
+        # Brasil
+        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
+    # Choose the image resolution (the higher the number the faster the processing is)
+        resolution = 4.0
+    elif v_extent == 'sp':
+        # São Paulo
+        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
+    # Choose the image resolution (the higher the number the faster the processing is)
+        resolution = 1.0
+    else:
+        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+        resolution = 2.0
+    return extent, resolution
+
+
+def adicionando_shapefile(v_extent, ax):
+    if v_extent == 'br':
+        # Adicionando o shapefile dos estados brasileiros
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+    elif v_extent == 'sp':
+        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+
+
+def adicionando_linhas(ax):
+    # Adicionando  linhas dos litorais
+    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
+    # Adicionando  linhas das fronteiras
+    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
+    # Adicionando  paralelos e meridianos
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
+    gl.top_labels = False
+    gl.right_labels = False
+
+
 def openOld():
+    # Função para abrir o arquivo.json
     with open('oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
@@ -154,21 +200,8 @@ def process_band_cmi(file, ch, v_extent):
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
     
-    # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 4.0
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 1.0
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
-        resolution = 2.0
-
+    extent, resolution = area_para_recorte(v_extent)
+        
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
     dtime, satellite, reproject_band = reproject(file, file_var, v_extent, resolution)
 
@@ -203,28 +236,12 @@ def process_band_cmi(file, ch, v_extent):
 
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
-
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+    
+    # Adicionando o shapefile dos estados brasileiros
+    adicionando_shapefile(v_extent, ax)
 
     # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
+    adicionando_linhas(ax)
 
     # Definindo a paleta de cores da imagem de acordo com o canal
     # Convertendo um arquivo CPT para ser usado em Python atraves da funcao loadCPT
@@ -297,15 +314,8 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
-    # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+    
+    extent, resolution = area_para_recorte(v_extent)
 
     if rgb_type == 'truecolor':
         # https://rammb.cira.colostate.edu/training/visit/quick_guides/
@@ -370,27 +380,11 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
 
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+    # Adicionando o shapefile dos estados brasileiros
+    adicionando_shapefile(v_extent, ax)
 
     # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
+    adicionando_linhas(ax)
 
     # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
@@ -430,20 +424,8 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     file_var = 'RRQPE'
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
-    # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 4.0
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 1.0
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
-        resolution = 2.0
+    # Area para o corte
+    extent, resolution = area_para_recorte(v_extent)
 
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
     dtime, satellite, reproject_rrqpef = reproject(rrqpef, file_var, v_extent, resolution)
@@ -476,27 +458,11 @@ def process_rrqpef(rrqpef, ch13, v_extent):
 
     ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
 
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+    # Adicionando o shapefile dos estados brasileiros
+    adicionando_shapefile(v_extent, ax)
 
     # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
+    adicionando_linhas(ax)
 
     # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
@@ -675,10 +641,8 @@ def processing(bands, p_br, p_sp, dir_in):
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
         
-    
-     # Checagem se e possivel gerar imagem RRQPEF
-    
-    
+
+    # Checagem se e possivel gerar imagem RRQPEF   
     if bands['18']:
         
         # Pega o nome netCDF da banda 13
