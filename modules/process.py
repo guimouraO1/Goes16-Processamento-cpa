@@ -94,7 +94,7 @@ def adicionando_logos(fig):
     fig.figimage(logo_cepagri, 10, 80, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
 
 
-def openOld():
+def abrir_old_json():
     # Função para abrir o arquivo.json
     with open('oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
@@ -517,7 +517,7 @@ def processing(bands, p_br, p_sp, dir_in):
             # Se a banda tiver novas imagens para o dia:
             if bands[b]:
                 # Imagens para processamento
-                old_bands = openOld()
+                old_bands = abrir_old_json()
                 # Tentando Processar
                 try:
                     # Cria o processo com a funcao de processamento
@@ -549,7 +549,7 @@ def processing(bands, p_br, p_sp, dir_in):
             # Se a banda tiver novas imagens para o dia:
             if bands[b]:
                 # Imagens para processamento
-                old_bands = openOld()
+                old_bands = abrir_old_json()
                 # Tentando Processar
                 try:
                     # Cria o processo com a funcao de processamento
