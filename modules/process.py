@@ -627,12 +627,13 @@ def process_glm(ch13, glm_list, v_extent):
 
 
 def processing(bands, p_br, p_sp, dir_in): 
+   
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
     
-    # Se a variavel de controle de processamento do brasil for True, realiza o processamento das bandas do ABI 1-16
+    # Checagem se e possivel gerar imagem bandas 1-16
     if p_br:
         logging.info('')
         logging.info('PROCESSANDO IMAGENS "BR"...')
