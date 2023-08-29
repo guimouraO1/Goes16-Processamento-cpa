@@ -838,7 +838,7 @@ def processing(bands, p_br, p_sp, dir_in):
             # Cria uma lista com os itens presentes no diretório da banda que são arquivos e terminam com ".nc"
             glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
             glm_list.sort()
-        
+            
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento

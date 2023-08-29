@@ -14,9 +14,9 @@ images.sort()
 glm_list = []
 
 ch13 = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
+print(ch13)
 date_ini = datetime.datetime(ch13.year, ch13.month, ch13.day, ch13.hour, ch13.minute)
 date_end = datetime.datetime(ch13.year, ch13.month, ch13.day, ch13.hour, ch13.minute) + datetime.timedelta(minutes=9, seconds=59)
-
 
 for x in images:
     xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
@@ -24,5 +24,3 @@ for x in images:
         glm_list.append(x)
     else:
         continue
-
-print(glm_list)
