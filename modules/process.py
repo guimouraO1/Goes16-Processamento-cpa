@@ -20,6 +20,7 @@ import re # Utilitario para trabalhar com expressoes regulares
 import json
 from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
 
+
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 
 # ============================================# Diretórios ========================================= #
@@ -500,6 +501,131 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     logging.info(f'{rrqpef} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
+def process_glm(ch13, glm_list, v_extent):
+    global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
+    # Captura a hora para contagem do tempo de processamento da imagem
+    processing_start_time = time.time()
+    # Area de interesse para recorte
+    if v_extent == 'br':
+        # Brasil
+        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
+    elif v_extent == 'sp':
+        # São Paulo
+        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
+    else:
+        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+
+    # Lendo imagem CMI reprojetada
+    reproject_ch13 = Dataset(ch13)
+    data_ch13 = reproject_ch13.variables['Band1'][:]
+
+    # Coletando do nome da imagem o satelite e a data/hora
+    satellite = (glm_list[0][glm_list[0].find("GLM-L2-LCFA_G") + 13:glm_list[0].find("_s")])
+    dtime = (glm_list[0][glm_list[0].find("GLM-L2-LCFA_G16_s") + 17:glm_list[0].find("_e") - 1])
+
+    # Initialize arrays for latitude, longitude, and event energy
+    lats = np.array([])
+    lons = np.array([])
+    energies = np.array([])
+
+    for g in glm_list:
+        # Lendo imagem CMI reprojetada
+        glm = Dataset(f'{dir_in}glm/{g}')
+        # Append lats / longs / event energies
+        lats = np.append(lats, glm.variables['event_lat'][:])
+        lons = np.append(lons, glm.variables['event_lon'][:])
+        energies = np.append(energies, glm.variables['event_energy'][:])
+
+    # Stack and transpose the lat lons
+    values = np.vstack((lats, lons)).T
+    # Get the counts
+    points, counts = np.unique(values, axis=0, return_counts=True)
+    # Get the counts indices
+    idx = counts.argsort()
+
+    # Formatando data para plotar na imagem e salvar o arquivo
+    date = (datetime.datetime.strptime(dtime, '%Y%j%H%M%S'))
+    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+
+    # Formatando a descricao a ser plotada na imagem
+    description = f' GOES-{satellite} GLM Density {date_img}'
+    institution = "CEPAGRI - UNICAMP"
+
+    # Choose the plot size (width x height, in inches)
+    d_p_i = 150
+    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+
+    # Use the Geostationary projection in cartopy
+    ax = plt.axes(projection=ccrs.PlateCarree())
+
+    # Define the image extent
+    ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
+
+    if v_extent == 'br':
+        # Adicionando o shapefile dos estados brasileiros
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+    elif v_extent == 'sp':
+        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
+        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+
+    # Adicionando  linhas dos litorais
+    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
+    # Adicionando  linhas das fronteiras
+    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
+    # Adicionando  paralelos e meridianos
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
+    gl.top_labels = False
+    gl.right_labels = False
+
+    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
+
+    # Plotando base
+    ax.imshow(data_ch13, origin='upper', cmap='gray_r', extent=img_extent)
+
+    # Plot the GLM Data
+    glm = plt.scatter(points[idx, 1], points[idx, 0], vmin=0, vmax=1000, s=counts[idx] * 0.1, c=counts[idx], cmap="jet", zorder=2)
+
+    cax0 = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.01325, ax.get_position().width, 0.0125])
+    cb = plt.colorbar(glm, orientation="horizontal", cax=cax0, ticks=[200, 400, 600, 800])
+    cb.ax.set_xticklabels(['200', '400', '600', '800'])
+    cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+    cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
+    cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
+    cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
+
+    # Adicionando descricao da imagem
+    # Criando novos eixos de acordo com a posicao da imagem
+    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
+    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
+    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
+    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
+    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+
+    # Adicionando os logos
+    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
+    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
+    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
+    fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+    fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+
+    # Salvando a imagem de saida
+    plt.savefig(f'{dir_out}glm/glm_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+    # Fecha a janela para limpar a memoria
+    plt.close()
+    # Realiza o log do calculo do tempo de processamento da imagem
+    logging.info(f'{dir_in}glm/{glm_list[0][0:31]}*.nc - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
+
+
 def processing(bands, p_br, p_sp, dir_in): 
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
@@ -513,7 +639,7 @@ def processing(bands, p_br, p_sp, dir_in):
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
             b = str(x).zfill(2) # Transforma o inteiro contador em string e com 2 digitos
-            # Se a banda tiver novas imagens para o dia:
+            # Se a banda tiver novas glm_list para o dia:
             if bands[b]:
                 # Imagens para processamento
                 old_bands = abrir_old_json()
@@ -545,7 +671,7 @@ def processing(bands, p_br, p_sp, dir_in):
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
             b = str(x).zfill(2) # Transforma o inteiro contador em string e com 2 digitos
-            # Se a banda tiver novas imagens para o dia:
+            # Se a banda tiver novas glm_list para o dia:
             if bands[b]:
                 # Imagens para processamento
                 old_bands = abrir_old_json()
@@ -660,9 +786,9 @@ def processing(bands, p_br, p_sp, dir_in):
                 # Inicia o processo
                 process.start()
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-            except:
+            except Exception as e:
                 # Realiza o log do erro
-                logging.info(f'Erro Arquivo - {rrqpef}')
+                logging.info(f'Erro {e} Arquivo - {rrqpef}')
                 # Remove a imagem com erro de processamento
                 os.remove(f'{rrqpef}')
                 os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
@@ -700,3 +826,37 @@ def processing(bands, p_br, p_sp, dir_in):
             process.join()
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
+
+
+    # Checagem se e possivel gerar imagem GLM
+    if bands['19']:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS GLM "BR"...')
+            
+            # Cria uma lista com os itens presentes no diretório da banda que são arquivos e terminam com ".nc"
+            glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
+            glm_list.sort()
+        
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process = Process(target=process_glm, args=(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', glm_list, "br"))
+                # Adiciona o processo na lista de controle do processamento paralelo
+                process_br.append(process)
+                # Inicia o processo
+                process.start()
+            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+            except Exception as e:
+                # Realiza o log do erro
+                logging.info("Erro {e} Arquivo ")
+                # Remove a imagem com erro de processamento
+                os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
+            
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_br:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa lista vazia para controle do processamento paralelo
+        process_br = []

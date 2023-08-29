@@ -92,9 +92,21 @@ def checar_imagens(bands, dir_in):
             bands['18'] = True
             logging.info(f'Novas imagens RRQPEF')
         except:
-            logging.info(f'Sem novas imagens RRQPEF')
-
-
+            logging.info(f'Erro ao baixar novas imagens RRQPEF')
+            bands['18'] = False
+    else:
+        logging.info(f'Sem novas imagens RRQPEF')
+        bands['18'] = False
+        
+    
+    # Checagem de novas imagens GLM (Band 19)
+    if bands['13']:
+        
+        bands['19'] = True
+        logging.info('Novas imagens GLM')
+    else:
+        bands['19'] = False
+        logging.info('Sem novas imagens GLM')
 
     # Retorna o dicionário "bands".      
     return bands  

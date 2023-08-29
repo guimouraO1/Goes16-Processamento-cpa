@@ -177,6 +177,7 @@ def check_images(c_bands):
     else:
         logging.info(f'Sem novas imagens RRQPEF')
 
+
     # Checagem de novas imagens GLM (Band 19)
     if c_bands["13"]:
         # Carrega a banda 13 que sera utilizada para compor o fundo
@@ -189,10 +190,12 @@ def check_images(c_bands):
         aux_list = []
         # Looping a partir dos arquivos da banda 13 que compoem o fundo
         for f in base:
+            
             # Extrair o data/hora do arquivo da banda 13 para download do arquivo GLM
             ftime = (datetime.datetime.strptime(f[f.find("M6C13_G16_s") + 11:f.find("_e") - 1], '%Y%j%H%M%S'))
             date_ini = datetime.datetime(ftime.year, ftime.month, ftime.day, ftime.hour, ftime.minute)
             date_end = datetime.datetime(ftime.year, ftime.month, ftime.day, ftime.hour, ftime.minute) + datetime.timedelta(minutes=9, seconds=59)
+            
             for x in imagens:
                 xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
                 if date_ini <= xtime <= date_end:
@@ -1507,85 +1510,6 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
 
 def processing(p_bands, p_br, p_sp):
-
-    # Checagem se e possivel gerar imagem RRQPEF
-    if p_bands["18"]:
-        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
-        if p_br:
-            logging.info("")
-            logging.info('PROCESSANDO IMAGENS RRQPEF "BR"...')
-            band18 = read_process_file('band18')
-            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
-            for i in band18:
-                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
-                i = i.strip().split(';')
-                # Tenta realizar o processamento da imagem
-                try:
-                    # Cria o processo com a funcao de processamento
-                    process = Process(target=process_rrqpef, args=(f'{dir_in}rrqpef/{i[0]}', f'{dir_in}band13/{i[1].replace(".nc", "_reproj_br.nc")}', "br"))
-                    # Adiciona o processo na lista de controle do processamento paralelo
-                    process_br.append(process)
-                    # Inicia o processo
-                    process.start()
-                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except OSError as ose:
-                    # Realiza o log do erro
-                    logging.info("Erro Arquivo - OSError")
-                    logging.info(str(ose))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}rrqpef/{i[0]}')
-                    os.remove(f'{dir_in}band13/{i[1].replace(".nc", "_reproj_br.nc")}')
-                except AttributeError as ae:
-                    # Realiza o log do erro
-                    logging.info(f'Erro Arquivo - AttributeError - {i}')
-                    logging.info(str(ae))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}rrqpef/{i[0]}')
-                    os.remove(f'{dir_in}band13/{i[1].replace(".nc", "_reproj_br.nc")}')
-            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-            for process in process_br:
-                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-                process.join()
-            # Limpa lista vazia para controle do processamento paralelo
-            process_br = []
-        # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
-        if p_sp:
-            logging.info("")
-            logging.info('PROCESSANDO IMAGENS RRQPEF "SP"...')
-            band18 = read_process_file('band18')
-            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
-            for i in band18:
-                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
-                i = i.strip().split(';')
-                # Tenta realizar o processamento da imagem
-                try:
-                    # Cria o processo com a funcao de processamento
-                    process = Process(target=process_rrqpef, args=(f'{dir_in}rrqpef/{i[0]}', f'{dir_in}band13/{i[1].replace(".nc", "_reproj_sp.nc")}', "sp"))
-                    # Adiciona o processo na lista de controle do processamento paralelo
-                    process_sp.append(process)
-                    # Inicia o processo
-                    process.start()
-                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except OSError as ose:
-                    # Realiza o log do erro
-                    logging.info("Erro Arquivo - OSError")
-                    logging.info(str(ose))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}rrqpef/{i[0]}')
-                    os.remove(f'{dir_in}band13/{i[1].replace(".nc", "_reproj_sp.nc")}')
-                except AttributeError as ae:
-                    # Realiza o log do erro
-                    logging.info(f'Erro Arquivo - AttributeError - {i}')
-                    logging.info(str(ae))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}rrqpef/{i[0]}')
-                    os.remove(f'{dir_in}band13/{i[1].replace(".nc", "_reproj_sp.nc")}')
-            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-            for process in process_sp:
-                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-                process.join()
-            # Limpa lista vazia para controle do processamento paralelo
-            process_sp = []
 
     # Checagem se e possivel gerar imagem GLM
     if p_bands["19"]:
