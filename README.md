@@ -89,14 +89,14 @@ You can create a Conda environment with required packages using the following co
 conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp
 ```
 ---
+
+To activate this environment, use
 ```bash
-# To activate this environment, use
-#
-#     $ conda activate goes
-#
-# To deactivate an active environment, use
-#
-#     $ conda deactivate
+conda activate goes
+```
+To deactivate an active environment, use
+```bash
+conda deactivate
 ```
 
 ## Installation
