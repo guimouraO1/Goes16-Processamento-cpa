@@ -95,7 +95,7 @@ conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal sc
 1. Clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/your-repo.git
+https://github.com/guimouraO1/processamentopy.git
 ```
 
 2. Navigate to the project directory:
