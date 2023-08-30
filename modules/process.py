@@ -829,21 +829,25 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
             glm_list.sort()
             # Filtra os arq glm para pegar somente os no intervalo ini < glm < fim
             glm_list = filtrar_imagens_por_intervalo(glm_list, ch13)
-            # Tenta realizar o processamento da imagem
-            try:
-                # Cria o processo com a funcao de processamento
-                process = Process(target=process_glm, args=(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', glm_list, "br"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_br.append(process)
-                # Inicia o processo
-                process.start()
-            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-            except Exception as e:
-                # Realiza o log do erro
-                logging.info(f'Erro {e} Arquivo ')
-                # Remove a imagem com erro de processamento
-                os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
             
+            if len(glm_list) > 0:
+                # Tenta realizar o processamento da imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process = Process(target=process_glm, args=(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', glm_list, "br"))
+                    # Adiciona o processo na lista de controle do processamento paralelo
+                    process_br.append(process)
+                    # Inicia o processo
+                    process.start()
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except Exception as e:
+                    # Realiza o log do erro
+                    logging.info(f'Erro {e} Arquivo ')
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
+            else:
+                logging.info(f'Sem imagens correspondentes a data para glm ')
+        
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in process_br:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
@@ -851,7 +855,7 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         # Limpa lista vazia para controle do processamento paralelo
         process_br = []
         # pasta glm para excluír os arq glm
-        pasta_glm = dir_in + 'glm/'
+        pasta_glm = f'{dir_in}glm/'
         try: # Apaga os arq que já foram processados
             apagar_itens_da_pasta(pasta_glm, glm_list)
         except Exception as e:

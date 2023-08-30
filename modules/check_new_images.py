@@ -6,26 +6,6 @@ import shutil
 import datetime
 from modules.utilities import download_prod
 
-# Função para controle do glm
-def filtrar_imagens_por_intervalo(ch13, dir_in):
-    # Pega lista de glm para verificação
-    glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
-    glm_list.sort()
-
-    # Pegando data inicio e fim para comparação
-    ch13_data = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
-    date_ini = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
-    date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + datetime.timedelta(minutes=9, seconds=59)
-    
-    # Populando lista para exclusão de imagens fora do período
-    for x in glm_list:
-        xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
-        if date_ini <= xtime <= date_end:
-            glm_list.append(x)
-            
-    return glm_list
-    
-
 # Função para remover todos os arquivos de uma pasta, exceto um específico.
 def remover_todos_exceto(nome_arquivo, pasta):
     for arquivo in os.listdir(pasta):
@@ -61,7 +41,6 @@ def checar_imagens(bands, dir_in):
         b = str(x).zfill(2)
         # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
         imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f)]
-
         # Se houver imagens na pasta:
         if imagens:
             # Encontra a imagem mais recente na lista.
@@ -100,7 +79,6 @@ def checar_imagens(bands, dir_in):
         bands["17"] = False
         logging.info(f'Sem novas imagens TRUECOLOR')
 
-
     # Checagem de novas imagens rrqpef (Band 18)
     if bands['13']:
         ch13 = old_bands['13']
@@ -121,15 +99,17 @@ def checar_imagens(bands, dir_in):
 
     # Checagem de novas imagens GLM (Band 19)
     if bands['13']:
-        # Filtra e vê se há arquivos na glm_list e verifica se os arquivos são da data para processar
-        glm_list = filtrar_imagens_por_intervalo(ch13, dir_in)
-        # Se não tem arquivos glm para processar
-        if not glm_list:
-            bands['19'] = False
-            logging.info('Sem novas imagens GLM')
-        else:
+        # Pega lista de glm para verificação
+        glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
+        glm_list.sort()
+        
+        # Se a lista for maior que 0 True
+        if len(glm_list) > 0:
             bands['19'] = True
             logging.info('Novas imagens GLM')
+        else:
+            bands['19'] = False
+            logging.info('Sem novas imagens GLM')
     else:
         bands['19'] = False
         logging.info('Sem novas imagens GLM')

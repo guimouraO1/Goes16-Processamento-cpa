@@ -31,12 +31,14 @@ def remover_imagens(bands, dir_in):
                 logging.info(f'Arquivo {oldBands[b]} removido com sucesso!')
             except:
                 print(f'Sem imagens para remover {oldBands[b]}')
-                
+
+
     if bands['18']:
         logging.info('Removendo netCDF-rrqpef processadas')
         shutil.rmtree(f'{dir_in}rrqpef/')
         os.mkdir(f'{dir_in}rrqpef/')
-        
+
+
     if bands['19']:
         # pega lista de itens que sobraram em glm 
         images = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
@@ -51,7 +53,7 @@ def remover_imagens(bands, dir_in):
         # Populando lista para exclusão de imagens fora do período
         for x in images:
             xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
-            if date_ini > xtime:
+            if xtime < date_ini:
                 lista_exclusao.append(x)
             else:
                 continue
