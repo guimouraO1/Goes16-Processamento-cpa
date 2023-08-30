@@ -19,7 +19,7 @@ from modules.dirs import get_dirs
 import re # Utilitario para trabalhar com expressoes regulares
 import json
 from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
-
+osr.DontUseExceptions()
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 
@@ -627,12 +627,13 @@ def process_glm(ch13, glm_list, v_extent):
 
 
 def processing(bands, p_br, p_sp, dir_in): 
+   
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
     
-    # Se a variavel de controle de processamento do brasil for True, realiza o processamento das bandas do ABI 1-16
+    # Checagem se e possivel gerar imagem bandas 1-16
     if p_br:
         logging.info('')
         logging.info('PROCESSANDO IMAGENS "BR"...')
