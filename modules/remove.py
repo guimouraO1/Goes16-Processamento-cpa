@@ -3,6 +3,7 @@ import os
 import json
 import shutil
 import datetime
+import re
 
 # Abre o json para pegar o nome dos arquivos
 def abrir_old_json():

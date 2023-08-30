@@ -60,7 +60,6 @@ def checar_imagens(bands, dir_in):
                 modificar_chave_old_bands('oldBands.json', b, latestBand)  
                 # Atualiza o dicionário "bands" com true para novas imagens.
                 bands[b] = True
-                
             else:
                 logging.info(f'Sem imagens para o dia band{b}')
                 # Atualiza o dicionário "bands" com false sem novas imagens.
@@ -104,6 +103,7 @@ def checar_imagens(bands, dir_in):
         # Pega lista de glm para verificação
         glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
         glm_list.sort()
+        
         # Se não tem arquivos glm para processar
         if not glm_list:
             bands['19'] = False
@@ -111,7 +111,6 @@ def checar_imagens(bands, dir_in):
         else:
             bands['19'] = True
             logging.info('Novas imagens GLM')
-    
     else:
         bands['19'] = False
         logging.info('Sem novas imagens GLM')
