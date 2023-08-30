@@ -101,12 +101,22 @@ def checar_imagens(bands, dir_in):
     
     # Checagem de novas imagens GLM (Band 19)
     if bands['13']:
-        
-        bands['19'] = True
-        logging.info('Novas imagens GLM')
+        # Pega lista de glm para verificação
+        glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
+        glm_list.sort()
+        # Se não tem arquivos glm para processar
+        if not glm_list:
+            bands['19'] = False
+            logging.info('Sem novas imagens GLM')
+        else:
+            bands['19'] = True
+            logging.info('Novas imagens GLM')
+    
     else:
         bands['19'] = False
         logging.info('Sem novas imagens GLM')
+
+
 
     # Retorna o dicionário "bands".      
     return bands  

@@ -19,6 +19,7 @@ from modules.dirs import get_dirs
 import re # Utilitario para trabalhar com expressoes regulares
 import json
 from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
+
 osr.DontUseExceptions()
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
@@ -38,6 +39,27 @@ dir_temp = dirs['dir_temp']
 arq_log = dirs['arq_log']
 # ============================================# Diretórios ========================================= #
 
+
+def apagar_itens_da_pasta(pasta_glm, glm_list):
+    [os.remove(os.path.join(pasta_glm, arquivo)) for arquivo in os.listdir(pasta_glm) if arquivo in glm_list]
+    logging.info('Arquivos da glm_lista foram excluídos com sucesso! ')
+
+
+def filtrar_imagens_por_intervalo(images, ch13):
+    
+    glm_list = [] 
+    ch13_data = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
+    date_ini = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
+    date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + datetime.timedelta(minutes=9, seconds=59)
+
+    for x in images:
+        xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
+        if date_ini <= xtime <= date_end:
+            glm_list.append(x)
+        else:
+            continue
+    
+    return glm_list
 
 
 def area_para_recorte(v_extent):
@@ -840,6 +862,8 @@ def processing(bands, p_br, p_sp, dir_in):
             glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
             glm_list.sort()
             
+            glm_list = filtrar_imagens_por_intervalo(glm_list, ch13)
+            
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
@@ -861,3 +885,10 @@ def processing(bands, p_br, p_sp, dir_in):
             process.join()
         # Limpa lista vazia para controle do processamento paralelo
         process_br = []
+        # pasta glm para excluír os arq glm
+        pasta_glm = dir_in + 'glm/'
+        # Apaga os arq que já foram processados
+        apagar_itens_da_pasta(pasta_glm, glm_list)
+
+
+

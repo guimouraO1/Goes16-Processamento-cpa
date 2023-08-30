@@ -62,6 +62,7 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
 
+
     # Se bands 17 for true processa True color gif br e sp
     if g_bands['17']:
         if g_br:
@@ -75,14 +76,23 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
             # Cria o processo com a funcao gif
             create_gif("truecolor", "sp")
     
+    
     if g_bands['18']:
         if g_br:
             logging.info('')
             logging.info('CRIANDO GIF ANIMADO RRQPEF "BR"...')
             # Cria o processo com a funcao gif
             create_gif("rrqpef", "br")
-        if g_br:
+        if g_sp:
             logging.info('')
             logging.info('CRIANDO GIF ANIMADO RRQPEF "SP"...')
             # Cria o processo com a funcao gif
             create_gif("rrqpef", "sp")
+
+
+    if g_bands["19"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO GLM "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("glm", "br")
