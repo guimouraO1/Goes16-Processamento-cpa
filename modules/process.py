@@ -41,12 +41,13 @@ arq_log = dirs['arq_log']
 
 
 def apagar_itens_da_pasta(pasta_glm, glm_list):
+    # Controle glm
     [os.remove(os.path.join(pasta_glm, arquivo)) for arquivo in os.listdir(pasta_glm) if arquivo in glm_list]
     logging.info('Arquivos da glm_lista foram excluídos com sucesso! ')
 
 
 def filtrar_imagens_por_intervalo(images, ch13):
-    
+    # Controle glm para checagem de imagens no intervalo
     glm_list = [] 
     ch13_data = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
     date_ini = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
@@ -105,6 +106,16 @@ def adicionando_linhas(ax):
     gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
     gl.top_labels = False
     gl.right_labels = False
+
+
+def adicionando_descricao_imagem(description, institution, ax, fig):
+    # Criando novos eixos de acordo com a posicao da imagem
+    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
+    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
+    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
+    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
+    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
 
 
 def adicionando_logos(fig):
@@ -319,13 +330,7 @@ def process_band_cmi(file, ch, v_extent):
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
 
     # Adicionando descricao da imagem
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+    adicionando_descricao_imagem(description, institution, ax, fig)
 
     # Adicionando os logos
     adicionando_logos(fig)
@@ -420,13 +425,7 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     ax.imshow(RGB, origin='upper', extent=img_extent)
 
     # Adicionando descricao da imagem
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax0 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.0135, ax.get_position().width - 0.003, 0.0125])
-    cax0.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax0.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    cax0.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax0.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax0.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+    adicionando_descricao_imagem(description, institution, ax, fig)
 
     # Adicionando os logos
     adicionando_logos(fig)
@@ -504,13 +503,7 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
 
     # Adicionando descricao da imagem
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+    adicionando_descricao_imagem(description, institution, ax, fig)
 
     # Adicionando os logos
     adicionando_logos(fig)
@@ -525,17 +518,12 @@ def process_rrqpef(rrqpef, ch13, v_extent):
 
 def process_glm(ch13, glm_list, v_extent):
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
+    
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
+    
     # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+    extent, resolution = area_para_recorte(v_extent)
 
     # Lendo imagem CMI reprojetada
     reproject_ch13 = Dataset(ch13)
@@ -584,27 +572,11 @@ def process_glm(ch13, glm_list, v_extent):
     # Define the image extent
     ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
 
-    if v_extent == 'br':
-        # Adicionando o shapefile dos estados brasileiros
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-    elif v_extent == 'sp':
-        # Adicionando o shapefile dos estados brasileiros e cidade de campinas
-        # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
-
+    # Adicionando o shapefile dos estados brasileiros
+    adicionando_shapefile(v_extent, ax)
+    
     # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
-    # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
-    # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
-    gl.top_labels = False
-    gl.right_labels = False
+    adicionando_linhas(ax)
 
     # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
@@ -624,22 +596,11 @@ def process_glm(ch13, glm_list, v_extent):
     cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
 
     # Adicionando descricao da imagem
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+    adicionando_descricao_imagem(description, institution, ax, fig)
 
     # Adicionando os logos
-    logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
-    logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
-    logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
-    fig.figimage(logo_noaa, 32, 233, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_goes, 10, 150, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-    fig.figimage(logo_cepagri, 10, 70, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
-
+    adicionando_logos(fig)
+    
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}glm/glm_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
     # Fecha a janela para limpar a memoria
@@ -857,13 +818,12 @@ def processing(bands, p_br, p_sp, dir_in):
         if p_br:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS GLM "BR"...')
-            
             # Cria uma lista com os itens presentes no diretório da banda que são arquivos e terminam com ".nc"
             glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
+            # Ordena a lista
             glm_list.sort()
-            
+            # Filtra os arq glm para pegar somente os no intervalo ini < glm < fim
             glm_list = filtrar_imagens_por_intervalo(glm_list, ch13)
-            
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
@@ -875,7 +835,7 @@ def processing(bands, p_br, p_sp, dir_in):
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except Exception as e:
                 # Realiza o log do erro
-                logging.info("Erro {e} Arquivo ")
+                logging.info(f'Erro {e} Arquivo ')
                 # Remove a imagem com erro de processamento
                 os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
             
@@ -887,8 +847,11 @@ def processing(bands, p_br, p_sp, dir_in):
         process_br = []
         # pasta glm para excluír os arq glm
         pasta_glm = dir_in + 'glm/'
-        # Apaga os arq que já foram processados
-        apagar_itens_da_pasta(pasta_glm, glm_list)
-
+        try: # Apaga os arq que já foram processados
+            apagar_itens_da_pasta(pasta_glm, glm_list)
+        except Exception as e:
+                # Realiza o log do erro
+                logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
+            
 
 

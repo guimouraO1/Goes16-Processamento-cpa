@@ -96,8 +96,8 @@ def checar_imagens(bands, dir_in):
     else:
         logging.info(f'Sem novas imagens RRQPEF')
         bands['18'] = False
-        
-    
+
+
     # Checagem de novas imagens GLM (Band 19)
     if bands['13']:
         # Pega lista de glm para verificação
@@ -114,7 +114,6 @@ def checar_imagens(bands, dir_in):
     else:
         bands['19'] = False
         logging.info('Sem novas imagens GLM')
-
 
 
     # Retorna o dicionário "bands".      
