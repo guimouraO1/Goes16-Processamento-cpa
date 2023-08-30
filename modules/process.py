@@ -19,7 +19,7 @@ from modules.dirs import get_dirs
 import re # Utilitario para trabalhar com expressoes regulares
 import json
 from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
-
+osr.DontUseExceptions()
 
 gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 
