@@ -61,7 +61,7 @@ def checar_imagens(bands, dir_in):
         b = str(x).zfill(2)
         # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
         imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+.nc$', f)]
-        
+
         # Se houver imagens na pasta:
         if imagens:
             # Encontra a imagem mais recente na lista.
