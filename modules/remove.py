@@ -59,6 +59,6 @@ def remover_imagens(bands, dir_in):
         pasta_glm = dir_in + 'glm/'
         try:
             [os.remove(os.path.join(pasta_glm, arquivo)) for arquivo in os.listdir(pasta_glm) if arquivo in lista_exclusao]
-            logging.info('Arquivos da glm_lista antes da data {date_ini}foram excluídos com sucesso! ')
+            logging.info(f'Arquivos da glm_lista antes da data {date_ini}foram excluídos com sucesso! ')
         except:
             logging.info('Não foi possível excluír arquivos glm fora da data limite ')

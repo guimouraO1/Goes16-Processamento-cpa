@@ -857,3 +857,4 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         except Exception as e:
                 # Realiza o log do erro
                 logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
+
