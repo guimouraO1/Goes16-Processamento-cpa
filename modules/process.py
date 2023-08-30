@@ -1,6 +1,5 @@
 import matplotlib
-# Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
+matplotlib.use('Agg')# Force matplotlib to not use any Xwindows backend.
 import matplotlib.pyplot as plt  # Plotagem de resultados, textos, logos, etc.
 from matplotlib import cm  # Utilitario para paletas de cores
 import cartopy  # Inserir mapas, shapefiles, paralelos, meridianos, latitudes, longitudes, etc.
@@ -15,10 +14,10 @@ import time  # Utilitario para trabalhar com tempos
 import os  # Utilitario para trabalhar com chamadas de sistema
 import logging  # Utilitario para criar os logs
 from multiprocessing import Process  # Utilitario para multiprocessamento
-from modules.dirs import get_dirs
 import re # Utilitario para trabalhar com expressoes regulares
 import json
-from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
+from modules.dirs import get_dirs
+from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
 
 osr.DontUseExceptions()
 
@@ -41,18 +40,18 @@ arq_log = dirs['arq_log']
 
 
 def apagar_itens_da_pasta(pasta_glm, glm_list):
-    # Controle glm
+    # Esta função remove arquivos da pasta_glm que estão na lista glm_list
     [os.remove(os.path.join(pasta_glm, arquivo)) for arquivo in os.listdir(pasta_glm) if arquivo in glm_list]
     logging.info('Arquivos da glm_lista foram excluídos com sucesso! ')
 
 
 def filtrar_imagens_por_intervalo(images, ch13):
-    # Controle glm para checagem de imagens no intervalo
+    # Extrai a data e hora da string 'ch13' e define um intervalo de 9 minutos e 59 segundos a partir dela.
     glm_list = [] 
     ch13_data = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
     date_ini = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
     date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + datetime.timedelta(minutes=9, seconds=59)
-
+    # Percorre a lista de nomes de imagens e verifica se a data e hora de cada imagem estão dentro do intervalo.
     for x in images:
         xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
         if date_ini <= xtime <= date_end:
@@ -239,11 +238,13 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
 
 
 def process_band_cmi(file, ch, v_extent):
+    
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
     file_var = 'CMI'
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
     
+    # Area de interesse para recorte
     extent, resolution = area_para_recorte(v_extent)
         
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
@@ -348,6 +349,7 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
     
+    # Area de interesse para recorte
     extent, resolution = area_para_recorte(v_extent)
 
     if rgb_type == 'truecolor':
@@ -445,7 +447,8 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     file_var = 'RRQPE'
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
-    # Area para o corte
+    
+    # Area de interesse para recorte
     extent, resolution = area_para_recorte(v_extent)
 
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
@@ -562,7 +565,7 @@ def process_glm(ch13, glm_list, v_extent):
     description = f' GOES-{satellite} GLM Density {date_img}'
     institution = "CEPAGRI - UNICAMP"
 
-    # Choose the plot size (width x height, in inches)
+    # Definindo tamanho da imagem de saida
     d_p_i = 150
     fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
 
@@ -609,7 +612,7 @@ def process_glm(ch13, glm_list, v_extent):
     logging.info(f'{dir_in}glm/{glm_list[0][0:31]}*.nc - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
-def processing(bands, p_br, p_sp, dir_in): 
+def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
    
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
@@ -622,7 +625,8 @@ def processing(bands, p_br, p_sp, dir_in):
         logging.info('PROCESSANDO IMAGENS "BR"...')
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
-            b = str(x).zfill(2) # Transforma o inteiro contador em string e com 2 digitos
+            # Transforma o inteiro contador em string e com 2 digitos
+            b = str(x).zfill(2)
             # Se a banda tiver novas glm_list para o dia:
             if bands[b]:
                 # Imagens para processamento
@@ -654,7 +658,8 @@ def processing(bands, p_br, p_sp, dir_in):
         logging.info('PROCESSANDO IMAGENS "SP"...')
         # Contador para processamento nas 16 bandas
         for x in range(1, 17):
-            b = str(x).zfill(2) # Transforma o inteiro contador em string e com 2 digitos
+            # Transforma o inteiro contador em string e com 2 digitos
+            b = str(x).zfill(2)
             # Se a banda tiver novas glm_list para o dia:
             if bands[b]:
                 # Imagens para processamento
@@ -852,6 +857,3 @@ def processing(bands, p_br, p_sp, dir_in):
         except Exception as e:
                 # Realiza o log do erro
                 logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
-            
-
-

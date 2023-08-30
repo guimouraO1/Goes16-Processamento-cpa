@@ -17,8 +17,8 @@ from osgeo import gdal  # Utilitario para a biblioteca GDAL
 from osgeo import osr  # Utilitario para a biblioteca GDAL
 from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
 import numpy as np  # Suporte para arrays e matrizes multidimensionais, com diversas funções matemáticas para trabalhar com estas estruturas
-from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
-from libs.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
+from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
+from modules.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
 import datetime  # Utilitario para datas e horas
 import time  # Utilitario para trabalhar com tempos
 import os  # Utilitario para trabalhar com chamadas de sistema
@@ -942,6 +942,7 @@ def process_glm(ch13, glm_list, v_extent):
 
 
 def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
+    
     global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
@@ -1510,51 +1511,6 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
 
 def processing(p_bands, p_br, p_sp):
-
-    # Checagem se e possivel gerar imagem GLM
-    if p_bands["19"]:
-        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
-        if p_br:
-            logging.info("")
-            logging.info('PROCESSANDO IMAGENS GLM "BR"...')
-            band19 = read_process_file('band19')
-            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
-            for i in band19:
-                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
-                i = i.strip().split(';')
-                # Coletando lista de GLM no indice 1
-                j = i[1].replace("'", "").strip('][').split(', ')
-                # Tenta realizar o processamento da imagem
-                try:
-                    # Cria o processo com a funcao de processamento
-                    process = Process(target=process_glm, args=(f'{dir_in}band13/{i[0].replace(".nc", "_reproj_br.nc")}', j, "br"))
-                    # Adiciona o processo na lista de controle do processamento paralelo
-                    process_br.append(process)
-                    # Inicia o processo
-                    process.start()
-                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except OSError as ose:
-                    # Realiza o log do erro
-                    logging.info("Erro Arquivo - OSError")
-                    logging.info(str(ose))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band13/{i[0].replace(".nc", "_reproj_br.nc")}')
-                    for f in j:
-                        os.remove(f'{dir_in}glm/{f}')
-                except AttributeError as ae:
-                    # Realiza o log do erro
-                    logging.info(f'Erro Arquivo - AttributeError - {i}')
-                    logging.info(str(ae))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band13/{i[0].replace(".nc", "_reproj_br.nc")}')
-                    for f in j:
-                        os.remove(f'{dir_in}glm/{f}')
-            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-            for process in process_br:
-                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-                process.join()
-            # Limpa lista vazia para controle do processamento paralelo
-            process_br = []
 
     # Checagem se e possivel gerar imagem NDVI
     if p_bands["20"]:

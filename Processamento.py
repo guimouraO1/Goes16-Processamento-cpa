@@ -11,7 +11,7 @@ from modules.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modules.quantity_products import quantity_products
 from modules.send_products import send_products
 from modules.dirs import get_dirs
-from modules.process import processing
+from modules.process import processamento_das_imagens
 from modules.check_new_images import checar_imagens
 from modules.remove import remover_imagens
 from modules.process_gif import process_gif
@@ -52,7 +52,7 @@ try:
     # Se tiver novas imagens para processamento:
     if any(bands[key] for key in bands):
         # Processa as imagens
-        processing(bands, br, sp, dir_in)
+        processamento_das_imagens(bands, br, sp, dir_in)
         # Remove os arquivos .nc que já foram processados
         remover_imagens(bands, dir_in)
         # A função é chamada para controlar a quantidade de produtos (imagens) a serem mantidos para a produção de um GIF animado.
