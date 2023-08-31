@@ -613,6 +613,7 @@ def process_glm(ch13, glm_list, v_extent):
 
 
 def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
+    
     # Checagem se e possivel gerar imagem bandas 1-16
     if p_br:
         logging.info('')

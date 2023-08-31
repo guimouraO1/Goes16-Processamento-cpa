@@ -171,7 +171,7 @@ def checar_imagens(bands, dir_in):
     checar_bandas(bands, dir_in)
 
     checar_truecolor(bands)
-
+    
     checar_rrqpef(bands, dir_in)
     
     checar_glm(bands, dir_in)    
