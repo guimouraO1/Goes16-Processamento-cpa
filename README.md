@@ -147,25 +147,24 @@ The directory structure of this repository is as follows:
 
 ```
 .
-├── temp
+
 ├── shapefiles
 ├── output
 ├── colortables
 ├── goes
-├── libs
 ├── logos
 ├── logs
 ├── modules/
-│   ├── oldBands.json
 │   ├── check_new_images.py
-│   ├── process.py
-│   ├── process_gif.py
-│   ├── logs.py
-│   ├── remove_images.py
-│   ├── quantity_products.py
-│   ├── send_products.py
 │   ├── dirs.py
+│   ├── logs.py
+│   ├── process_gif.py
+│   ├── process.py
+│   ├── quantity_products.py
+│   ├── remove.py
+│   ├── send_products.py
 │   └── utilities.py
+├── oldBands.json
 ├── Processamento.py
 └── README.md
 ```
@@ -232,6 +231,9 @@ The code is highly modularized for ease of maintenance and extensibility. Below,
 
 ---
 
+## Example: NOAA GOES-16 truecolor Processing on CEPAGRI
+
+![GOES-16 Satellite](shapefiles/truecolor.png)
 
 ---
 
