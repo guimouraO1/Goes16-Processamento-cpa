@@ -185,7 +185,7 @@ To use the script, follow these steps:
 
 ## Processamento.py
 
-## Code Structure
+### Code Structure
 
 The code is highly modularized for ease of maintenance and extensibility. Below, we detail the key functionalities of the code:
 
@@ -228,11 +228,6 @@ The code is highly modularized for ease of maintenance and extensibility. Below,
 ### Sending Processed Products
 
 - The `send_products` function sends the processed images to a specific site (cpa.unicamp.br).
-
-
-### Closing the Log and Execution Time
-
-- The `finalize_log_time` function is called to close the log and record the script's end time.
 
 
 ---
