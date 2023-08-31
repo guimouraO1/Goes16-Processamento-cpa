@@ -39,7 +39,7 @@ def remover_imagens(bands, dir_in):
         os.mkdir(f'{dir_in}rrqpef/')
 
     # Controle de produtos de glm
-    if bands['19']:
+    if bands['19'] or bands['13']:
         aux = False
         # Verificar produtos glm
         # Verifica a quantidade de itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_br.png$"
