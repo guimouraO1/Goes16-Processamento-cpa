@@ -187,7 +187,7 @@ To use the script, follow these steps:
 ### Code Structure
 
 - The code is highly modularized for ease of maintenance and extensibility. Below, we detail the key functionalities of the code:
-
+---
 ### Directory Configuration
 
 - The `dirs.py` file defines input, output, and temporary directories where images will be read, processed, and stored.
