@@ -38,7 +38,7 @@ def checar_bandas(bands, dir_in):
         # Formata um int para um string de dois dígitos (01, 02, ..., 16).
         b = str(x).zfill(2)
         # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
-        imagens = [f for f in os.listdir(f'{dir_in}band02/') if os.path.isfile(os.path.join(f'{dir_in}band02/', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+[0-9].nc$', f)]
+        imagens = [f for f in os.listdir(f'{dir_in}band{b}') if os.path.isfile(os.path.join(f'{dir_in}band{b}', f)) and re.match('^CG_ABI-L2-CMIPF-M[0-9]C[0-1][0-9]_G16_s.+_e.+_c.+[0-9].nc$', f)]
         # Se houver imagens na pasta:
         if imagens:
             # Encontra a imagem mais recente na lista.
@@ -83,7 +83,6 @@ def checar_truecolor(bands):
 
 # Checa se há bandas 13 para rrqpef e baixa o produto
 def checar_rrqpef(bands, dir_in):
-    
     old_bands = abrir_old_json()
     # Checagem de novas imagens rrqpef (Band 18)
     if bands['13']:
@@ -108,7 +107,7 @@ def checar_glm(bands, dir_in):
     # Checagem de novas imagens GLM (Band 19)
     if bands['13']:
         # Pega lista de glm para verificação
-        glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+[0-9].nc$', f)]
+        glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
         glm_list.sort()
         # Se a lista for maior que 0 True
         if len(glm_list) > 0:
