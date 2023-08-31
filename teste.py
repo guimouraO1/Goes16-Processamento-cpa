@@ -35,7 +35,6 @@ dir_in = '/home/guimoura/download_amazon/goes/'
 v_extent = 'br'
 
 
-
 def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     
     global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out

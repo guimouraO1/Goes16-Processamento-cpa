@@ -33,7 +33,7 @@ def modificar_chave_old_bands(caminho_arquivo, chave, novo_valor):
 
 # Checa bandas 1-16
 def checar_bandas(bands, dir_in):
-        # Checagem imagens ABI 1-16
+    # Checagem imagens ABI 1-16
     for x in range(1, 17):
         # Formata um int para um string de dois dígitos (01, 02, ..., 16).
         b = str(x).zfill(2)
@@ -81,7 +81,7 @@ def checar_truecolor(bands):
         logging.info(f'Sem novas imagens TRUECOLOR')
 
 
-# Checa se há bandas 13 para rrqpef
+# Checa se há bandas 13 para rrqpef e baixa o produto
 def checar_rrqpef(bands, dir_in):
     old_bands = abrir_old_json()
     # Checagem de novas imagens rrqpef (Band 18)
@@ -161,7 +161,9 @@ def checar_ndvi(bands):
         logging.info(f'Sem novas imagens NDVI')
 
 
-# Função para verificar a existência de novas imagens.
+# ========================================#     Main     #========================================== #
+
+# Função para verificar a existência de novas imagens
 def checar_imagens(bands, dir_in):
     
     logging.info("VERIFICANDO NOVAS IMAGENS")
