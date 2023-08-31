@@ -184,47 +184,47 @@ To use the script, follow these steps:
 
 ## Processamento.py
 
-### Code Structure
+1. Code Structure
 
 The code is highly modularized for ease of maintenance and extensibility. Below, we detail the key functionalities of the code:
 
-### Directory Configuration
+2. Directory Configuration
 
 - The `dirs.py` file defines input, output, and temporary directories where images will be read, processed, and stored.
 
-### Band Processing Control
+3. Band Processing Control
 
 - A dictionary called `bands` is created to represent the processing status of each image band. Initially, all bands are marked as unprocessed (False).
 
-### Log Configuration and Time Tracking
+4. Log Configuration and Time Tracking
 
 - The `conf_log` function is called to configure log generation. Next, the `start` variable is initialized to record the script's start time.
 
-### Checking for New Images
+5. Checking for New Images
 
 - The `checar_imagens` function is called to check if there are new images to be processed. The `bands` dictionary is updated to reflect this information.
 
-### Image Processing
+6. Image Processing
 
 - If there is at least one new image to process (any band with a True value in the dictionary), the `processamento_das_imagens` function is called to perform image processing.
 
-### Storage of Processed Images
+7. Storage of Processed Images
 
 - Processed images are stored in the output directory (`dir_out`).
 
-### Removal of Processed Images
+8. Removal of Processed Images
 
 - After processing, the `remover_imagens` function is called to remove the `.nc` files that have already been processed from the input directory (`dir_in`).
 
-### Product Quantity Control
+9. Product Quantity Control
 
 - The `quantity_products` function is called to control the quantity of products (images) to be retained for producing an animated GIF.
 
-### Creation of Animated GIF
+10. Creation of Animated GIF
 
 - Next, the `process_gif` function is called to create an animated GIF from the processed images.
 
-### Sending Processed Products
+11. Sending Processed Products
 
 - The `send_products` function sends the processed images to a specific site (cpa.unicamp.br).
 
