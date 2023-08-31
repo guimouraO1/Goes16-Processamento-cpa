@@ -832,7 +832,7 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in):
             logging.info("")
             logging.info('PROCESSANDO IMAGENS GLM "BR"...')
             # Cria uma lista com os itens presentes no diretório da banda que são arquivos e terminam com ".nc"
-            glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
+            glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+[0-9].nc$', f)]
             # Ordena a lista
             glm_list.sort()
             # Filtra os arq glm para pegar somente os no intervalo ini < glm < fim
@@ -872,6 +872,9 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in):
                 logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
 
 
+
+# ========================================#     Main     #========================================== #
+
 def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
    
     # Cria lista vazia para controle do processamento paralelo
@@ -886,8 +889,3 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
     iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp)
 
     iniciar_processo_glm(p_br, bands, process_br, dir_in)
-    
-
-
-
-

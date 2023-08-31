@@ -42,14 +42,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     processing_start_time = time.time()
     
     # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+    extent, resolution = area_para_recorte(v_extent)
 
     # Lendo imagem CMI reprojetada
     reproject_ch02 = Dataset(ch02)
@@ -83,7 +76,6 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     
     # // Abrindo o Dataset do arquivo da mascara
     reproject_mask = Dataset(f'{dir_in}clsm/{r_file}')
-
 
     data_ch02 = reproject_ch02.variables['Band1'][:]
     data_ch03 = reproject_ch03.variables['Band1'][:]
