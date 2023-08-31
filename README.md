@@ -186,7 +186,7 @@ To use the script, follow these steps:
 
 1. Code Structure
 
-The code is highly modularized for ease of maintenance and extensibility. Below, we detail the key functionalities of the code:
+- The code is highly modularized for ease of maintenance and extensibility. Below, we detail the key functionalities of the code:
 
 2. Directory Configuration
 
