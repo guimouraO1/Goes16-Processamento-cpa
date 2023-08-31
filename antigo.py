@@ -225,6 +225,14 @@ def check_images(c_bands):
     else:
         logging.info(f'Sem novas imagens GLM')
 
+
+
+
+
+
+
+
+
     # Checagem de novas imagens ndvi (Band 20)
     if c_bands["02"] and c_bands["03"]:
         # Carrega os arquivos de processamento das bandas para composicao do ndvi
@@ -263,6 +271,16 @@ def check_images(c_bands):
             logging.info(f'Sem novas imagens NDVI')
     else:
         logging.info(f'Sem novas imagens NDVI')
+
+
+
+
+
+
+
+
+
+
 
     # Checagem de novas imagens fdcf (Band 21)
     if c_bands["17"]:
@@ -1597,6 +1615,28 @@ def processing(p_bands, p_br, p_sp):
             p_bands["20"] = False
             # Remove o arquivo de processamento ndvi
             os.remove(f'{dir_temp}band20_process.txt')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # Checagem se e possivel gerar imagem FDCF
     if p_bands["21"]:

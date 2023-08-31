@@ -40,9 +40,9 @@ arq_log = dirs['arq_log']
 
 
 def apagar_itens_da_pasta(pasta_glm, glm_list):
-    # Esta função remove arquivos da pasta_glm que estão na lista glm_list
+    # Esta função remove arquivos da pasta_glm que estão na lista glm_list e já foram processados
     [os.remove(os.path.join(pasta_glm, arquivo)) for arquivo in os.listdir(pasta_glm) if arquivo in glm_list]
-    logging.info('Arquivos da glm_lista foram excluídos com sucesso! ')
+    logging.info('Arquivos já processados da glm_lista foram excluídos com sucesso! ')
 
 
 def filtrar_imagens_por_intervalo(images, ch13):
@@ -612,13 +612,7 @@ def process_glm(ch13, glm_list, v_extent):
     logging.info(f'{dir_in}glm/{glm_list[0][0:31]}*.nc - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
-def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
-   
-    # Cria lista vazia para controle do processamento paralelo
-    process_br = []
-    # Cria lista vazia para controle processamento paralelo
-    process_sp = []
-    
+def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
     # Checagem se e possivel gerar imagem bandas 1-16
     if p_br:
         logging.info('')
@@ -687,6 +681,9 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         process_sp = []
 
 
+def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp):
+    
+    old_bands = abrir_old_json()
     # Checagem se e possivel gerar imagem TrueColor
     if bands['17']:
         
@@ -749,8 +746,12 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
             process.join()
         # Limpa lista vazia para controle do processamento paralelo
         process_sp = []
-        
 
+
+def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp):
+    
+    old_bands = abrir_old_json()
+    
     # Checagem se e possivel gerar imagem RRQPEF   
     if bands['18']:
         
@@ -817,6 +818,13 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         process_sp = []
 
 
+def iniciar_processo_glm(p_br, bands, process_br, dir_in):
+    
+    old_bands = abrir_old_json()
+
+    # Pega o nome netCDF da banda 13
+    ch13 = old_bands['13']
+    
     # Checagem se e possivel gerar imagem GLM
     if bands['19']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -856,9 +864,30 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         process_br = []
         # pasta glm para excluír os arq glm
         pasta_glm = f'{dir_in}glm/'
-        try: # Apaga os arq que já foram processados
+        # Apaga os arq que já foram processados
+        try:
             apagar_itens_da_pasta(pasta_glm, glm_list)
         except Exception as e:
                 # Realiza o log do erro
                 logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
+
+
+def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
+   
+    # Cria lista vazia para controle do processamento paralelo
+    process_br = []
+    # Cria lista vazia para controle processamento paralelo
+    process_sp = []
+    
+    iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp)
+    
+    iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp)
+
+    iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp)
+
+    iniciar_processo_glm(p_br, bands, process_br, dir_in)
+    
+
+
+
 

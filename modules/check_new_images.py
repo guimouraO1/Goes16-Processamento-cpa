@@ -31,11 +31,9 @@ def modificar_chave_old_bands(caminho_arquivo, chave, novo_valor):
         json.dump(dados, arquivo_json, indent=4)
 
 
-# Função para verificar a existência de novas imagens.
-def checar_imagens(bands, dir_in):
-    logging.info("VERIFICANDO NOVAS IMAGENS")
-
-    # Checagem imagens ABI 1-16
+# Checa bandas 1-16
+def checar_bandas(bands, dir_in):
+        # Checagem imagens ABI 1-16
     for x in range(1, 17):
         # Formata um int para um string de dois dígitos (01, 02, ..., 16).
         b = str(x).zfill(2)
@@ -70,7 +68,10 @@ def checar_imagens(bands, dir_in):
             # Atualiza o dicionário "bands" com false sem novas imagens.
             bands[b] = False
 
-    # Checagem de novas imagens truecolor (Band 17) se todas as bands 1, 2, 3 forem True
+
+# Checa se há bandas 1, 2, 3 para true color
+def checar_truecolor(bands):
+        # Checagem de novas imagens truecolor (Band 17) se todas as bands 1, 2, 3 forem True
     if all(bands[str(x).zfill(2)] for x in range(1, 4)):
         # Se Todas as três bandas são True
         bands['17'] = True
@@ -79,6 +80,10 @@ def checar_imagens(bands, dir_in):
         bands["17"] = False
         logging.info(f'Sem novas imagens TRUECOLOR')
 
+
+# Checa se há bandas 13 para rrqpef
+def checar_rrqpef(bands, dir_in):
+    old_bands = abrir_old_json()
     # Checagem de novas imagens rrqpef (Band 18)
     if bands['13']:
         ch13 = old_bands['13']
@@ -97,12 +102,13 @@ def checar_imagens(bands, dir_in):
         bands['18'] = False
 
 
+# Checa se há bandas 13 para glm
+def checar_glm(bands, dir_in):
     # Checagem de novas imagens GLM (Band 19)
     if bands['13']:
         # Pega lista de glm para verificação
         glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
         glm_list.sort()
-        
         # Se a lista for maior que 0 True
         if len(glm_list) > 0:
             bands['19'] = True
@@ -114,5 +120,62 @@ def checar_imagens(bands, dir_in):
         bands['19'] = False
         logging.info('Sem novas imagens GLM')
 
+
+# Checa se há bandas 2,3 para ndvi
+def checar_ndvi(bands):
+    
+    old_bands = abrir_old_json()
+    
+    # Checagem de novas imagens ndvi (Band 20)
+    if bands['02'] and bands['03']:
+        
+        # Carrega os arquivos de processamento das bandas para composicao do ndvi
+        file_ch02 = old_bands['02']
+        file_ch03 = old_bands['03']
+
+        date_now = datetime.datetime.now()
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
+        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00)) + datetime.timedelta(hours=5, minutes=1)
+        
+        date_file = (datetime.datetime.strptime(file_ch02[file_ch02.find("M6C02_G16_s") + 11:file_ch02.find("_e") - 1], '%Y%j%H%M%S'))
+        
+        if date_ini <= date_file <= date_end:
+            
+            # Verifica se ha arquivo correspondente na banda 03
+            matches_ch03 = [z for z in file_ch03 if z.startswith(file_ch02[0:43].replace('M6C02', 'M6C03'))]
+            
+            # Se houver arquivos de mesma data nas 2 bandas
+            if file_ch02 and matches_ch03:
+                product_list = (f'{file_ch02.strip()};{matches_ch03[0].strip()}')
+        else:
+            logging.info(f'Sem novas imagens NDVI')
+            bands['20'] = False
+
+        if product_list:
+                bands['20'] = True
+                logging.info(f'Novas imagens NDVI')
+        else:
+            bands["20"] = False
+            logging.info(f'Sem novas imagens NDVI')
+    else:
+        logging.info(f'Sem novas imagens NDVI')
+
+
+# Função para verificar a existência de novas imagens.
+def checar_imagens(bands, dir_in):
+    
+    logging.info("VERIFICANDO NOVAS IMAGENS")
+
+    checar_bandas(bands, dir_in)
+
+    checar_truecolor(bands)
+
+    checar_rrqpef(bands, dir_in)
+    
+    checar_glm(bands, dir_in)    
+
+    print(bands)
+    
+    
     # Retorna o dicionário "bands".      
     return bands
