@@ -32,7 +32,7 @@ def remover_imagens(bands, dir_in):
             except:
                 print(f'Sem imagens para remover {oldBands[b]}')
 
-
+    # Controle de produtos de rrqpef
     if bands['18']:
         logging.info('Removendo netCDF-rrqpef processadas')
         shutil.rmtree(f'{dir_in}rrqpef/')
