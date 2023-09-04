@@ -642,23 +642,23 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     min = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%M')
     yyyymmddhhmn = year+month+day_of_year+hora+min
 
-    #//Download arquivo mascara de nuvens
+    # Download arquivo mascara de nuvens
     print("Download File Mask NDVI")
     file_mask = download_prod(yyyymmddhhmn,'ABI-L2-ACMF',f'{dir_in}clsm/')
 
-    # // Reprojetando o arquivo de nuvens
+    # Reprojetando o arquivo de nuvens
     reproject(f'{dir_in}clsm/{file_mask}.nc','BCM',v_extent,4)
 
-    # //Capturando o nome do arquivo reprojetado
+    # Capturando o nome do arquivo reprojetado
     r_file = file_mask + f'_reproj_{v_extent}.nc'
     
-    # // Abrindo o Dataset do arquivo da mascara
+    #  Abrindo o Dataset do arquivo da mascara
     reproject_mask = Dataset(f'{dir_in}clsm/{r_file}')
 
     data_ch02 = reproject_ch02.variables['Band1'][:]
     data_ch03 = reproject_ch03.variables['Band1'][:]
 
-    ## //
+    #
     data_mask = reproject_mask.variables['Band1'][:]
 
     reproject_ch02 = None
@@ -1203,11 +1203,6 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
             bands['20'] = True
         else:
             bands['20'] = False
-
-
-
-
-
 
 
 # ========================================#     Main     #========================================== #
