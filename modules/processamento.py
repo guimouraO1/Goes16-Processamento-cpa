@@ -967,21 +967,21 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     fire_mask_values = fire_mask.variables['Mask'][:, :]
     selected_fires = (fire_mask_values == 10) | (fire_mask_values == 11) | (fire_mask_values == 13) | (
             fire_mask_values == 30) | (fire_mask_values == 33)
-    print('1')
+
     lat, lon = degrees(fire_mask)
-    print('2')
     
     # separando Latitudes e Longitudes dos pontos
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
     brasil = (shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
+    
     for i in range(len(p_lat)):
-        if brasil[0].covers(Point(p_lon[i], p_lat[i])):
+        if brasil[0].covers(Point(p_lon[i], p_lat[i])): ################################
             p = (p_lat[i], p_lon[i])
             matriz_pixels_fogo.append(p)
 
     
-    print('3')
+   
     save_txt(matriz_pixels_fogo, f'fdcf_{date.strftime("%Y%m%d_%H%M%S")}_br')
     print('4')
     

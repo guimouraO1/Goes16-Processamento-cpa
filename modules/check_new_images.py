@@ -157,6 +157,7 @@ def checar_ndvi(bands, dir_in):
 
 
 def checar_fdcf(bands, dir_in):  
+    
     # Checagem de novas imagens fdcf (Band 21)
     if bands['17']:
         # Coleto o nome das novas bandas
@@ -168,8 +169,10 @@ def checar_fdcf(bands, dir_in):
         try:
             # Download arquivo fdcf
             name_fdcf = download_prod(datetime.datetime.strftime(ftime, '%Y%m%d%H%M'), "ABI-L2-FDCF", f'{dir_in}fdcf/')
+            print(name_fdcf)
+            
             # Modifica o arquivo JSON com a imagem mais recente.               
-            modificar_chave_old_bands('oldBands.json', '21', name_fdcf)
+            modificar_chave_old_bands(f'oldBands.json', '21', name_fdcf)
             bands['21'] = True
             logging.info(f'novas imagens FDCF')
         except:

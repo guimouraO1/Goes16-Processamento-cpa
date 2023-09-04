@@ -25,7 +25,7 @@ from modules.utilities import download_prod
 from modules.processamento import reproject
 import cartopy.feature as cfeature # features
 from modules.processamento import area_para_recorte
-
+import json
 oldbands = abrir_old_json()
 
 dirs = get_dirs()
@@ -46,26 +46,14 @@ old_bands = abrir_old_json()
 # Carrega os arquivos de processamento das bandas para composicao do ndvi
 file_ch02 = old_bands['02']
 
-# Listar arquivos no diretório da pasta "band03"
-file_ch03_dir = f'{dir_in}band03/'
-file_ch03_list = os.listdir(file_ch03_dir)
+# Função para modificar um valor em um arquivo JSON.
+def modificar_chave_old_bands(caminho_arquivo, chave, novo_valor):
+    with open(caminho_arquivo, 'r') as arquivo_json:
+        dados = json.load(arquivo_json)
+    dados['oldImagesName'][chave] = novo_valor
+    with open(caminho_arquivo, 'w') as arquivo_json:
+        json.dump(dados, arquivo_json, indent=4)
+# Download arquivo fdcf
+file_name = 'OR_ABI-L2-FDCF-M6_G16_s20232471430205_e20232471439513_c20232471440031.nc'
 
-date_now = datetime.datetime.now()
-date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, 13, 0)
-date_end = date_ini + datetime.timedelta(hours=10, minutes=1)
-
-date_file = datetime.datetime.strptime(file_ch02[file_ch02.find("M6C02_G16_s") + 11:file_ch02.find("_e") - 1], '%Y%j%H%M%S')
-
-if date_ini <= date_file <= date_end:
-    # Verifica se há arquivo correspondente na banda 03
-    matches_ch03 = [z for z in file_ch03_list if z.startswith(file_ch02[0:43].replace('M6C02', 'M6C03'))]
-    print(matches_ch03)
-    if file_ch02 and matches_ch03:
-
-        print(f'Novas imagens NDVI')
-    else:
-        
-        print(f'Sem novas imagens NDVI')
-else:
-    
-    print(f'Sem novas imagens NDVI')
+modificar_chave_old_bands(f'oldBands.json', '21', file_name)
