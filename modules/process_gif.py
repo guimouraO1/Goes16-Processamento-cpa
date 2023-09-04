@@ -95,19 +95,19 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
             # Cria o processo com a funcao gif
             create_gif("glm", "br")
 
-    if g_bands["20"]:
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO NDVI "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("ndvi", "br")
+    # if g_bands["20"]:
+    #     if g_br:
+    #         logging.info('')
+    #         logging.info('CRIANDO GIF ANIMADO NDVI "BR"...')
+    #         # Cria o processo com a funcao gif
+    #         create_gif("ndvi", "br")
 
-    if g_bands["21"]:
-        if g_br:
-            logging.info('')
-            logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("fdcf", "br")
+    # if g_bands["21"]:
+    #     if g_br:
+    #         logging.info('')
+    #         logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
+    #         # Cria o processo com a funcao gif
+    #         create_gif("fdcf", "br")
 
 
 

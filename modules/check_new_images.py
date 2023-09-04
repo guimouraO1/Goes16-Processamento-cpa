@@ -128,7 +128,6 @@ def checar_ndvi(bands, dir_in):
     
     # Checagem de novas imagens ndvi (Band 20)
     if bands['02'] and bands['03']:
-        
         # Carrega os arquivos de processamento das bandas para composicao do ndvi
         file_ch02 = old_bands['02']
         

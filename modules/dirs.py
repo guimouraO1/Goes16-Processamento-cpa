@@ -2,8 +2,8 @@ import datetime
 
 # Modifique aqui os diretórios para uso
 def get_dirs():
-    dir_main = '/home/guimoura/download_amazon/'
-    # dir_main = '/mnt/c/Users/Gui/OneDrive/Documentos/processamentopy/'
+    # dir_main = '/home/guimoura/download_amazon/'
+    dir_main = '/mnt/c/Users/Gui/OneDrive/Documentos/processamentopy/'
     dirs = {
         'dir_in': dir_main + 'goes/',
         'dir_main': dir_main,

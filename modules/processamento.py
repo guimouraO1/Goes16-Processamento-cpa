@@ -1483,24 +1483,23 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
 
 def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
     
-    # Coleta o nome das novas bandas
-    old_bands = abrir_old_json()
-    
-    ch01 = old_bands['01']
-    ch02 = old_bands['02']
-    ch03 = old_bands['03']
-    
-    # Pega o nome do arquivo band01 para fazer comparação
-    fdcf = old_bands['21']
-    
     if bands['21']:
-
-        # Checagem se e possivel gerar imagem FDCF
-        fdcf_diario = False
         
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
-        if p_br:
+        if p_br: 
+            # Checagem se e possivel gerar imagem FDCF
+            fdcf_diario = False
             
+            # Coleta o nome das novas bandas
+            old_bands = abrir_old_json()
+            
+            ch01 = old_bands['01']
+            ch02 = old_bands['02']
+            ch03 = old_bands['03']
+            
+            # Pega o nome do arquivo band01 para fazer comparação
+            fdcf = old_bands['21']
+           
             logging.info("")
             logging.info('PROCESSANDO IMAGENS FDCF "BR"...')
             
