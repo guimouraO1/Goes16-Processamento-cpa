@@ -205,3 +205,5 @@ def checar_imagens(bands, dir_in):
     
     # Retorna o dicionário "bands".      
     return bands
+
+# ========================================#     Main     #========================================== #

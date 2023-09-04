@@ -21,10 +21,15 @@ from modules.process_gif import process_gif
 #==================================#           Dicionário        #==================================#
 dirs = get_dirs()
 # Importando dirs do modulo dirs.py
-arq_log = dirs['arq_log']
+
 dir_in = dirs['dir_in']
-dir_temp = dirs['dir_temp']
 dir_out = dirs['dir_out']
+dir_main = dirs['dir_main']
+dir_shapefiles = dirs['dir_shapefiles']
+dir_colortables = dirs['dir_colortables']
+dir_logos = dirs['dir_logos']
+dir_temp = dirs['dir_temp']
+arq_log = dirs['arq_log']
 #==================================#           Dicionário        #==================================#
 
 

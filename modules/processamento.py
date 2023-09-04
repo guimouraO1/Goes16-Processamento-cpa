@@ -1180,8 +1180,8 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
         for process in process_br:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
-        # Limpa lista vazia para controle do processamento paralelo
-        process_br = []
+        # Limpa a lista de processos
+        process_br.clear()
 
     if p_sp:
         logging.info('')
@@ -1213,8 +1213,8 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
         for process in process_sp:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
-        # Limpa lista vazia para controle do processamento paralelo
-        process_sp = []
+        # Limpa a lista de processos
+        process_sp.clear()
 
 
 def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp):
@@ -1250,8 +1250,8 @@ def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp):
         for process in process_br:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
-        # Limpa lista vazia para controle do processamento paralelo
-        process_br = []
+        # Limpa a lista de processos
+        process_br.clear()
         
         # Se a variavel de controle de processamento sp for True, realiza o processamento
         if p_sp:
@@ -1280,17 +1280,14 @@ def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp):
         for process in process_sp:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
-        # Limpa lista vazia para controle do processamento paralelo
-        process_sp = []
+        # Limpa a lista de processos
+        process_sp.clear()
 
 
 def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp):
-    
     old_bands = abrir_old_json()
-    
     # Checagem se e possivel gerar imagem RRQPEF   
     if bands['18']:
-        
         # Pega o nome netCDF da banda 13
         ch13 = old_bands['13']
         # Pega a lista de arquivos baixados rrqpef
@@ -1323,8 +1320,8 @@ def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp):
         for process in process_br:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
-        # Limpa lista vazia para controle do processamento paralelo
-        process_br = []
+        # Limpa a lista de processos
+        process_br.clear()
         
                 # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_sp:
@@ -1350,17 +1347,14 @@ def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp):
         for process in process_sp:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
-        # Limpa lista vazia para controle do processamento paralelo
-        process_sp = []
+        # Limpa a lista de processos
+        process_sp.clear()
 
 
 def iniciar_processo_glm(p_br, bands, process_br, dir_in):
-    
     old_bands = abrir_old_json()
-
     # Pega o nome netCDF da banda 13
     ch13 = old_bands['13']
-    
     # Checagem se e possivel gerar imagem GLM
     if bands['19']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1390,17 +1384,16 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in):
                     # Remove a imagem com erro de processamento
                     os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
             
-    
                 # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
                 for process in process_br:
                     # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
                     process.join()
-                # Limpa lista vazia para controle do processamento paralelo
-                process_br = []
+                # Limpa a lista de processos
+                process_br.clear()
+                
                 # pasta glm para excluír os arq glm
                 pasta_glm = f'{dir_in}glm/'
                 # Apaga os arq que já foram processados
-                
                 try:
                     apagar_itens_da_pasta(pasta_glm, glm_list)
                 except Exception as e:
@@ -1461,36 +1454,29 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
                 # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
                 process.join()
             
-            # Limpa lista vazia para controle do processamento paralelo
-            process_br = []
+            # Limpa a lista de processos
+            process_br.clear()
 
 
 def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
-    
     if bands['21']:
-        
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br: 
             # Checagem se e possivel gerar imagem FDCF
             fdcf_diario = False
-            
             # Coleta o nome das novas bandas
             old_bands = abrir_old_json()
-            
-            ch01 = old_bands['01']
-            ch02 = old_bands['02']
-            ch03 = old_bands['03']
-            
+            # Pegando nome das bands 01, 02, 03
+            ch01, ch02, ch03 = old_bands['01'], old_bands['02'], old_bands['03']
             # Pega o nome do arquivo band01 para fazer comparação
             fdcf = old_bands['21']
-           
+            
             logging.info("")
             logging.info('PROCESSANDO IMAGENS FDCF "BR"...')
             
             # Captura a data do arquivo
             date_file = (datetime.datetime.strptime(fdcf[fdcf.find("ABI-L2-FDCF-M6_G16_s") + 20:fdcf.find("_e") - 1], '%Y%j%H%M%S'))
             # Captura a data atual
-            # date_now = datetime.datetime.now() - datetime.timedelta(days=1)
             date_now = datetime.datetime.now()
             # Aponta o horario 23h50 para o dia anterior
             date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
@@ -1507,7 +1493,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
             else:
                 # Adiciona false para a variavel de processamento semanal
                 fdcf_diario = False
-            logging.info(f'fdcf_diario: {fdcf_diario}')
+                logging.info(f'fdcf_diario: {fdcf_diario}')
             
             # Tenta realizar o processamento da imagem
             try:
@@ -1527,8 +1513,8 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
         for process in process_br:
             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
-        # Limpa lista vazia para controle do processamento paralelo
-        process_br = []
+        # Limpa a lista de processos
+        process_br.clear()
 
 
 # ========================================#     Main     #========================================== #
@@ -1539,6 +1525,7 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
+    
     try:
         iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp)
         
