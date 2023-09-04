@@ -1497,7 +1497,9 @@ def processing(p_bands, p_br, p_sp):
         if p_br:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS FDCF "BR"...')
+
             band21 = read_process_file('band21')
+            
             # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
             for i in band21:
                 # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento

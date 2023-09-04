@@ -877,6 +877,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
 
     def degrees(file_id):
+        
         proj_info = file_id.variables['goes_imager_projection']
         lon_origin = proj_info.longitude_of_projection_origin
         H = proj_info.perspective_point_height + proj_info.semi_major_axis
@@ -910,6 +911,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         return lat, lon
 
     def save_txt(array, nome_arquivo_txt):
+        print('savetxt')
         # Checa se a matriz é vazia
         if len(array) == 0:
             print(f'{nome_arquivo_txt} vazia')
@@ -965,18 +967,25 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     fire_mask_values = fire_mask.variables['Mask'][:, :]
     selected_fires = (fire_mask_values == 10) | (fire_mask_values == 11) | (fire_mask_values == 13) | (
             fire_mask_values == 30) | (fire_mask_values == 33)
+    print('1')
     lat, lon = degrees(fire_mask)
+    print('2')
+    
     # separando Latitudes e Longitudes dos pontos
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
-    brasil = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
+    brasil = (shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
+    
     for i in range(len(p_lat)):
         if brasil[0].covers(Point(p_lon[i], p_lat[i])):
             p = (p_lat[i], p_lon[i])
             matriz_pixels_fogo.append(p)
 
+    
+    print('3')
     save_txt(matriz_pixels_fogo, f'fdcf_{date.strftime("%Y%m%d_%H%M%S")}_br')
-
+    print('4')
+    
     # Le o arquivo de controle de quantidade de pontos
     try:
         with open(f'{dir_temp}band21_control.txt', 'r') as fo:
@@ -1468,35 +1477,16 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
             for process in process_br:
                 # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
                 process.join()
-
-            if ndvi_diario:
-                # Tenta realizar o processamento da ultima imagem
-                try:
-                    # Cria o processo com a funcao de processamento
-                    process_ndvi(ndvi_diario, f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br")
-                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except Exception as e:
-                    # Realiza o log do erro
-                    logging.info("Erro no processamento do Arquivo NDVI")
-                    logging.info(str(e))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}')
-                    os.remove(f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}')
             
             # Limpa lista vazia para controle do processamento paralelo
             process_br = []
-
-        # Verifica se deve ser gerado a imagem ndvi, se sim, a banda continua True, caso nao, a banda volta para False
-        if ndvi_diario and datetime.datetime.now().isoweekday() == 6:
-            bands['20'] = True
-        else:
-            bands['20'] = False
 
 
 def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
     
     # Coleta o nome das novas bandas
     old_bands = abrir_old_json()
+    
     ch01 = old_bands['01']
     ch02 = old_bands['02']
     ch03 = old_bands['03']
@@ -1537,11 +1527,11 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
                 # Adiciona false para a variavel de processamento semanal
                 fdcf_diario = False
             print("fdcf_diario: ", fdcf_diario)
+            
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf}.nc', f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 
-                                f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', 'br', fdcf_diario))
+                process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf}.nc', f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br", fdcf_diario))
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_br.append(process)
                 # Inicia o processo

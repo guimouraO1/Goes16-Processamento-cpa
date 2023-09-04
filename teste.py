@@ -41,3 +41,12 @@ dir_logos = dirs['dir_logos']
 dir_temp = dirs['dir_temp']
 arq_log = dirs['arq_log']
 
+
+
+# Coleto o nome das novas bandas
+old_bands = abrir_old_json()
+oldbands = abrir_old_json()
+
+fdcf = oldbands['21']
+
+print(f'{fdcf}.nc')
