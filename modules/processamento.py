@@ -20,6 +20,8 @@ import json
 from modules.dirs import get_dirs
 from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
 from modules.utilities import download_prod
+from shapely.geometry import Point
+from shutil import copyfile  # Utilitario para copia de arquivos
 
 osr.DontUseExceptions()
 
@@ -870,6 +872,289 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     logging.info(f'{ch02[0:59].replace("M6C02", "M6C0*")} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
+def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
+    
+    global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
+
+    def degrees(file_id):
+        proj_info = file_id.variables['goes_imager_projection']
+        lon_origin = proj_info.longitude_of_projection_origin
+        H = proj_info.perspective_point_height + proj_info.semi_major_axis
+        r_eq = proj_info.semi_major_axis
+        r_pol = proj_info.semi_minor_axis
+
+        # Data info
+        lat_rad_1d = file_id.variables['x'][:]
+        lon_rad_1d = file_id.variables['y'][:]
+
+        # Create meshgrid filled with radian angles
+        lat_rad, lon_rad = np.meshgrid(lat_rad_1d, lon_rad_1d)
+
+        # lat/lon calculus routine from satellite radian angle vectors
+        lambda_0 = (lon_origin * np.pi) / 180.0
+
+        a_var = np.power(np.sin(lat_rad), 2.0) + (np.power(np.cos(lat_rad), 2.0) * (
+                np.power(np.cos(lon_rad), 2.0) + (((r_eq * r_eq) / (r_pol * r_pol)) * np.power(np.sin(lon_rad), 2.0))))
+        b_var = -2.0 * H * np.cos(lat_rad) * np.cos(lon_rad)
+        c_var = (H ** 2.0) - (r_eq ** 2.0)
+
+        r_s = (-1.0 * b_var - np.sqrt((b_var ** 2) - (4.0 * a_var * c_var))) / (2.0 * a_var)
+
+        s_x = r_s * np.cos(lat_rad) * np.cos(lon_rad)
+        s_y = - r_s * np.sin(lat_rad)
+        s_z = r_s * np.cos(lat_rad) * np.sin(lon_rad)
+
+        lat = (180.0 / np.pi) * (np.arctan(((r_eq * r_eq) / (r_pol * r_pol)) * (s_z / np.sqrt(((H - s_x) * (H - s_x)) + (s_y * s_y)))))
+        lon = (lambda_0 - np.arctan(s_y / (H - s_x))) * (180.0 / np.pi)
+
+        return lat, lon
+
+    def save_txt(array, nome_arquivo_txt):
+        # Checa se a matriz é vazia
+        if len(array) == 0:
+            print(f'{nome_arquivo_txt} vazia')
+            pass
+        else:
+            # Criando nome do arquivo e diretório -- Mudar as barras para Linux
+            with open(f"{dir_out}fdcf/{nome_arquivo_txt}.txt", 'w') as file:  # tomar cuidado se não ele fica criando diretorio
+                for valor in array:
+                    valor = f"{valor[0]},{valor[1]}\n"
+                    file.write(valor)
+
+    def save_log_erro(array_errors, nome_arquivo_txt):
+        # Checa se a matriz é vazia
+        if len(array_errors) == 0:
+            pass
+        else:
+            # Criando nome do arquivo e diretório -- Mudar as barras para Linux
+            with open(f"{dir_out}fdcf/{nome_arquivo_txt}.txt", 'w') as file:
+                for valor in array_errors:
+                    erro = f"{valor}\n"
+                    file.write(erro)
+
+    file_var = 'FDCF'
+    # Captura a hora para contagem do tempo de processamento da imagem
+    processing_start_time = time.time()
+    
+    # Area de interesse para recorte
+    if v_extent == 'br':
+        # Brasil
+        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
+        # Choose the image resolution (the higher the number the faster the processing is)
+        resolution = 4.0
+    elif v_extent == 'sp':
+        # São Paulo
+        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
+        # Choose the image resolution (the higher the number the faster the processing is)
+        resolution = 1.0
+    else:
+        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
+        resolution = 2.0
+
+    # Lendo imagem FDCF
+    fire_mask = Dataset(fdcf)
+
+    # Coletando do nome da imagem a data/hora
+    dtime_fdcf = fdcf[fdcf.find("ABI-L2-FDCF-M6_G16_s") + 20:fdcf.find("_e") - 1]
+    # Formatando data para plotar na imagem e salvar o arquivo
+    date = (datetime.datetime.strptime(dtime_fdcf, '%Y%j%H%M%S'))
+    date_img = date.strftime('%d-%b-%Y')
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+
+    matriz_pixels_fogo = []
+    fire_mask_values = fire_mask.variables['Mask'][:, :]
+    selected_fires = (fire_mask_values == 10) | (fire_mask_values == 11) | (fire_mask_values == 13) | (
+            fire_mask_values == 30) | (fire_mask_values == 33)
+    lat, lon = degrees(fire_mask)
+    # separando Latitudes e Longitudes dos pontos
+    p_lat = lat[selected_fires]
+    p_lon = lon[selected_fires]
+    brasil = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
+    for i in range(len(p_lat)):
+        if brasil[0].covers(Point(p_lon[i], p_lat[i])):
+            p = (p_lat[i], p_lon[i])
+            matriz_pixels_fogo.append(p)
+
+    save_txt(matriz_pixels_fogo, f'fdcf_{date.strftime("%Y%m%d_%H%M%S")}_br')
+
+    # Le o arquivo de controle de quantidade de pontos
+    try:
+        with open(f'{dir_temp}band21_control.txt', 'r') as fo:
+            control = fo.readline()
+            print("tamanho control withopen: ", int(control))
+    except:
+        control = 0
+        print("tamanho control except: ", int(control))
+
+    # Verifica se as ocorrencias de pontos é maior que as anteriores, se sim, armazena a quantidade e as imagens para gerar fundo
+    print("Len matriz_pixels_fogo: ", len(matriz_pixels_fogo), " int control: ", int(control))
+    date_ini = datetime.datetime(date.year, date.month, date.day, int(13), int(00))
+    date_end = datetime.datetime(date.year, date.month, date.day, int(18), int(1))
+    if len(matriz_pixels_fogo) > int(control) and date_ini <= date <= date_end:
+        copyfile(ch01, f'{dir_in}fdcf/ch01.nc')
+        copyfile(ch02, f'{dir_in}fdcf/ch02.nc')
+        copyfile(ch03, f'{dir_in}fdcf/ch03.nc')
+        with open(f'{dir_temp}band21_control.txt', 'w') as fo:
+            fo.write(str(len(matriz_pixels_fogo)))
+
+    print("fdcf_diario: ", fdcf_diario)
+    if fdcf_diario:
+        # Reiniciar contagem para verificar imagem com maior quantidade de pontos no dia
+        with open(f'{dir_temp}band21_control.txt', 'w') as fo:
+            fo.write(str(0))
+
+        # Lendo imagem CMI reprojetada
+        reproject_ch01 = Dataset(f'{dir_in}fdcf/ch01.nc')
+        reproject_ch02 = Dataset(f'{dir_in}fdcf/ch02.nc')
+        reproject_ch03 = Dataset(f'{dir_in}fdcf/ch03.nc')
+        data_ch01 = reproject_ch01.variables['Band1'][:]
+        data_ch02 = reproject_ch02.variables['Band1'][:]
+        data_ch03 = reproject_ch03.variables['Band1'][:]
+        reproject_ch01 = None
+        del reproject_ch01
+        reproject_ch02 = None
+        del reproject_ch02
+        reproject_ch03 = None
+        del reproject_ch03
+        # RGB Components
+        R = data_ch02
+        G = 0.45 * data_ch02 + 0.1 * data_ch03 + 0.45 * data_ch01
+        B = data_ch01
+        # Minimuns, Maximuns and Gamma
+        Rmin = 0.0
+        Rmax = 1.0
+        Gmin = 0.0
+        Gmax = 1.0
+        Bmin = 0.0
+        Bmax = 1.0
+        R[R > Rmax] = Rmax
+        R[R < Rmin] = Rmin
+        G[G > Gmax] = Gmax
+        G[G < Gmin] = Gmin
+        B[B > Bmax] = Bmax
+        B[B < Bmin] = Bmin
+        gamma_R = 1
+        gamma_G = 1
+        gamma_B = 1
+        # Normalize the data
+        R = ((R - Rmin) / (Rmax - Rmin)) ** (1 / gamma_R)
+        G = ((G - Gmin) / (Gmax - Gmin)) ** (1 / gamma_G)
+        B = ((B - Bmin) / (Bmax - Bmin)) ** (1 / gamma_B)
+        # Create the RGB
+        RGB = np.stack([R, G, B], axis=2)
+        # Eliminate values outside the globe
+        mask = (RGB == [R[0, 0], G[0, 0], B[0, 0]]).all(axis=2)
+        RGB[mask] = np.nan
+
+        # Definindo tamanho da imagem de saida.
+        d_p_i = 150
+        fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+        img_extent = [extent[0], extent[2], extent[1], extent[3]]
+        ax = plt.axes(projection=ccrs.PlateCarree(), extent=img_extent)
+        ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
+
+        # Estados, coastline e shape Brasil.
+        estados = shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries()
+        ax.add_geometries(estados, ccrs.PlateCarree(), edgecolor='orange', facecolor='none', linewidth=0.65, zorder=4)
+        ax.coastlines(resolution='10m', color='orange', linewidth=0.4, zorder=4)
+        ax.add_feature(cartopy.feature.BORDERS, edgecolor='orange', linewidth=0.4, zorder=4)
+        gl = ax.gridlines(color='white', linestyle='--', linewidth=0.25, alpha=0.4, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5), zorder=5)
+
+        # Adicionando descricao da imagem.
+        cruz = '+'
+        description = f"GOES-16 Natural True Color,     Fire Hot Spot em {date_img}"  # Esse espaço é necessário para adicionar o caractere na imagem
+        institution = f'CEPAGRI - UNICAMP'
+
+        # Plotando a imagem RGB
+        ax.imshow(RGB, origin='upper', extent=img_extent)
+
+        # Criando novos eixos conforme a posicao da imagem.
+        cax0 = fig.add_axes([ax.get_position().x0 + 0.02, ax.get_position().y0 - 0.0135, ax.get_position().width - 0.02, 0.0090])
+        cax0.patch.set_color('black')  # Alterando a cor do novo eixo
+        cax0.text(-0.02, 0.13, description, color='white', size=10)  # Adicionando descrição
+        cax0.text(0.178, 0.13, cruz, color='red', size=12)  # Adicionando simbolo "+"
+        cax0.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando Instituicao
+        cax0.xaxis.set_visible(False)  # Removendo
+
+        # Adicionando os logos.
+        logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
+        logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
+        logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
+        fig.figimage(logo_noaa, 26, 203, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+        fig.figimage(logo_goes, 10, 120, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
+        fig.figimage(logo_cepagri, 10, 40, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+
+        # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.txt$"
+        fdcf_list = [name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match(f'^fdcf_{date.strftime("%Y%m%d")}_.+_br.txt$', name)]
+
+        # Cria matriz diária de pontos e log. de erros e faz o ‘loop’ nos arquivos do diretório.
+        matriz_diaria = []
+
+        ## Captura a lista com os "contornos" dos estados para separar o total de pontos individual
+        geometry_estados = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm40_BRA_1.shp").geometries())
+
+        ## Os 26 estados estão em ordem alfabética no arquivo shapefile e o indice 27 armazena o total diário
+        lista_totalpixels_uf = [0 for i in range(28)]
+        log_erro = []
+        for name in fdcf_list:
+            try:
+                with open(f'{dir_out}fdcf/{name}', 'r') as file:
+                    for linha in file.readlines():
+                        linha = linha.split(',')
+                        p = [float(linha[0]), float(linha[1])]  # Ponto em lat,lon
+                        ## Checkagem para evitar contagem de pontos duplicados
+                        if not (p in matriz_diaria):   
+                            ax.plot(float(linha[1]), float(linha[0]), 'r+', ms=2.5, transform=ccrs.PlateCarree())  # plotando em lon,lat
+                            matriz_diaria.append(p)
+                            ## Contagem do total por estado
+                            for j in range(27):
+                                estado = geometry_estados[j]
+                                if estado.covers(Point(float(linha[1]),float(linha[0]))):
+                                    lista_totalpixels_uf[j]+=1
+                                    break
+                        else:
+                            continue
+            except Exception as erro:
+                print(f'Erro no processamento da matriz diária: {erro}')
+                log_erro.append(f'{name} - Error: {erro}')
+                pass
+
+        # Calcula a soma do total de focos incendios diário
+        lista_totalpixels_uf[27]+= np.sum(lista_totalpixels_uf)
+
+        ### Manipulação dos dados para tabela
+        lista_siglas_UF = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
+                   'RS','RO','RR','SC','SP','SE','TO','Total']
+        columns = ('UF', 'Hot Spot')
+        data = []
+        for i in range(28):
+            table_value = (lista_siglas_UF[i],lista_totalpixels_uf[i])
+            data.append(table_value)
+        
+        ## Cria a tabela com os dados separados anteriormente
+        tabela= matplotlib.table.table(ax =ax,cellText=data,colLabels=columns,cellLoc ='center',loc='lower right',rowLoc='center',
+                               colLoc='center')
+        tabela.auto_set_column_width(col=list(range(len(data))))
+
+        # Cria os nomes dos arquivos diários e salva no "directory".
+
+        print("save_txt: matriz_diaria")
+        save_txt(matriz_diaria, f'fdcf_{date.strftime("%Y%m%d")}_br')
+        save_log_erro(log_erro, f'fdcf_{date.strftime("%Y%m%d")}_errors')
+
+        plt.savefig(f'{dir_out}fdcf/fdcf_{date_file}_br.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+        # Fecha a janela para limpar a memoria
+        plt.close()
+
+        # Remove arquivos separados do dia
+        print('Removendo os arquivos fdcf do dia do diretório')
+        for name in fdcf_list:
+            os.remove(f'{dir_out}fdcf/{name}')
+
+    # Realiza o log do calculo do tempo de processamento da imagem
+    logging.info(f'{fdcf} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
+
+
 def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
     
     # Checagem se e possivel gerar imagem bandas 1-16
@@ -1205,6 +1490,74 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
             bands['20'] = False
 
 
+def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
+    
+    # Coleta o nome das novas bandas
+    old_bands = abrir_old_json()
+    ch01 = old_bands['01']
+    ch02 = old_bands['02']
+    ch03 = old_bands['03']
+    
+    # Pega o nome do arquivo band01 para fazer comparação
+    fdcf = old_bands['21']
+    
+    if bands['21']:
+
+        # Checagem se e possivel gerar imagem FDCF
+        fdcf_diario = False
+        
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS FDCF "BR"...')
+            
+            # Captura a data do arquivo
+            date_file = (datetime.datetime.strptime(fdcf[fdcf.find("ABI-L2-FDCF-M6_G16_s") + 20:fdcf.find("_e") - 1], '%Y%j%H%M%S'))
+            # Captura a data atual
+            # date_now = datetime.datetime.now() - datetime.timedelta(days=1)
+            date_now = datetime.datetime.now()
+            # Aponta o horario 23h50 para o dia anterior
+            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
+            
+            # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
+            print("date_file: ", type(date_file), date_file)
+            print("date: ", type(date), date)
+            print("date_file: ", date_file.year, date_file.month, date_file.day, "date: ", date.year, date.month, date.day)
+            
+            #Checagem para ver se é 23:50 para processamento do acumulado diário
+            if date_file.year == date.year and date_file.month == date.month and date_file.day == date.day and date_file >= date:
+                # Adiciona true para a variavel de processamento semanal
+                fdcf_diario = True
+                print("fdcf_diario: ", fdcf_diario)
+            else:
+                # Adiciona false para a variavel de processamento semanal
+                fdcf_diario = False
+            print("fdcf_diario: ", fdcf_diario)
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf})', f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 
+                                f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', 'br', fdcf_diario))
+                # Adiciona o processo na lista de controle do processamento paralelo
+                process_br.append(process)
+                # Inicia o processo
+                process.start()
+            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+            except Exception as e:
+                # Realiza o log do erro
+                logging.info("Erro Arquivo fdcf")
+                logging.info(str(e))
+
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_br:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa lista vazia para controle do processamento paralelo
+        process_br = []
+
+
+
 # ========================================#     Main     #========================================== #
 
 def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
@@ -1223,3 +1576,9 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
     iniciar_processo_glm(p_br, bands, process_br, dir_in)
     
     iniciar_processo_ndvi(p_br, bands, process_br, dir_in)
+    
+    iniciar_processo_fdcf(p_br, bands, process_br, dir_in)
+    
+    # Realiza log do encerramento do processamento
+    logging.info("")
+    logging.info("PROCESSAMENTO ENCERRADO")

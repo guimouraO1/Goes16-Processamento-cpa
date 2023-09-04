@@ -233,50 +233,7 @@ def check_images(c_bands):
 
 
 
-    # Checagem de novas imagens ndvi (Band 20)
-    if c_bands["02"] and c_bands["03"]:
-        # Carrega os arquivos de processamento das bandas para composicao do ndvi
-        file_ch02 = read_process_file('band02')
-        file_ch03 = read_process_file('band03')
-        # Cria lista vazia para adicionar os produtos que forem baixados
-        product_list = []
-        # Looping a partir dos arquivos da banda 02 que compoem o ndvi
-        for x in file_ch02:
-            date_now = datetime.datetime.now()
-            date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
-            date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00)) + datetime.timedelta(hours=5, minutes=1)
-            date_file = (datetime.datetime.strptime(x[x.find("M6C02_G16_s") + 11:x.find("_e") - 1], '%Y%j%H%M%S'))
-            if date_ini <= date_file <= date_end:
-                # Verifica se ha arquivo correspondente na banda 03
-                matches_ch03 = [z for z in file_ch03 if z.startswith(x[0:43].replace('M6C02', 'M6C03'))]
-                # Se houver arquivos de mesma data nas 2 bandas
-                if x and matches_ch03:
-                    product_list.append(f'{x.strip()};{matches_ch03[0].strip()}')
-            else:
-                continue
-        if product_list:
-            # Cria o arquivo com a nova lista de imagens
-            write_new_file("band20", product_list)
-            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
-            c_bands["20"] = write_process_file("band20")
-            if c_bands["20"]:
-                logging.info(f'Novas imagens NDVI')
-            else:
-                logging.info(f'Sem novas imagens NDVI')
-                os.remove(f'{dir_temp}band20_process.txt')
-            # Transforma o arquivo band??_new.txt para band??_old.txt
-            os.replace(f'{dir_temp}band20_new.txt', f'{dir_temp}band20_old.txt')
-        else:
-            c_bands["20"] = False
-            logging.info(f'Sem novas imagens NDVI')
-    else:
-        logging.info(f'Sem novas imagens NDVI')
-
-
-
-
-
-
+   
 
 
 
@@ -1248,6 +1205,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
 
 
 def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
+    
     global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
 
     def degrees(file_id):
@@ -1309,6 +1267,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     file_var = 'FDCF'
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
+    
     # Area de interesse para recorte
     if v_extent == 'br':
         # Brasil
@@ -1529,115 +1488,6 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
 
 def processing(p_bands, p_br, p_sp):
-
-    # Checagem se e possivel gerar imagem NDVI
-    if p_bands["20"]:
-        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
-        if p_br:
-            logging.info("")
-            logging.info('PROCESSANDO IMAGENS NDVI "BR"...')
-            band20 = read_process_file('band20')
-            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
-            for i in band20:
-                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
-                i = i.strip().split(';')
-                # Captura a data do arquivo
-                date_file = (datetime.datetime.strptime(i[0][i[0].find("M6C02_G16_s") + 11:i[0].find("_e") - 1], '%Y%j%H%M%S'))
-                # Captura a data atual
-                date_now = datetime.datetime.now()
-                # Aponta o horario 18h para a data atual
-                date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
-                # Se a data do arquivo for maior ou igual as 18h da data atual e o dia da semana atual for sabado (6)
-                if date_file >= date:
-                    # Adiciona true para a variavel de processamento semanal
-                    ndvi_diario = True
-                    # Guarda a ultima imagem semanal
-                    ultima_diario = i
-                    # Pula o processamento dessa ultima imagem
-                    continue
-                # Tenta realizar o processamento da imagem
-                try:
-                    # Cria o processo com a funcao de processamento
-                    process = Process(target=process_ndvi,
-                                      args=(ndvi_diario, f'{dir_in}band02/{i[0].replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{i[1].replace(".nc", "_reproj_br.nc")}', "br"))
-                    # Adiciona o processo na lista de controle do processamento paralelo
-                    process_br.append(process)
-                    # Inicia o processo
-                    process.start()
-                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except OSError as ose:
-                    # Realiza o log do erro
-                    logging.info("Erro Arquivo - OSError")
-                    logging.info(str(ose))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band02/{i[0].replace(".nc", "_reproj_br.nc")}')
-                    os.remove(f'{dir_in}band03/{i[1].replace(".nc", "_reproj_br.nc")}')
-                except AttributeError as ae:
-                    # Realiza o log do erro
-                    logging.info(f'Erro Arquivo - AttributeError - {i}')
-                    logging.info(str(ae))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band02/{i[0].replace(".nc", "_reproj_br.nc")}')
-                    os.remove(f'{dir_in}band03/{i[1].replace(".nc", "_reproj_br.nc")}')
-            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-            for process in process_br:
-                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-                process.join()
-
-        
-            
-            if ndvi_diario:
-                # Tenta realizar o processamento da ultima imagem
-                try:
-                    # Cria o processo com a funcao de processamento
-                    process_ndvi(ndvi_diario, f'{dir_in}band02/{ultima_diario[0].replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ultima_diario[1].replace(".nc", "_reproj_br.nc")}', "br")
-                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except OSError as ose:
-                    # Realiza o log do erro
-                    logging.info("Erro Arquivo - OSError")
-                    logging.info(str(ose))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band02/{ultima_diario[0].replace(".nc", "_reproj_br.nc")}')
-                    os.remove(f'{dir_in}band03/{ultima_diario[1].replace(".nc", "_reproj_br.nc")}')
-                except AttributeError as ae:
-                    # Realiza o log do erro
-                    logging.info(f'Erro Arquivo - AttributeError - {ultima_diario}')
-                    logging.info(str(ae))
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band02/{ultima_diario[0].replace(".nc", "_reproj_br.nc")}')
-                    os.remove(f'{dir_in}band03/{ultima_diario[1].replace(".nc", "_reproj_br.nc")}')
-
-            # Limpa lista vazia para controle do processamento paralelo
-            process_br = []
-
-        # Verifica se deve ser gerado a imagem ndvi, se sim, a banda continua True, caso nao, a banda volta para False
-        if ndvi_diario and datetime.datetime.now().isoweekday() == 6:
-            p_bands["20"] = True
-        else:
-            p_bands["20"] = False
-            # Remove o arquivo de processamento ndvi
-            os.remove(f'{dir_temp}band20_process.txt')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     # Checagem se e possivel gerar imagem FDCF

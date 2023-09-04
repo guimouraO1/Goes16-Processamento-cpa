@@ -94,7 +94,21 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
             logging.info('CRIANDO GIF ANIMADO GLM "BR"...')
             # Cria o processo com a funcao gif
             create_gif("glm", "br")
-            
+
+    if g_bands["20"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO NDVI "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("ndvi", "br")
+
+    if g_bands["21"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("fdcf", "br")
+
 
 
 #  Esse código é uma implementação Python que utiliza o software FFmpeg para criar arquivos GIF animados a partir de uma sequência de imagens PNG. 

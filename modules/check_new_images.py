@@ -157,6 +157,30 @@ def checar_ndvi(bands, dir_in):
             logging.info(f'Sem novas imagens NDVI')
 
 
+def checar_fdcf(bands, dir_in):  
+    # Checagem de novas imagens fdcf (Band 21)
+    if bands['17']:
+        # Coleto o nome das novas bandas
+        old_bands = abrir_old_json()
+        # Extrai a data/hora do arquivo para download do arquivo FDCF
+        ch01 = old_bands['01']
+        # Extrai a data/hora do arquivo ch01
+        ftime = (datetime.datetime.strptime(ch01[ch01.find("M6C01_G16_s") + 11:ch01.find("_e") - 1], '%Y%j%H%M%S'))
+        try:
+            # Download arquivo fdcf
+            name_fdcf = download_prod(datetime.datetime.strftime(ftime, '%Y%m%d%H%M'), "ABI-L2-FDCF", f'{dir_in}fdcf/')
+            # Modifica o arquivo JSON com a imagem mais recente.               
+            modificar_chave_old_bands('oldBands.json', '21', name_fdcf)
+            bands['21'] = True
+            logging.info(f'novas imagens FDCF')
+        except:
+            bands['21'] = False
+            logging.info(f'Sem novas imagens FDCF')
+    else:
+        bands['21'] = False
+        logging.info(f'Sem novas imagens FDCF')
+
+
 # ========================================#     Main     #========================================== #
 
 # Função para verificar a existência de novas imagens
@@ -174,8 +198,9 @@ def checar_imagens(bands, dir_in):
     
     checar_ndvi(bands)
 
-    print(bands)
+    checar_fdcf(bands, dir_in)
     
+    print(bands)
     
     # Retorna o dicionário "bands".      
     return bands

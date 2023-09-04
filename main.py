@@ -11,7 +11,7 @@ from modules.logs import conf_log, finalize_log_time # Cria os arquivos de logs
 from modules.quantity_products import quantity_products
 from modules.send_products import send_products
 from modules.dirs import get_dirs
-from modules.process import processamento_das_imagens
+from modules.processamento import processamento_das_imagens
 from modules.check_new_images import checar_imagens
 from modules.remove import remover_imagens
 from modules.process_gif import process_gif
@@ -32,7 +32,7 @@ dir_out = dirs['dir_out']
 # Dicionarios das bandas key : value
 bands = {}
 # Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
-for num in range(1, 21):
+for num in range(1, 22):
     b = str(num).zfill(2)
     bands[f'{b}'] = False
 br = True
