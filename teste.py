@@ -24,14 +24,26 @@ from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de
 from modules.utilities import download_prod
 from modules.process import reproject
 import cartopy.feature as cfeature # features
+from modules.process import area_para_recorte
 
 oldbands = abrir_old_json()
 
+dirs = get_dirs()
+
+# Acessando os diretórios usando as chaves do dicionário
+dir_in = dirs['dir_in']
+dir_main = dirs['dir_main']
+dir_out = dirs['dir_out']
+dir_libs = dirs['dir_libs']
+dir_shapefiles = dirs['dir_shapefiles']
+dir_colortables = dirs['dir_colortables']
+dir_logos = dirs['dir_logos']
+dir_temp = dirs['dir_temp']
+arq_log = dirs['arq_log']
 
 ndvi_diario =  True
 ch02 = oldbands['02']
 ch03 = oldbands['03']
-dir_in = '/home/guimoura/download_amazon/goes/'
 v_extent = 'br'
 
 
@@ -315,4 +327,4 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{ch02[0:59].replace("M6C02", "M6C0*")} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
-process_ndvi(ndvi_diario, f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band02/{ch03.replace(".nc", "_reproj_br.nc")}', v_extent)
+process_ndvi(ndvi_diario, f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', v_extent)

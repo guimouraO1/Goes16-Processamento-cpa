@@ -122,7 +122,7 @@ def checar_glm(bands, dir_in):
 
 
 # Checa se há bandas 2,3 para ndvi
-def checar_ndvi(bands):
+def checar_ndvi(bands, dir_in):
     
     old_bands = abrir_old_json()
     
@@ -131,34 +131,30 @@ def checar_ndvi(bands):
         
         # Carrega os arquivos de processamento das bandas para composicao do ndvi
         file_ch02 = old_bands['02']
-        file_ch03 = old_bands['03']
+        
+        # Listar arquivos no diretório da pasta "band03"
+        file_ch03_dir = f'{dir_in}band03/'
+        file_ch03_list = os.listdir(file_ch03_dir)
 
         date_now = datetime.datetime.now()
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
-        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00)) + datetime.timedelta(hours=5, minutes=1)
-        
-        date_file = (datetime.datetime.strptime(file_ch02[file_ch02.find("M6C02_G16_s") + 11:file_ch02.find("_e") - 1], '%Y%j%H%M%S'))
-        
-        if date_ini <= date_file <= date_end:
-            
-            # Verifica se ha arquivo correspondente na banda 03
-            matches_ch03 = [z for z in file_ch03 if z.startswith(file_ch02[0:43].replace('M6C02', 'M6C03'))]
-            
-            # Se houver arquivos de mesma data nas 2 bandas
-            if file_ch02 and matches_ch03:
-                product_list = (f'{file_ch02.strip()};{matches_ch03[0].strip()}')
-        else:
-            logging.info(f'Sem novas imagens NDVI')
-            bands['20'] = False
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, 13, 0)
+        date_end = date_ini + datetime.timedelta(hours=5, minutes=1)
 
-        if product_list:
+        date_file = datetime.datetime.strptime(file_ch02[file_ch02.find("M6C02_G16_s") + 11:file_ch02.find("_e") - 1], '%Y%j%H%M%S')
+
+        if date_ini <= date_file <= date_end:
+            # Verifica se há arquivo correspondente na banda 03
+            matches_ch03 = [z for z in file_ch03_list if z.startswith(file_ch02[0:43].replace('M6C02', 'M6C03'))]
+            
+            if file_ch02 and matches_ch03:
                 bands['20'] = True
                 logging.info(f'Novas imagens NDVI')
+            else:
+                bands['20'] = False
+                logging.info(f'Sem novas imagens NDVI')
         else:
-            bands["20"] = False
+            bands['20'] = False
             logging.info(f'Sem novas imagens NDVI')
-    else:
-        logging.info(f'Sem novas imagens NDVI')
 
 
 # ========================================#     Main     #========================================== #
@@ -174,7 +170,9 @@ def checar_imagens(bands, dir_in):
     
     checar_rrqpef(bands, dir_in)
     
-    checar_glm(bands, dir_in)    
+    checar_glm(bands, dir_in)   
+    
+    checar_ndvi(bands)
 
     print(bands)
     

@@ -5,6 +5,7 @@ from matplotlib import cm  # Utilitario para paletas de cores
 import cartopy  # Inserir mapas, shapefiles, paralelos, meridianos, latitudes, longitudes, etc.
 import cartopy.crs as ccrs  # Utilitario para sistemas de referência e coordenadas
 import cartopy.io.shapereader as shpreader  # Utilitario para leitura de shapefiles
+import cartopy.feature as cfeature # features
 from osgeo import gdal  # Utilitario para a biblioteca GDAL
 from osgeo import osr  # Utilitario para a biblioteca GDAL
 from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
@@ -18,6 +19,7 @@ import re # Utilitario para trabalhar com expressoes regulares
 import json
 from modules.dirs import get_dirs
 from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
+from modules.utilities import download_prod
 
 osr.DontUseExceptions()
 
@@ -612,6 +614,262 @@ def process_glm(ch13, glm_list, v_extent):
     logging.info(f'{dir_in}glm/{glm_list[0][0:31]}*.nc - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
+def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
+    
+    global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
+    
+    # Captura a hora para contagem do tempo de processamento da imagem
+    processing_start_time = time.time()
+    
+    # Area de interesse para recorte
+    extent, resolution = area_para_recorte(v_extent)
+
+    # Lendo imagem CMI reprojetada
+    reproject_ch02 = Dataset(ch02)
+    reproject_ch03 = Dataset(ch03)
+
+    # Coletando do nome da imagem a data/hora
+    dtime_ch02 = ch02[ch02.find("M6C02_G16_s") + 11:ch02.find("_e") - 1]
+
+    #//Hora para fazer o download Mask
+    dtime_mask = ch02[ch02.find("M6C02_G16_s") + 11:ch02.find("_e") - 3]
+
+    ## Transforma de data Juliana para data normal
+    year = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%Y')
+    day_of_year = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%d')
+    month = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%m')
+    hora = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%H')
+    min = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%M')
+    yyyymmddhhmn = year+month+day_of_year+hora+min
+
+    #//Download arquivo mascara de nuvens
+    print("Download File Mask NDVI")
+    file_mask = download_prod(yyyymmddhhmn,'ABI-L2-ACMF',f'{dir_in}clsm/')
+
+    # // Reprojetando o arquivo de nuvens
+    reproject(f'{dir_in}clsm/{file_mask}.nc','BCM',v_extent,4)
+
+    # //Capturando o nome do arquivo reprojetado
+    r_file = file_mask + f'_reproj_{v_extent}.nc'
+    
+    # // Abrindo o Dataset do arquivo da mascara
+    reproject_mask = Dataset(f'{dir_in}clsm/{r_file}')
+
+    data_ch02 = reproject_ch02.variables['Band1'][:]
+    data_ch03 = reproject_ch03.variables['Band1'][:]
+
+    ## //
+    data_mask = reproject_mask.variables['Band1'][:]
+
+    reproject_ch02 = None
+    del reproject_ch02
+    
+    reproject_ch03 = None
+    del reproject_ch03
+
+    reproject_mask = None
+    del reproject_mask
+
+    # NDVI Components
+    NDVI = (data_ch03 - data_ch02) / (data_ch03 + data_ch02)
+
+    # // Capturando somente os valores máximos de NDVI
+    NDVI_fmax = np.zeros(np.shape(NDVI))
+    NDVI_fmax[NDVI_fmax == 0 ] = np.nan
+
+    NDVI_fmax = np.fmax(NDVI_fmax,NDVI)
+
+    # // Retirando as nuvens do arquivo NDVI
+    NDVI_fmax = np.where(data_mask==0,NDVI,data_mask)
+    NDVI_fmax[NDVI_fmax == 1]= np.nan
+
+    # Formatando data para plotar na imagem e salvar o arquivo
+    date = (datetime.datetime.strptime(dtime_ch02, '%Y%j%H%M%S'))
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+
+    # Salvando array NDVI
+    print('Salvando - NDVI')
+    NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_file}_{v_extent}.npy')
+
+    # Removendo os arquivos Clear Sky Mask baixados e reprojetado de nuvens
+    print('Removendo arquivo filemask do diretório')
+    os.remove(f'{dir_in}clsm/{r_file}')
+    os.remove(f'{dir_in}clsm/{file_mask}.nc')
+
+
+    if ndvi_diario and datetime.datetime.now().isoweekday() == 6:
+        # Captura a data atual e calculando data inicial e final
+        date_now = datetime.datetime.now()
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
+        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+
+        # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
+        ndvi_list = [name for name in os.listdir(f'{dir_in}ndvi/') if os.path.isfile(os.path.join(f'{dir_in}ndvi/', name)) and re.match('^ndvi_.+_.+_br.npy$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        ndvi_list.sort()
+        teste = np.load(f'{dir_in}ndvi/{ndvi_list[0]}', allow_pickle=True)
+        NDVI_fmax = np.zeros(teste.shape)
+        ## // Seta os valores para nan para não haver problema entre fazer o máximo entre um valor negativo e zero 
+        ## // max(i,v) = v se i#0 e v >i / v £ R, se i=0 e v<0 max(i,v) = i então se i = nan max(i,v)=v para v £ R
+        NDVI_fmax[NDVI_fmax == 0] = np.nan
+        del teste
+
+        # Looping para ler e comparar os arquivos NDVI salvos do sabado
+        for f in ndvi_list:
+            # Captura a data do arquivo
+            date = f[f.find("ndvi_") + 5:f.find("ndvi_") + 13]
+            # Captura a hora do arquivo
+            hour = f[f.find("ndvi_") + 14:f.find("ndvi_") + 20]
+            # Monta a data/hora do arquivo
+            date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
+            # Se a data/hora do arquivo estiver dentro do limite de datas
+            if date_ini <= date_file <= date_end + datetime.timedelta(minutes=1):
+                # print(f, date_file)
+                # Le o arquivo NDVI
+                NDVI_file = np.load(f'{dir_in}ndvi/{f}', allow_pickle=True)
+                NDVI_file[NDVI_file > 0.999] = np.nan
+                NDVI_file[NDVI_file < -0.999] = np.nan
+                # Compara os arrays NDVI e retorna um novo array com os maiores valores de cada elemento
+                NDVI_fmax = np.fmax(NDVI_fmax, NDVI_file)
+                
+            else:
+                continue
+                
+        NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br_fmax.npy')
+        
+
+        # Captura a data atual e calculando data inicial e final do acumulado da semana
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59)) - datetime.timedelta(days=6, hours=23, minutes=59)
+        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59))
+
+        # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
+        ndvi_list_fmax = [name for name in os.listdir(f'{dir_in}ndvi') if os.path.isfile(os.path.join(f'{dir_in}ndvi', name)) and re.match('^ndvi_.+_.+_br_fmax.npy$', name)]
+        
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        ndvi_list_fmax.sort()
+        teste = np.load(f'{dir_in}ndvi/{ndvi_list_fmax[0]}', allow_pickle=True)
+        NDVI_fmax = np.zeros(teste.shape)
+        NDVI_fmax[NDVI_fmax == 0] = np.nan
+        del teste
+
+        # Looping para ler e comparar os arquivos NDVI salvos da semana
+        for f in range(0, len(ndvi_list_fmax)):
+            # Captura a data do arquivo
+            date_i = ndvi_list_fmax[f][ndvi_list_fmax[f].find("ndvi_") + 5:ndvi_list_fmax[f].find("ndvi_") + 13]
+            date_e = ndvi_list_fmax[f][ndvi_list_fmax[f].find("ndvi_") + 14:ndvi_list_fmax[f].find("ndvi_") + 22]
+            # Monta a data/hora do arquivo
+            date_file_i = (datetime.datetime.strptime(date_i, '%Y%m%d'))
+            date_file_e = (datetime.datetime.strptime(date_e, '%Y%m%d'))
+            # Se a data/hora do arquivo estiver dentro do limite de datas
+            if date_file_i == date_file_e and date_ini <= date_file_i <= date_end:
+                # Le o arquivo NDVI
+                NDVI_file_fmax = np.load(f'{dir_in}ndvi/{ndvi_list_fmax[f]}', allow_pickle=True)
+
+                # Compara os arrays NDVI e retorna um novo array com os maiores valores de cada elemento
+                NDVI_fmax = np.fmax(NDVI_fmax, NDVI_file_fmax)
+
+            else:
+                continue
+
+        NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br.npy')
+
+        # Formatando a descricao a ser plotada na imagem
+        description = f' GOES-16 COMPOSIÇÃO MÁXIMA DE VALOR NDVI NO PERÍODO {date_ini.strftime("%d-%b-%Y")}  -  {date_end.strftime("%d-%b-%Y")}'
+        institution = "CEPAGRI - UNICAMP"
+
+        # Choose the plot size (width x height, in inches)
+        d_p_i = 150
+        fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+
+        # Use the Geostationary projection in cartopy
+        ax = plt.axes(projection=ccrs.PlateCarree())
+
+        # Adicionando o shapefile dos estados brasileiros
+        adicionando_shapefile(v_extent, ax)
+
+        # Adicionando  linhas dos litorais
+        adicionando_linhas(ax)
+    
+        # # Add an ocean mask
+        ax.add_feature(cfeature.OCEAN, facecolor='cornflowerblue', zorder=3)
+        
+        # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
+        img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
+
+        colors = ["#0000FF", "#0030FF", "#0060FF", "#0090FF", "#00C0FF", "#003000", "#164A16", "#00C000", "#FFFF00", "#FF8000", "#FF0000"]
+        my_cmap = cm.colors.LinearSegmentedColormap.from_list("", colors)  # Create a custom linear colormap
+
+        # Plotando a imagem
+        array_NDVI = np.load(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br.npy', allow_pickle=True)
+        img = ax.imshow(array_NDVI, origin='upper', vmin=-1, vmax=1, cmap=my_cmap, extent=img_extent)
+
+        cax0 = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.01325, ax.get_position().width, 0.0125])
+        cb = plt.colorbar(img, orientation="horizontal", cax=cax0, ticks=[-0.66, -0.33, 0, 0.33, 0.66])
+        cb.ax.set_xticklabels(['-0.66', '-0.33', '0', '0.33', '0.66'])
+        cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+        cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
+        cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
+        cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de cores
+
+        # Adicionando descricao da imagem
+        adicionando_descricao_imagem(description, institution, ax, fig)
+
+        # Adicionando os logos
+        adicionando_logos(fig)
+
+        # Salvando a imagem de saida
+        # plt.savefig(f'{dir_out}ndvi/ndvi_{date_end.strftime("%Y%m%d_%H%M%S")}_br.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+        plt.savefig(f'{dir_out}ndvi/ndvi_{date_end.strftime("%Y%m%d_%H%M%S")}_br.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+        # Fecha a janela para limpar a memoria
+        plt.close()
+
+    elif ndvi_diario:
+        
+        # Captura a data atual e calculando data inicial e final
+        date_now = datetime.datetime.now()
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
+        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+
+        # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
+        ndvi_list = [name for name in os.listdir(f'{dir_in}ndvi') if os.path.isfile(os.path.join(f'{dir_in}ndvi', name)) and re.match('^ndvi_.+_.+_br.npy$', name)]
+        # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+        ndvi_list.sort()
+        teste = np.load(f'{dir_in}ndvi/{ndvi_list[0]}', allow_pickle=True)
+        NDVI_fmax = np.zeros(teste.shape)
+        ## // Seta os valores para nan para não haver problema entre fazer o máximo entre um valor negativo e zero 
+        ## // max(i,v) = v se i#0 e v >i / v £ R, se i=0 e v<0 max(i,v) = i então se i = nan max(i,v)=v para v £ R
+        NDVI_fmax[NDVI_fmax == 0] = np.nan
+        del teste
+
+        # Looping para ler e comparar os arquivos NDVI salvos do dia
+        for f in ndvi_list:
+            # Captura a data do arquivo
+            date = f[f.find("ndvi_") + 5:f.find("ndvi_") + 13]
+            # Captura a hora do arquivo
+            hour = f[f.find("ndvi_") + 14:f.find("ndvi_") + 20]
+            # Monta a data/hora do arquivo
+            date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
+            # Se a data/hora do arquivo estiver dentro do limite de datas
+            if date_ini <= date_file <= date_end + datetime.timedelta(minutes=1):
+                # print(f, date_file)
+                # Le o arquivo NDVI
+                NDVI_file = np.load(f'{dir_in}ndvi/{f}', allow_pickle=True)
+                NDVI_file[NDVI_file > 0.999] = np.nan
+                NDVI_file[NDVI_file < -0.999] = np.nan
+                # Compara os arrays NDVI e retorna um novo array com os maiores valores de cada elemento
+                NDVI_fmax = np.fmax(NDVI_fmax, NDVI_file)
+                # Remove o arquivo NDVI
+                # os.remove(f'{dir_in}ndvi/{f}')
+            else:
+                continue
+
+
+        NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br_fmax.npy')
+
+    # Realiza o log do calculo do tempo de processamento da imagem
+    logging.info(f'{ch02[0:59].replace("M6C02", "M6C0*")} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
+
+
 def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
     
     # Checagem se e possivel gerar imagem bandas 1-16
@@ -875,6 +1133,81 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in):
             else:
                 logging.info(f'Sem imagens correspondentes a data para glm ')
         
+        
+def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
+    
+    oldbands = abrir_old_json()
+    
+    # Pega o nome netCDF das bandas 02, 03
+    ch02 = oldbands['02']
+    ch03 = oldbands['03']
+
+    # Checagem se e possivel gerar imagem NDVI
+    if bands['20']:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            # Captura a data do arquivo
+            date_file = (datetime.datetime.strptime(ch02[ch02.find("M6C02_G16_s") + 11:ch02.find("_e") - 1], '%Y%j%H%M%S'))
+            # Captura a data atual
+            date_now = datetime.datetime.now()
+            # Aponta o horario 18h para a data atual
+            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+            
+            # Se a data do arquivo for maior ou igual as 18h da data atual e o dia da semana atual for sabado (6)
+            if date_file >= date:
+                # Adiciona true para a variavel de processamento semanal
+                ndvi_diario = True
+            
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process = Process(target=process_ndvi, args=(ndvi_diario, f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br"))
+                # Adiciona o processo na lista de controle do processamento paralelo
+                process_br.append(process)
+                # Inicia o processo
+                process.start()
+            
+            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+            except Exception as e:
+                # Realiza o log do erro
+                logging.info("Erro no processamento do Arquivo NDVI")
+                logging.info(str(e))
+                # Remove a imagem com erro de processamento
+                os.remove(f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}')
+                os.remove(f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}')
+            
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_br:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+
+            if ndvi_diario:
+                # Tenta realizar o processamento da ultima imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process_ndvi(ndvi_diario, f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br")
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except Exception as e:
+                    # Realiza o log do erro
+                    logging.info("Erro no processamento do Arquivo NDVI")
+                    logging.info(str(e))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}')
+            
+            # Limpa lista vazia para controle do processamento paralelo
+            process_br = []
+
+        # Verifica se deve ser gerado a imagem ndvi, se sim, a banda continua True, caso nao, a banda volta para False
+        if ndvi_diario and datetime.datetime.now().isoweekday() == 6:
+            bands['20'] = True
+        else:
+            bands['20'] = False
+
+
+
+
+
 
 
 # ========================================#     Main     #========================================== #
@@ -894,7 +1227,4 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
 
     iniciar_processo_glm(p_br, bands, process_br, dir_in)
     
-
-
-
-
+    iniciar_processo_ndvi(p_br, bands, process_br, dir_in)

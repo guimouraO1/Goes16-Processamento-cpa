@@ -1584,6 +1584,8 @@ def processing(p_bands, p_br, p_sp):
                 # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
                 process.join()
 
+        
+            
             if ndvi_diario:
                 # Tenta realizar o processamento da ultima imagem
                 try:
