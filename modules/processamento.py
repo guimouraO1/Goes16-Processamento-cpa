@@ -975,7 +975,6 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
     brasil = (shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
-    
     for i in range(len(p_lat)):
         if brasil[0].covers(Point(p_lon[i], p_lat[i])):
             p = (p_lat[i], p_lon[i])
