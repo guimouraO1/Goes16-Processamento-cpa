@@ -35,29 +35,35 @@ def remover_imagens(bands, dir_in):
     # Controle de produtos de rrqpef
     if bands['18']:
         logging.info('Removendo netCDF-rrqpef processadas')
-        shutil.rmtree(f'{dir_in}rrqpef/')
-        os.mkdir(f'{dir_in}rrqpef/')
+        try:
+            shutil.rmtree(f'{dir_in}rrqpef/')
+            os.mkdir(f'{dir_in}rrqpef/')
+        except:
+            logging.info('Ocorreu um erro ao tentar apagar rrqpef')
 
     # Controle de produtos de glm
     if bands['19'] or bands['13']:
-        aux = False
-        # Verificar produtos glm
-        # Verifica a quantidade de itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_br.png$"
-        result_br = len([name for name in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', name)) and re.match('^OR_GLM-L2-LCFA_G16_.+_.+.nc$', name)])
-        # Subtrai o limite de imagens BR
-        result_br -= 48
-        # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
-        if result_br > 0:
-            aux = True
-            # Cria uma lista com os itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_br.png$"
-            prod_br = [name for name in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', name)) and re.match('^OR_GLM-L2-LCFA_G16_.+_.+.nc$', name)]
-            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
-            prod_br.sort()
-            # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
-            for y in range(0, result_br):
-                # Remove arquivo em excesso
-                os.remove(f'{dir_in}glm/{prod_br[y]}')
-        if aux:
-            logging.info("Produtos em excesso removidos com sucesso")
-        else:
-            logging.info("Quantidade de produtos dentro do limite")
+        try:
+            aux = False
+            # Verificar produtos glm
+            # Verifica a quantidade de itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_br.png$"
+            result_br = len([name for name in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', name)) and re.match('^OR_GLM-L2-LCFA_G16_.+_.+.nc$', name)])
+            # Subtrai o limite de imagens BR
+            result_br -= 48
+            # Se o resultado for maior que zero, temos imagens em excesso, entao serao removidas
+            if result_br > 0:
+                aux = True
+                # Cria uma lista com os itens no diretorio dos produtos glm que sao arquivos e se encaixa na expressao regular "^glm_.+_.+_br.png$"
+                prod_br = [name for name in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', name)) and re.match('^OR_GLM-L2-LCFA_G16_.+_.+.nc$', name)]
+                # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+                prod_br.sort()
+                # Looping do tamanho dos arquivos em excesso para remocao, removendo do inicio da lista os arquivos em excesso
+                for y in range(0, result_br):
+                    # Remove arquivo em excesso
+                    os.remove(f'{dir_in}glm/{prod_br[y]}')
+            if aux:
+                logging.info("Produtos em excesso removidos com sucesso")
+            else:
+                logging.info("Quantidade de produtos dentro do limite")
+        except:
+            logging.info('Ocorreu um erro ao tentar apagar glm')

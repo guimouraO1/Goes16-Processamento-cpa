@@ -1429,6 +1429,7 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
 
     # Checagem se e possivel gerar imagem NDVI
     if bands['20']:
+        ndvi_diario = False
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             # Captura a data do arquivo
@@ -1537,7 +1538,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf})', f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 
+                process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf}.nc', f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 
                                 f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', 'br', fdcf_diario))
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_br.append(process)
@@ -1566,18 +1567,22 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
-    
-    iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp)
-    
-    iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp)
+    try:
+        iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp)
+        
+        iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp)
 
-    iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp)
+        iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp)
 
-    iniciar_processo_glm(p_br, bands, process_br, dir_in)
-    
-    iniciar_processo_ndvi(p_br, bands, process_br, dir_in)
-    
-    iniciar_processo_fdcf(p_br, bands, process_br, dir_in)
+        iniciar_processo_glm(p_br, bands, process_br, dir_in)
+        
+        iniciar_processo_ndvi(p_br, bands, process_br, dir_in)
+        
+        iniciar_processo_fdcf(p_br, bands, process_br, dir_in)
+        
+    except:
+        logging.info('Ocorrou um erro no processamento')
+
     
     # Realiza log do encerramento do processamento
     logging.info("")
