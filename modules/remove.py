@@ -43,6 +43,7 @@ def remover_imagens(bands, dir_in):
 
     # Controle de produtos de glm
     if bands['19'] or bands['13']:
+        logging.info(f'Removendo imagens GLM')
         try:
             aux = False
             # Verificar produtos glm
@@ -67,3 +68,17 @@ def remover_imagens(bands, dir_in):
                 logging.info("Quantidade de produtos dentro do limite")
         except:
             logging.info('Ocorreu um erro ao tentar apagar glm')
+            
+    if bands['21']:
+        oldBands = abrir_old_json()
+        ch21 = oldBands['21']
+        logging.info(f'Removendo imagens FDCF')
+        try:
+            os.remove(f'{dir_in}fdcf/ch01.nc')
+            os.remove(f'{dir_in}fdcf/ch02.nc')
+            os.remove(f'{dir_in}fdcf/ch03.nc')
+            os.remove(f'{dir_in}fdcf/{ch21}.nc')
+        except FileNotFoundError as e:
+            # Realiza o log do erro
+            logging.info(f'Erro Arquivo - FileNotFoundError - {ch21}')
+            logging.info(str(e))

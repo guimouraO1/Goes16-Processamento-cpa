@@ -964,7 +964,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     p_lon = lon[selected_fires]
     brasil = (shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
     brasil_geometries = list(sg.shape(geometry) for geometry in brasil)
-    
+    # Alteração Guilherme
     for i in range(len(p_lat)):
         point = sg.Point(p_lon[i], p_lat[i])
         if any(geo.contains(point) for geo in brasil_geometries):
@@ -973,19 +973,18 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
     
     save_txt(matriz_pixels_fogo, f'fdcf_{date.strftime("%Y%m%d_%H%M%S")}_br')
-
     
     # Le o arquivo de controle de quantidade de pontos
     try:
         with open(f'{dir_temp}band21_control.txt', 'r') as fo:
             control = fo.readline()
-            logging.info("tamanho control withopen: ", int(control))
+            logging.info(f'tamanho control withopen: {int(control)}')
     except:
         control = 0
-        logging.info("tamanho control except: ", int(control))
+        logging.info(f'tamanho control except: {int(control)}')
 
     # Verifica se as ocorrencias de pontos é maior que as anteriores, se sim, armazena a quantidade e as imagens para gerar fundo
-    logging.info("Len matriz_pixels_fogo: ", len(matriz_pixels_fogo), " int control: ", int(control))
+    logging.info(f'Len matriz_pixels_fogo:{len(matriz_pixels_fogo)}  int control:  {int(control)}')
     date_ini = datetime.datetime(date.year, date.month, date.day, int(13), int(00))
     date_end = datetime.datetime(date.year, date.month, date.day, int(18), int(1))
     if len(matriz_pixels_fogo) > int(control) and date_ini <= date <= date_end:
@@ -995,7 +994,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
             fo.write(str(len(matriz_pixels_fogo)))
 
-    logging.info("fdcf_diario: ", fdcf_diario)
+    logging.info(f'fdcf_diario: {fdcf_diario}')
     if fdcf_diario:
         # Reiniciar contagem para verificar imagem com maior quantidade de pontos no dia
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
@@ -1074,13 +1073,8 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         cax0.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando Instituicao
         cax0.xaxis.set_visible(False)  # Removendo
 
-        # Adicionando os logos.
-        logo_noaa = plt.imread(dir_logos + 'NOAA_Logo.png')  # Lendo o arquivo do logo
-        logo_goes = plt.imread(dir_logos + 'GOES_Logo.png')  # Lendo o arquivo do logo
-        logo_cepagri = plt.imread(dir_logos + 'CEPAGRI-Logo.png')  # Lendo o arquivo do logo
-        fig.figimage(logo_noaa, 26, 203, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-        fig.figimage(logo_goes, 10, 120, zorder=3, alpha=0.6, origin='upper')  # Plotando logo
-        fig.figimage(logo_cepagri, 10, 40, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
+        # Adicionando os logos
+        adicionando_logos(fig)
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.txt$"
         fdcf_list = [name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match(f'^fdcf_{date.strftime("%Y%m%d")}_.+_br.txt$', name)]
@@ -1502,19 +1496,18 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
             date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
             
             # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
-            logging.info("date_file: ", type(date_file), date_file)
-            logging.info("date: ", type(date), date)
-            logging.info("date_file: ", date_file.year, date_file.month, date_file.day, "date: ", date.year, date.month, date.day)
+            logging.info(f'date_file: {date_file}')
+            logging.info(f'date: {date}')
             
             #Checagem para ver se é 23:50 para processamento do acumulado diário
             if date_file.year == date.year and date_file.month == date.month and date_file.day == date.day and date_file >= date:
                 # Adiciona true para a variavel de processamento semanal
                 fdcf_diario = True
-                logging.info("fdcf_diario: ", fdcf_diario)
+                logging.info(f'fdcf_diario: {fdcf_diario}')
             else:
                 # Adiciona false para a variavel de processamento semanal
                 fdcf_diario = False
-            logging.info("fdcf_diario: ", fdcf_diario)
+            logging.info(f'fdcf_diario: {fdcf_diario}')
             
             # Tenta realizar o processamento da imagem
             try:
@@ -1538,7 +1531,6 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
         process_br = []
 
 
-
 # ========================================#     Main     #========================================== #
 
 def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
@@ -1560,9 +1552,8 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         
         iniciar_processo_fdcf(p_br, bands, process_br, dir_in)
         
-    except:
-        logging.info('Ocorrou um erro no processamento')
-
+    except Exception as e:
+        logging.info(f'Ocorrou um Erro {e} no Processamento')
     
     # Realiza log do encerramento do processamento
     logging.info("")
