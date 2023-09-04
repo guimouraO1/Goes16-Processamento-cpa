@@ -17,8 +17,8 @@ from osgeo import gdal  # Utilitario para a biblioteca GDAL
 from osgeo import osr  # Utilitario para a biblioteca GDAL
 from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
 import numpy as np  # Suporte para arrays e matrizes multidimensionais, com diversas funções matemáticas para trabalhar com estas estruturas
-from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
-from modules.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
+from libs.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
+from libs.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
 import datetime  # Utilitario para datas e horas
 import time  # Utilitario para trabalhar com tempos
 import os  # Utilitario para trabalhar com chamadas de sistema
@@ -177,7 +177,6 @@ def check_images(c_bands):
     else:
         logging.info(f'Sem novas imagens RRQPEF')
 
-
     # Checagem de novas imagens GLM (Band 19)
     if c_bands["13"]:
         # Carrega a banda 13 que sera utilizada para compor o fundo
@@ -190,12 +189,10 @@ def check_images(c_bands):
         aux_list = []
         # Looping a partir dos arquivos da banda 13 que compoem o fundo
         for f in base:
-            
             # Extrair o data/hora do arquivo da banda 13 para download do arquivo GLM
             ftime = (datetime.datetime.strptime(f[f.find("M6C13_G16_s") + 11:f.find("_e") - 1], '%Y%j%H%M%S'))
             date_ini = datetime.datetime(ftime.year, ftime.month, ftime.day, ftime.hour, ftime.minute)
             date_end = datetime.datetime(ftime.year, ftime.month, ftime.day, ftime.hour, ftime.minute) + datetime.timedelta(minutes=9, seconds=59)
-            
             for x in imagens:
                 xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
                 if date_ini <= xtime <= date_end:
@@ -225,19 +222,44 @@ def check_images(c_bands):
     else:
         logging.info(f'Sem novas imagens GLM')
 
-
-
-
-
-
-
-
-
-   
-
-
-
-
+    # Checagem de novas imagens ndvi (Band 20)
+    if c_bands["02"] and c_bands["03"]:
+        # Carrega os arquivos de processamento das bandas para composicao do ndvi
+        file_ch02 = read_process_file('band02')
+        file_ch03 = read_process_file('band03')
+        # Cria lista vazia para adicionar os produtos que forem baixados
+        product_list = []
+        # Looping a partir dos arquivos da banda 02 que compoem o ndvi
+        for x in file_ch02:
+            date_now = datetime.datetime.now()
+            date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
+            date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00)) + datetime.timedelta(hours=5, minutes=1)
+            date_file = (datetime.datetime.strptime(x[x.find("M6C02_G16_s") + 11:x.find("_e") - 1], '%Y%j%H%M%S'))
+            if date_ini <= date_file <= date_end:
+                # Verifica se ha arquivo correspondente na banda 03
+                matches_ch03 = [z for z in file_ch03 if z.startswith(x[0:43].replace('M6C02', 'M6C03'))]
+                # Se houver arquivos de mesma data nas 2 bandas
+                if x and matches_ch03:
+                    product_list.append(f'{x.strip()};{matches_ch03[0].strip()}')
+            else:
+                continue
+        if product_list:
+            # Cria o arquivo com a nova lista de imagens
+            write_new_file("band20", product_list)
+            # Realiza a comparacao da lista nova com a lista antiga, se houver novas imagens, cria o arquivo de processamento e aponta True no dicionario de controle das bandas
+            c_bands["20"] = write_process_file("band20")
+            if c_bands["20"]:
+                logging.info(f'Novas imagens NDVI')
+            else:
+                logging.info(f'Sem novas imagens NDVI')
+                os.remove(f'{dir_temp}band20_process.txt')
+            # Transforma o arquivo band??_new.txt para band??_old.txt
+            os.replace(f'{dir_temp}band20_new.txt', f'{dir_temp}band20_old.txt')
+        else:
+            c_bands["20"] = False
+            logging.info(f'Sem novas imagens NDVI')
+    else:
+        logging.info(f'Sem novas imagens NDVI')
 
     # Checagem de novas imagens fdcf (Band 21)
     if c_bands["17"]:
@@ -676,7 +698,6 @@ def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
 
 
 def process_rrqpef(rrqpef, ch13, v_extent):
-    
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
     file_var = 'RRQPE'
     # Captura a hora para contagem do tempo de processamento da imagem
@@ -917,7 +938,6 @@ def process_glm(ch13, glm_list, v_extent):
 
 
 def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
-    
     global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
@@ -991,8 +1011,8 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     NDVI_fmax = np.fmax(NDVI_fmax,NDVI)
 
     # // Retirando as nuvens do arquivo NDVI
-    NDVI_fmax = np.where(data_mask==0,NDVI,data_mask)
-    NDVI_fmax[NDVI_fmax == 1]= np.nan
+    NDVI_fmax[np.multiply(NDVI_fmax,data_mask)!=0] = np.nan
+
 
     # Formatando data para plotar na imagem e salvar o arquivo
     date = (datetime.datetime.strptime(dtime_ch02, '%Y%j%H%M%S'))
@@ -1205,7 +1225,6 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
 
 
 def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
-    
     global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
 
     def degrees(file_id):
@@ -1267,7 +1286,6 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     file_var = 'FDCF'
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
-    
     # Area de interesse para recorte
     if v_extent == 'br':
         # Brasil
@@ -1296,7 +1314,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     matriz_pixels_fogo = []
     fire_mask_values = fire_mask.variables['Mask'][:, :]
     selected_fires = (fire_mask_values == 10) | (fire_mask_values == 11) | (fire_mask_values == 13) | (
-            fire_mask_values == 30) | (fire_mask_values == 33)
+            fire_mask_values == 30) | (fire_mask_values == 31) | (fire_mask_values == 33)
     lat, lon = degrees(fire_mask)
     # separando Latitudes e Longitudes dos pontos
     p_lat = lat[selected_fires]
@@ -1488,7 +1506,407 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
 
 def processing(p_bands, p_br, p_sp):
+    global dir_in, dir_temp
+    # Cria lista vazia para controle do processamento paralelo
+    process_br = []
+    # Cria lista vazia para controle processamento paralelo
+    process_sp = []
+    # Variavel de processamento diario do NDVI
+    ndvi_diario = False
+    ultima_diario = []
 
+    # Processando arquivos das bandas do ABI
+    # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+    if p_br:
+        logging.info("")
+        logging.info('PROCESSANDO IMAGENS "BR"...')
+        # Contador para processamento nas 16 bandas
+        for x in range(1, 17):
+            # Transforma o inteiro contador em string e com 2 digitos
+            b = str(x).zfill(2)
+            # Se o dicionario de controle das bandas apontar True para essa banda, realiza o processamento
+            if p_bands[b]:
+                # Le o arquivo de processamento da banda
+                img = read_process_file(f'band{b}')
+                # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
+                for i in img:
+                    # Remove possiveis espacos vazios no inicio ou final da string
+                    i = i.strip()
+                    # Tenta realizar o processamento da imagem
+                    try:
+                        # Cria o processo com a funcao de processamento
+                        process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{i}', b, "br"))
+                        # Adiciona o processo na lista de controle do processamento paralelo
+                        process_br.append(process)
+                        # Inicia o processo
+                        process.start()
+                    # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                    except OSError as ose:
+                        # Realiza o log do erro
+                        logging.info(f'Erro Arquivo - OSError - {i}')
+                        logging.info(str(ose))
+                        # Remove a imagem com erro de processamento
+                        os.remove(f'{dir_in}band{b}/{i}')
+                    except AttributeError as ae:
+                        # Realiza o log do erro
+                        logging.info(f'Erro Arquivo - AttributeError - {i}')
+                        logging.info(str(ae))
+                        # Remove a imagem com erro de processamento
+                        os.remove(f'{dir_in}band{b}/{i}')
+            # Se o dicionario de controle das bandas apontar False para essa banda, nao realiza o processamento e continua a tentativa nas outras bandas
+            else:
+                continue
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_br:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa lista vazia para controle do processamento paralelo
+        process_br = []
+    # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
+    if p_sp:
+        logging.info("")
+        logging.info('PROCESSANDO IMAGENS "SP"...')
+        # Contador para processamento nas 16 bandas
+        for x in range(1, 17):
+            # Transforma o inteiro contador em string e com 2 digitos
+            b = str(x).zfill(2)
+            # Se o dicionario de controle das bandas apontar True para essa banda, realiza o processamento
+            if p_bands[b]:
+                # Le o arquivo de processamento da banda
+                img = read_process_file(f'band{b}')
+                # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
+                for i in img:
+                    # Remove possiveis espacos vazios no inicio ou final da string
+                    i = i.strip()
+                    # Tenta realizar o processamento da imagem
+                    try:
+                        # Cria o processo com a funcao de processamento
+                        process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{i}', b, "sp"))
+                        # Adiciona o processo na lista de controle do processamento paralelo
+                        process_sp.append(process)
+                        # Inicia o processo
+                        process.start()
+                    # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                    except OSError as ose:
+                        # Realiza o log do erro
+                        logging.info("Erro Arquivo - OSError")
+                        logging.info(str(ose))
+                        # Remove a imagem com erro de processamento
+                        os.remove(f'{dir_in}band{b}/{i}')
+                    except AttributeError as ae:
+                        # Realiza o log do erro
+                        logging.info(f'Erro Arquivo - AttributeError - {i}')
+                        logging.info(str(ae))
+                        # Remove a imagem com erro de processamento
+                        os.remove(f'{dir_in}band{b}/{i}')
+            # Se o dicionario de controle das bandas apontar False para essa banda, nao realiza o processamento e continua a tentativa nas outras bandas
+            else:
+                continue
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_sp:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa lista vazia para controle do processamento paralelo
+        process_sp = []
+
+    # Checagem se e possivel gerar imagem TrueColor
+    if p_bands["17"]:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS TRUECOLOR "BR"...')
+            band17 = read_process_file('band17')
+            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
+            for i in band17:
+                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
+                i = i.strip().split(';')
+                # Montando dicionario de argumentos
+                kwargs = {'ch01': f'{dir_in}band01/{i[0].replace(".nc", "_reproj_br.nc")}', 'ch02': f'{dir_in}band02/{i[1].replace(".nc", "_reproj_br.nc")}',
+                          'ch03': f'{dir_in}band03/{i[2].replace(".nc", "_reproj_br.nc")}'}
+                # Tenta realizar o processamento da imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process = Process(target=process_band_rgb, args=("truecolor", "br"), kwargs=kwargs)
+                    # Adiciona o processo na lista de controle do processamento paralelo
+                    process_br.append(process)
+                    # Inicia o processo
+                    process.start()
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except OSError as ose:
+                    # Realiza o log do erro
+                    logging.info("Erro Arquivo - OSError")
+                    logging.info(str(ose))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band01/{i[0].replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band02/{i[1].replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band03/{i[2].replace(".nc", "_reproj_br.nc")}')
+                except AttributeError as ae:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - AttributeError - {i}')
+                    logging.info(str(ae))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band01/{i[0].replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band02/{i[1].replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band03/{i[2].replace(".nc", "_reproj_br.nc")}')
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_br:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+            # Limpa lista vazia para controle do processamento paralelo
+            process_br = []
+        # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
+        if p_sp:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS TRUECOLOR "SP"...')
+            band17 = read_process_file('band17')
+            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
+            for i in band17:
+                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
+                i = i.strip().split(';')
+                # Montando dicionario de argumentos
+                kwargs = {'ch01': f'{dir_in}band01/{i[0].replace(".nc", "_reproj_sp.nc")}', 'ch02': f'{dir_in}band02/{i[1].replace(".nc", "_reproj_sp.nc")}',
+                          'ch03': f'{dir_in}band03/{i[2].replace(".nc", "_reproj_sp.nc")}'}
+                # Tenta realizar o processamento da imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process = Process(target=process_band_rgb, args=("truecolor", "sp"), kwargs=kwargs)
+                    # Adiciona o processo na lista de controle do processamento paralelo
+                    process_sp.append(process)
+                    # Inicia o processo
+                    process.start()
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except OSError as ose:
+                    # Realiza o log do erro
+                    logging.info("Erro Arquivo - OSError")
+                    logging.info(str(ose))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band01/{i[0].replace(".nc", "_reproj_sp.nc")}')
+                    os.remove(f'{dir_in}band02/{i[1].replace(".nc", "_reproj_sp.nc")}')
+                    os.remove(f'{dir_in}band03/{i[2].replace(".nc", "_reproj_sp.nc")}')
+                except AttributeError as ae:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - AttributeError - {i}')
+                    logging.info(str(ae))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band01/{i[0].replace(".nc", "_reproj_sp.nc")}')
+                    os.remove(f'{dir_in}band02/{i[1].replace(".nc", "_reproj_sp.nc")}')
+                    os.remove(f'{dir_in}band03/{i[2].replace(".nc", "_reproj_sp.nc")}')
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_sp:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+            # Limpa lista vazia para controle do processamento paralelo
+            process_sp = []
+
+    # Checagem se e possivel gerar imagem RRQPEF
+    if p_bands["18"]:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS RRQPEF "BR"...')
+            band18 = read_process_file('band18')
+            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
+            for i in band18:
+                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
+                i = i.strip().split(';')
+                # Tenta realizar o processamento da imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process = Process(target=process_rrqpef, args=(f'{dir_in}rrqpef/{i[0]}', f'{dir_in}band13/{i[1].replace(".nc", "_reproj_br.nc")}', "br"))
+                    # Adiciona o processo na lista de controle do processamento paralelo
+                    process_br.append(process)
+                    # Inicia o processo
+                    process.start()
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except OSError as ose:
+                    # Realiza o log do erro
+                    logging.info("Erro Arquivo - OSError")
+                    logging.info(str(ose))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}rrqpef/{i[0]}')
+                    os.remove(f'{dir_in}band13/{i[1].replace(".nc", "_reproj_br.nc")}')
+                except AttributeError as ae:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - AttributeError - {i}')
+                    logging.info(str(ae))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}rrqpef/{i[0]}')
+                    os.remove(f'{dir_in}band13/{i[1].replace(".nc", "_reproj_br.nc")}')
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_br:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+            # Limpa lista vazia para controle do processamento paralelo
+            process_br = []
+        # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
+        if p_sp:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS RRQPEF "SP"...')
+            band18 = read_process_file('band18')
+            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
+            for i in band18:
+                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
+                i = i.strip().split(';')
+                # Tenta realizar o processamento da imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process = Process(target=process_rrqpef, args=(f'{dir_in}rrqpef/{i[0]}', f'{dir_in}band13/{i[1].replace(".nc", "_reproj_sp.nc")}', "sp"))
+                    # Adiciona o processo na lista de controle do processamento paralelo
+                    process_sp.append(process)
+                    # Inicia o processo
+                    process.start()
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except OSError as ose:
+                    # Realiza o log do erro
+                    logging.info("Erro Arquivo - OSError")
+                    logging.info(str(ose))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}rrqpef/{i[0]}')
+                    os.remove(f'{dir_in}band13/{i[1].replace(".nc", "_reproj_sp.nc")}')
+                except AttributeError as ae:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - AttributeError - {i}')
+                    logging.info(str(ae))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}rrqpef/{i[0]}')
+                    os.remove(f'{dir_in}band13/{i[1].replace(".nc", "_reproj_sp.nc")}')
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_sp:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+            # Limpa lista vazia para controle do processamento paralelo
+            process_sp = []
+
+    # Checagem se e possivel gerar imagem GLM
+    if p_bands["19"]:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS GLM "BR"...')
+            band19 = read_process_file('band19')
+            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
+            for i in band19:
+                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
+                i = i.strip().split(';')
+                # Coletando lista de GLM no indice 1
+                j = i[1].replace("'", "").strip('][').split(', ')
+                # Tenta realizar o processamento da imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process = Process(target=process_glm, args=(f'{dir_in}band13/{i[0].replace(".nc", "_reproj_br.nc")}', j, "br"))
+                    # Adiciona o processo na lista de controle do processamento paralelo
+                    process_br.append(process)
+                    # Inicia o processo
+                    process.start()
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except OSError as ose:
+                    # Realiza o log do erro
+                    logging.info("Erro Arquivo - OSError")
+                    logging.info(str(ose))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band13/{i[0].replace(".nc", "_reproj_br.nc")}')
+                    for f in j:
+                        os.remove(f'{dir_in}glm/{f}')
+                except AttributeError as ae:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - AttributeError - {i}')
+                    logging.info(str(ae))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band13/{i[0].replace(".nc", "_reproj_br.nc")}')
+                    for f in j:
+                        os.remove(f'{dir_in}glm/{f}')
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_br:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+            # Limpa lista vazia para controle do processamento paralelo
+            process_br = []
+
+    # Checagem se e possivel gerar imagem NDVI
+    if p_bands["20"]:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS NDVI "BR"...')
+            band20 = read_process_file('band20')
+            # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
+            for i in band20:
+                # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento
+                i = i.strip().split(';')
+                # Captura a data do arquivo
+                date_file = (datetime.datetime.strptime(i[0][i[0].find("M6C02_G16_s") + 11:i[0].find("_e") - 1], '%Y%j%H%M%S'))
+                # Captura a data atual
+                date_now = datetime.datetime.now()
+                # Aponta o horario 18h para a data atual
+                date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+                # Se a data do arquivo for maior ou igual as 18h da data atual e o dia da semana atual for sabado (6)
+                if date_file >= date:
+                    # Adiciona true para a variavel de processamento semanal
+                    ndvi_diario = True
+                    # Guarda a ultima imagem semanal
+                    ultima_diario = i
+                    # Pula o processamento dessa ultima imagem
+                    continue
+                # Tenta realizar o processamento da imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process = Process(target=process_ndvi,
+                                      args=(ndvi_diario, f'{dir_in}band02/{i[0].replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{i[1].replace(".nc", "_reproj_br.nc")}', "br"))
+                    # Adiciona o processo na lista de controle do processamento paralelo
+                    process_br.append(process)
+                    # Inicia o processo
+                    process.start()
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except OSError as ose:
+                    # Realiza o log do erro
+                    logging.info("Erro Arquivo - OSError")
+                    logging.info(str(ose))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band02/{i[0].replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band03/{i[1].replace(".nc", "_reproj_br.nc")}')
+                except AttributeError as ae:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - AttributeError - {i}')
+                    logging.info(str(ae))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band02/{i[0].replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band03/{i[1].replace(".nc", "_reproj_br.nc")}')
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_br:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+
+            if ndvi_diario:
+                # Tenta realizar o processamento da ultima imagem
+                try:
+                    # Cria o processo com a funcao de processamento
+                    process_ndvi(ndvi_diario, f'{dir_in}band02/{ultima_diario[0].replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ultima_diario[1].replace(".nc", "_reproj_br.nc")}', "br")
+                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+                except OSError as ose:
+                    # Realiza o log do erro
+                    logging.info("Erro Arquivo - OSError")
+                    logging.info(str(ose))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band02/{ultima_diario[0].replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band03/{ultima_diario[1].replace(".nc", "_reproj_br.nc")}')
+                except AttributeError as ae:
+                    # Realiza o log do erro
+                    logging.info(f'Erro Arquivo - AttributeError - {ultima_diario}')
+                    logging.info(str(ae))
+                    # Remove a imagem com erro de processamento
+                    os.remove(f'{dir_in}band02/{ultima_diario[0].replace(".nc", "_reproj_br.nc")}')
+                    os.remove(f'{dir_in}band03/{ultima_diario[1].replace(".nc", "_reproj_br.nc")}')
+
+            # Limpa lista vazia para controle do processamento paralelo
+            process_br = []
+
+        # Verifica se deve ser gerado a imagem ndvi, se sim, a banda continua True, caso nao, a banda volta para False
+        if ndvi_diario and datetime.datetime.now().isoweekday() == 6:
+            p_bands["20"] = True
+        else:
+            p_bands["20"] = False
+            # Remove o arquivo de processamento ndvi
+            os.remove(f'{dir_temp}band20_process.txt')
 
     # Checagem se e possivel gerar imagem FDCF
     if p_bands["21"]:
@@ -1497,9 +1915,7 @@ def processing(p_bands, p_br, p_sp):
         if p_br:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS FDCF "BR"...')
-
             band21 = read_process_file('band21')
-            
             # Para cada imagem no arquivo, cria um processo chamando a funcao de processamento
             for i in band21:
                 # Remove possiveis espacos vazios no inicio ou final da string e separa cada termo como um elemento

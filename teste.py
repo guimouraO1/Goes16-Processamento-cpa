@@ -26,6 +26,7 @@ from modules.processamento import reproject
 import cartopy.feature as cfeature # features
 from modules.processamento import area_para_recorte
 import json
+
 oldbands = abrir_old_json()
 
 dirs = get_dirs()
@@ -41,19 +42,3 @@ dir_logos = dirs['dir_logos']
 dir_temp = dirs['dir_temp']
 arq_log = dirs['arq_log']
 
-
-old_bands = abrir_old_json()
-# Carrega os arquivos de processamento das bandas para composicao do ndvi
-file_ch02 = old_bands['02']
-
-# Função para modificar um valor em um arquivo JSON.
-def modificar_chave_old_bands(caminho_arquivo, chave, novo_valor):
-    with open(caminho_arquivo, 'r') as arquivo_json:
-        dados = json.load(arquivo_json)
-    dados['oldImagesName'][chave] = novo_valor
-    with open(caminho_arquivo, 'w') as arquivo_json:
-        json.dump(dados, arquivo_json, indent=4)
-# Download arquivo fdcf
-file_name = 'OR_ABI-L2-FDCF-M6_G16_s20232471430205_e20232471439513_c20232471440031.nc'
-
-modificar_chave_old_bands(f'oldBands.json', '21', file_name)
