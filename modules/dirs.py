@@ -8,7 +8,6 @@ def get_dirs():
         'dir_in': dir_main + 'goes/',
         'dir_main': dir_main,
         'dir_out': dir_main + 'output/',
-        'dir_libs': dir_main + 'libs/',
         'dir_shapefiles': dir_main + 'shapefiles/',
         'dir_colortables': dir_main + 'colortables/',
         'dir_logos': dir_main + 'logos/',

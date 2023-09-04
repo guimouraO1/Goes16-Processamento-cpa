@@ -21,7 +21,10 @@ from modules.dirs import get_dirs
 from modules.utilities import load_cpt  # Funcao para ler as paletas de cores de arquivos CPT
 from modules.utilities import download_prod
 from shapely.geometry import Point
+import shapely.geometry as sg
 from shutil import copyfile  # Utilitario para copia de arquivos
+# Configurar o NumPy para ignorar os avisos
+np.seterr(invalid='ignore')
 
 osr.DontUseExceptions()
 
@@ -34,7 +37,6 @@ dirs = get_dirs()
 dir_in = dirs['dir_in']
 dir_main = dirs['dir_main']
 dir_out = dirs['dir_out']
-dir_libs = dirs['dir_libs']
 dir_shapefiles = dirs['dir_shapefiles']
 dir_colortables = dirs['dir_colortables']
 dir_logos = dirs['dir_logos']
@@ -645,7 +647,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     yyyymmddhhmn = year+month+day_of_year+hora+min
 
     # Download arquivo mascara de nuvens
-    print("Download File Mask NDVI")
+    logging.info("Download File Mask NDVI")
     file_mask = download_prod(yyyymmddhhmn,'ABI-L2-ACMF',f'{dir_in}clsm/')
 
     # Reprojetando o arquivo de nuvens
@@ -690,11 +692,11 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     date_file = date.strftime('%Y%m%d_%H%M%S')
 
     # Salvando array NDVI
-    print('Salvando - NDVI')
+    logging.info('Salvando - NDVI')
     NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_file}_{v_extent}.npy')
 
     # Removendo os arquivos Clear Sky Mask baixados e reprojetado de nuvens
-    print('Removendo arquivo filemask do diretório')
+    logging.info('Removendo arquivo filemask do diretório')
     os.remove(f'{dir_in}clsm/{r_file}')
     os.remove(f'{dir_in}clsm/{file_mask}.nc')
 
@@ -726,7 +728,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
             if date_ini <= date_file <= date_end + datetime.timedelta(minutes=1):
-                # print(f, date_file)
+                # logging.info(f, date_file)
                 # Le o arquivo NDVI
                 NDVI_file = np.load(f'{dir_in}ndvi/{f}', allow_pickle=True)
                 NDVI_file[NDVI_file > 0.999] = np.nan
@@ -853,7 +855,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
             if date_ini <= date_file <= date_end + datetime.timedelta(minutes=1):
-                # print(f, date_file)
+                # logging.info(f, date_file)
                 # Le o arquivo NDVI
                 NDVI_file = np.load(f'{dir_in}ndvi/{f}', allow_pickle=True)
                 NDVI_file[NDVI_file > 0.999] = np.nan
@@ -911,10 +913,9 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         return lat, lon
 
     def save_txt(array, nome_arquivo_txt):
-        print('savetxt')
         # Checa se a matriz é vazia
         if len(array) == 0:
-            print(f'{nome_arquivo_txt} vazia')
+            logging.info(f'{nome_arquivo_txt} vazia')
             pass
         else:
             # Criando nome do arquivo e diretório -- Mudar as barras para Linux
@@ -939,19 +940,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     processing_start_time = time.time()
     
     # Area de interesse para recorte
-    if v_extent == 'br':
-        # Brasil
-        extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 4.0
-    elif v_extent == 'sp':
-        # São Paulo
-        extent = [-53.25, -26.0, -44.0, -19.5]  # Min lon, Min lat, Max lon, Max lat
-        # Choose the image resolution (the higher the number the faster the processing is)
-        resolution = 1.0
-    else:
-        extent = [-115.98, -55.98, -25.01, 34.98]  # Min lon, Min lat, Max lon, Max lat
-        resolution = 2.0
+    extent, resolution = area_para_recorte(v_extent)
 
     # Lendo imagem FDCF
     fire_mask = Dataset(fdcf)
@@ -974,28 +963,29 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
     brasil = (shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
+    brasil_geometries = list(sg.shape(geometry) for geometry in brasil)
     
     for i in range(len(p_lat)):
-        if brasil[0].covers(Point(p_lon[i], p_lat[i])): ################################
+        point = sg.Point(p_lon[i], p_lat[i])
+        if any(geo.contains(point) for geo in brasil_geometries):
             p = (p_lat[i], p_lon[i])
             matriz_pixels_fogo.append(p)
 
     
-   
     save_txt(matriz_pixels_fogo, f'fdcf_{date.strftime("%Y%m%d_%H%M%S")}_br')
-    print('4')
+
     
     # Le o arquivo de controle de quantidade de pontos
     try:
         with open(f'{dir_temp}band21_control.txt', 'r') as fo:
             control = fo.readline()
-            print("tamanho control withopen: ", int(control))
+            logging.info("tamanho control withopen: ", int(control))
     except:
         control = 0
-        print("tamanho control except: ", int(control))
+        logging.info("tamanho control except: ", int(control))
 
     # Verifica se as ocorrencias de pontos é maior que as anteriores, se sim, armazena a quantidade e as imagens para gerar fundo
-    print("Len matriz_pixels_fogo: ", len(matriz_pixels_fogo), " int control: ", int(control))
+    logging.info("Len matriz_pixels_fogo: ", len(matriz_pixels_fogo), " int control: ", int(control))
     date_ini = datetime.datetime(date.year, date.month, date.day, int(13), int(00))
     date_end = datetime.datetime(date.year, date.month, date.day, int(18), int(1))
     if len(matriz_pixels_fogo) > int(control) and date_ini <= date <= date_end:
@@ -1005,7 +995,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
             fo.write(str(len(matriz_pixels_fogo)))
 
-    print("fdcf_diario: ", fdcf_diario)
+    logging.info("fdcf_diario: ", fdcf_diario)
     if fdcf_diario:
         # Reiniciar contagem para verificar imagem com maior quantidade de pontos no dia
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
@@ -1123,7 +1113,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
                         else:
                             continue
             except Exception as erro:
-                print(f'Erro no processamento da matriz diária: {erro}')
+                logging.info(f'Erro no processamento da matriz diária: {erro}')
                 log_erro.append(f'{name} - Error: {erro}')
                 pass
 
@@ -1146,7 +1136,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
         # Cria os nomes dos arquivos diários e salva no "directory".
 
-        print("save_txt: matriz_diaria")
+        logging.info("save_txt: matriz_diaria")
         save_txt(matriz_diaria, f'fdcf_{date.strftime("%Y%m%d")}_br')
         save_log_erro(log_erro, f'fdcf_{date.strftime("%Y%m%d")}_errors')
 
@@ -1155,7 +1145,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         plt.close()
 
         # Remove arquivos separados do dia
-        print('Removendo os arquivos fdcf do dia do diretório')
+        logging.info('Removendo os arquivos fdcf do dia do diretório')
         for name in fdcf_list:
             os.remove(f'{dir_out}fdcf/{name}')
 
@@ -1512,19 +1502,19 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
             date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
             
             # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
-            print("date_file: ", type(date_file), date_file)
-            print("date: ", type(date), date)
-            print("date_file: ", date_file.year, date_file.month, date_file.day, "date: ", date.year, date.month, date.day)
+            logging.info("date_file: ", type(date_file), date_file)
+            logging.info("date: ", type(date), date)
+            logging.info("date_file: ", date_file.year, date_file.month, date_file.day, "date: ", date.year, date.month, date.day)
             
             #Checagem para ver se é 23:50 para processamento do acumulado diário
             if date_file.year == date.year and date_file.month == date.month and date_file.day == date.day and date_file >= date:
                 # Adiciona true para a variavel de processamento semanal
                 fdcf_diario = True
-                print("fdcf_diario: ", fdcf_diario)
+                logging.info("fdcf_diario: ", fdcf_diario)
             else:
                 # Adiciona false para a variavel de processamento semanal
                 fdcf_diario = False
-            print("fdcf_diario: ", fdcf_diario)
+            logging.info("fdcf_diario: ", fdcf_diario)
             
             # Tenta realizar o processamento da imagem
             try:

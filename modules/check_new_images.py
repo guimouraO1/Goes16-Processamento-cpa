@@ -169,7 +169,6 @@ def checar_fdcf(bands, dir_in):
         try:
             # Download arquivo fdcf
             name_fdcf = download_prod(datetime.datetime.strftime(ftime, '%Y%m%d%H%M'), "ABI-L2-FDCF", f'{dir_in}fdcf/')
-            print(name_fdcf)
             
             # Modifica o arquivo JSON com a imagem mais recente.               
             modificar_chave_old_bands(f'oldBands.json', '21', name_fdcf)
