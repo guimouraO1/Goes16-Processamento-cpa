@@ -1432,6 +1432,8 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
         ndvi_diario = False
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
+            logging.info('')
+            logging.info('PROCESSANDO IMAGENS NDVI...')
             # Captura a data do arquivo
             date_file = (datetime.datetime.strptime(ch02[ch02.find("M6C02_G16_s") + 11:ch02.find("_e") - 1], '%Y%j%H%M%S'))
             # Captura a data atual
