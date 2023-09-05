@@ -135,13 +135,13 @@ def adicionando_logos(fig):
 
 def abrir_old_json():
     # Função para abrir o arquivo.json
-    with open('oldBands.json', 'r') as jsonOld:
+    with open('new_bands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 
 
-def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
-    global dir_in
+def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution, dir_in):
+
     def get_geot(ex, nlines, ncols):
         
         # Compute resolution based on data dimension
@@ -246,6 +246,7 @@ def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution):
 def process_band_cmi(file, ch, v_extent):
     
     global dir_shapefiles, dir_colortables, dir_logos, dir_out
+    
     file_var = 'CMI'
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
@@ -254,7 +255,7 @@ def process_band_cmi(file, ch, v_extent):
     extent, resolution = area_para_recorte(v_extent)
         
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
-    dtime, satellite, reproject_band = reproject(file, file_var, v_extent, resolution)
+    dtime, satellite, reproject_band = reproject(file, file_var, v_extent, resolution, dir_in)
 
     if 1 <= int(ch) <= 6:
         data = reproject_band.ReadAsArray()
@@ -458,7 +459,7 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     extent, resolution = area_para_recorte(v_extent)
 
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
-    dtime, satellite, reproject_rrqpef = reproject(rrqpef, file_var, v_extent, resolution)
+    dtime, satellite, reproject_rrqpef = reproject(rrqpef, file_var, v_extent, resolution, dir_in)
     data = reproject_rrqpef.ReadAsArray()
     reproject_rrqpef = None
     del reproject_rrqpef
@@ -651,7 +652,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     file_mask = download_prod(yyyymmddhhmn,'ABI-L2-ACMF',f'{dir_in}clsm/')
 
     # Reprojetando o arquivo de nuvens
-    reproject(f'{dir_in}clsm/{file_mask}.nc','BCM',v_extent,4)
+    reproject(f'{dir_in}clsm/{file_mask}.nc','BCM',v_extent, 4, dir_in)
 
     # Capturando o nome do arquivo reprojetado
     r_file = file_mask + f'_reproj_{v_extent}.nc'
@@ -1148,7 +1149,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     logging.info(f'{fdcf} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
-def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
+def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
     
     # Checagem se e possivel gerar imagem bandas 1-16
     if p_br:
@@ -1160,21 +1161,19 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
             b = str(x).zfill(2)
             # Se a banda tiver novas glm_list para o dia:
             if bands[b]:
-                # Imagens para processamento
-                old_bands = abrir_old_json()
                 # Tentando Processar
                 try:
                     # Cria o processo com a funcao de processamento
-                    process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{old_bands[b]}', b, "br"))
+                    process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{new_bands[b]}', b, "br"))
                     # Adiciona o processo na lista de controle do processamento paralelo
                     process_br.append(process)
                     # Inicia o processo
                     process.start()
                 # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
                 except Exception as e:
-                    logging.info(f'Erro {e} no Arquivo - {old_bands[b]}')
+                    logging.info(f'Erro {e} no Arquivo - {new_bands[b]}')
                     # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band{b}/{old_bands[b]}')
+                    os.remove(f'{dir_in}band{b}/{new_bands[b]}')
             else:
                 continue
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
@@ -1193,21 +1192,19 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
             b = str(x).zfill(2)
             # Se a banda tiver novas glm_list para o dia:
             if bands[b]:
-                # Imagens para processamento
-                old_bands = abrir_old_json()
                 # Tentando Processar
                 try:
                     # Cria o processo com a funcao de processamento
-                    process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{old_bands[b]}', b, 'sp'))
+                    process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{new_bands[b]}', b, 'sp'))
                     # Adiciona o processo na lista de controle do processamento paralelo
                     process_sp.append(process)
                     # Inicia o processo
                     process.start()
                 # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
                 except Exception as e:
-                    logging.info(f'Erro {e} no Arquivo - {old_bands[b]}')
+                    logging.info(f'Erro {e} no Arquivo - {new_bands[b]}')
                     # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band{b}/{old_bands[b]}')
+                    os.remove(f'{dir_in}band{b}/{new_bands[b]}')
             else:
                 continue
         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
@@ -1218,20 +1215,17 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp):
         process_sp.clear()
 
 
-def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp):
-    
-    old_bands = abrir_old_json()
+def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands):
     # Checagem se e possivel gerar imagem TrueColor
     if bands['17']:
-        
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS TRUECOLOR "BR"...')
             # Pegando nome das bandas 01, 02, 03
-            ch01 = old_bands['01']
-            ch02 = old_bands['02']
-            ch03 = old_bands['03']
+            ch01 = new_bands['01']
+            ch02 = new_bands['02']
+            ch03 = new_bands['03']
             # Montando dicionario de argumentos
             kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', 
                       'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}'}
@@ -1259,9 +1253,9 @@ def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp):
             logging.info("")
             logging.info('PROCESSANDO IMAGENS TRUECOLOR "SP"...')
             # Pegando nome das bandas 01, 02, 03
-            ch01 = old_bands['01']
-            ch02 = old_bands['02']
-            ch03 = old_bands['03']
+            ch01 = new_bands['01']
+            ch02 = new_bands['02']
+            ch03 = new_bands['03']
             # Montando dicionario de argumentos
             kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_sp.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_sp.nc")}', 
                       'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_sp.nc")}'}
@@ -1285,12 +1279,11 @@ def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp):
         process_sp.clear()
 
 
-def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp):
-    old_bands = abrir_old_json()
+def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands):
     # Checagem se e possivel gerar imagem RRQPEF   
     if bands['18']:
         # Pega o nome netCDF da banda 13
-        ch13 = old_bands['13']
+        ch13 = new_bands['13']
         # Pega a lista de arquivos baixados rrqpef
         rrqpef_list = os.listdir(f'{dir_in}rrqpef/')
         # Pega só o primeiro arquivo para enviar de argumento
@@ -1352,10 +1345,9 @@ def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp):
         process_sp.clear()
 
 
-def iniciar_processo_glm(p_br, bands, process_br, dir_in):
-    old_bands = abrir_old_json()
+def iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands):
     # Pega o nome netCDF da banda 13
-    ch13 = old_bands['13']
+    ch13 = new_bands['13']
     # Checagem se e possivel gerar imagem GLM
     if bands['19']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1404,13 +1396,10 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in):
         logging.info(f'Sem imagens correspondentes a data para glm ')
         
         
-def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
-    
-    oldbands = abrir_old_json()
-    
+def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
     # Pega o nome netCDF das bandas 02, 03
-    ch02 = oldbands['02']
-    ch03 = oldbands['03']
+    ch02 = new_bands['02']
+    ch03 = new_bands['03']
 
     # Checagem se e possivel gerar imagem NDVI
     if bands['20']:
@@ -1464,21 +1453,19 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
             process_br.clear()
 
 
-def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
+def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
     if bands['21']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br: 
             # Checagem se e possivel gerar imagem FDCF
             fdcf_diario = False
-            # Coleta o nome das novas bandas
-            old_bands = abrir_old_json()
             # Pegando nome das bands 01, 02, 03
-            ch01 = old_bands['01']
-            ch02 = old_bands['02']
-            ch03 = old_bands['03']
+            ch01 = new_bands['01']
+            ch02 = new_bands['02']
+            ch03 = new_bands['03']
             
             # Pega o nome do arquivo band01 para fazer comparação
-            fdcf = old_bands['21']
+            fdcf = new_bands['21']
             
             logging.info("")
             logging.info('PROCESSANDO IMAGENS FDCF "BR"...')
@@ -1533,25 +1520,27 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
 
 # ========================================#     Main     #========================================== #
 
-def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
+def processamento_das_imagens(bands, p_br, p_sp, dir_in, new_bands): 
    
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
     
+    new_bands = abrir_old_json()
+    
     try:
-        iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp)
+        iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands)
         
-        iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp)
+        iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands)
 
-        iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp)
+        iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands)
 
-        iniciar_processo_glm(p_br, bands, process_br, dir_in)
+        iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands)
         
-        iniciar_processo_ndvi(p_br, bands, process_br, dir_in)
+        iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands)
         
-        iniciar_processo_fdcf(p_br, bands, process_br, dir_in)
+        iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands)
         
     except Exception as e:
         logging.info(f'Ocorrou um Erro {e} no Processamento')

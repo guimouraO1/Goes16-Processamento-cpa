@@ -66,6 +66,8 @@ def modificar_chave_old_bands(caminho_arquivo, chave, novo_valor):
 
 # Checa bandas 1-16
 def checar_bandas(bands, dir_in):
+    # Obtém as imagens antigas.
+    old_bands = abrir_old_json()
     # Checagem imagens ABI 1-16
     for x in range(1, 17):
         # Formata um int para um string de dois dígitos (01, 02, ..., 16).
@@ -76,9 +78,7 @@ def checar_bandas(bands, dir_in):
         if imagens:
             # Encontra a imagem mais recente na lista.
             latestBand = max(imagens)
-            # Obtém as imagens antigas.
-            old_bands = abrir_old_json()
-            
+        
             # Se houver uma imagem mais recente e ela for diferente das antigas:
             if latestBand and latestBand != old_bands[b]: 
                 logging.info(f'Novas imagens para o dia band{b}')
@@ -114,11 +114,11 @@ def checar_truecolor(bands):
         logging.info(f'Sem novas imagens TRUECOLOR')
 
 
-# Checa se há bandas 13 para rrqpef e baixa o produto
+# Checa se há banda 13 para rrqpef e baixa o produto
 def checar_rrqpef(bands, dir_in):
-    old_bands = abrir_old_json()
     # Checagem de novas imagens rrqpef (Band 18)
     if bands['13']:
+        old_bands = abrir_old_json()
         ch13 = old_bands['13']
         # Extrair o data/hora do arquivo da banda 13 para download do arquivo RRQPEF
         ftime = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
@@ -137,11 +137,10 @@ def checar_rrqpef(bands, dir_in):
 
 # Checa se há bandas 13 para glm
 def checar_glm(bands, dir_in):
-    
-    old_bands = abrir_old_json()
-    ch13 = old_bands['13']    
     # Checagem de novas imagens GLM (Band 19)
     if bands['13']:
+            old_bands = abrir_old_json()
+            ch13 = old_bands['13'] 
             # Cria uma lista com os itens presentes no diretório da banda que são arquivos e terminam com ".nc"
             glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
             # Ordena a lista
@@ -161,13 +160,11 @@ def checar_glm(bands, dir_in):
         logging.info('Sem novas imagens GLM')
 
 
-# Checa se há bandas 2,3 para ndvi
+# Checa se há bandas 2, 3 para ndvi
 def checar_ndvi(bands, dir_in):
-    
-    old_bands = abrir_old_json()
     # Checagem de novas imagens ndvi (Band 20)
     if bands['02'] and bands['03']:
-        
+        old_bands = abrir_old_json()
         # Carrega os arquivos de processamento das bandas para composicao do ndvi
         file_ch02 = old_bands['02']
         # Converte o nome do arquivo da banda 02 para o formato da banda 03
@@ -203,6 +200,7 @@ def checar_ndvi(bands, dir_in):
             logging.info(f'Sem novas imagens NDVI')
 
 
+# Checa se há bandas 1, 2, 3 (truecolor) para fdcf
 def checar_fdcf(bands, dir_in):  
 
     # Checagem de novas imagens fdcf (Band 21)

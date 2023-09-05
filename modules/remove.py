@@ -15,11 +15,11 @@ def abrir_old_json():
 def remover_imagens(bands, dir_in):
     logging.info("")
     logging.info('REMOVENDO IMAGENS PROCESSADAS')
+    oldBands = abrir_old_json()
     # Contador para remover imagens nas 16 bandas
     for x in range(1, 17):
         # Transforma o inteiro contador em string e com 2 digitos
         b = str(x).zfill(2)
-        oldBands = abrir_old_json()
         if bands[b] == True:       
             try:
                 reprojbr = str(oldBands[b])
@@ -32,6 +32,7 @@ def remover_imagens(bands, dir_in):
             except:
                 print(f'Sem imagens para remover {oldBands[b]}')
 
+
     # Controle de produtos de rrqpef
     if bands['18']:
         logging.info('Removendo netCDF-rrqpef processadas')
@@ -40,6 +41,7 @@ def remover_imagens(bands, dir_in):
             os.mkdir(f'{dir_in}rrqpef/')
         except:
             logging.info('Ocorreu um erro ao tentar apagar rrqpef')
+
 
     # Controle de produtos de glm
     if bands['19'] or bands['13']:
@@ -69,8 +71,8 @@ def remover_imagens(bands, dir_in):
         except:
             logging.info('Ocorreu um erro ao tentar apagar glm')
             
+   
     if bands['21']:
-        
         ch21 = oldBands['21']
         logging.info(f'Removendo imagens FDCF')
         try:
