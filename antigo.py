@@ -224,6 +224,7 @@ def check_images(c_bands):
 
     # Checagem de novas imagens ndvi (Band 20)
     if c_bands["02"] and c_bands["03"]:
+        
         # Carrega os arquivos de processamento das bandas para composicao do ndvi
         file_ch02 = read_process_file('band02')
         file_ch03 = read_process_file('band03')

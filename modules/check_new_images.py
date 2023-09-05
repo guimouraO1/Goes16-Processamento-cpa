@@ -6,6 +6,39 @@ import shutil
 import datetime
 from modules.utilities import download_prod
 
+# filtra arquivos glm para verificar se correspondem a data
+def filtrar_imagens_por_intervalo(images, ch13):
+    # Extrai a data e hora da string 'ch13' e define um intervalo de 9 minutos e 59 segundos a partir dela.
+    glm_list = [] 
+    ch13_data = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
+    date_ini = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
+    date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + datetime.timedelta(minutes=9, seconds=59)
+    # Percorre a lista de nomes de imagens e verifica se a data e hora de cada imagem estão dentro do intervalo.
+    for x in images:
+        xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
+        if date_ini <= xtime <= date_end:
+            glm_list.append(x)
+        else:
+            continue
+    
+    return glm_list
+
+
+# Compara imagens fdcf para download
+def checar_pasta_fdcf(ftime, dir_in):
+    name_glr = [f for f in os.listdir(f'{dir_in}fdcf/') if os.path.isfile(os.path.join(f'{dir_in}fdcf/', f)) and re.match('^OR_ABI-L2-FDCF-M6_G16_s.+_e.+_c.+.nc$', f)]
+    for x in name_glr:
+        # Extrai a data/hora do arquivo fdcf
+        f_fdcf_time = (datetime.datetime.strptime(x[x.find("OR_ABI-L2-FDCF-M6_G16_s") + 23:x.find("_e") - 1], '%Y%j%H%M%S'))        
+        # compara com arquivo baixado com a banda
+        if ftime == f_fdcf_time:
+            # Modifica o arquivo JSON com a imagem mais recente.               
+            modificar_chave_old_bands(f'oldBands.json', '21', x)
+        else:
+            os.remove(f'{dir_in}fdcf/{x}')
+            continue
+
+
 # Função para remover todos os arquivos de uma pasta, exceto um específico.
 def remover_todos_exceto(nome_arquivo, pasta):
     for arquivo in os.listdir(pasta):
@@ -104,18 +137,25 @@ def checar_rrqpef(bands, dir_in):
 
 # Checa se há bandas 13 para glm
 def checar_glm(bands, dir_in):
+    
+    old_bands = abrir_old_json()
+    ch13 = old_bands['13']    
     # Checagem de novas imagens GLM (Band 19)
     if bands['13']:
-        # Pega lista de glm para verificação
-        glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
-        glm_list.sort()
-        # Se a lista for maior que 0 True
-        if len(glm_list) > 0:
-            bands['19'] = True
-            logging.info('Novas imagens GLM')
-        else:
-            bands['19'] = False
-            logging.info('Sem novas imagens GLM')
+            # Cria uma lista com os itens presentes no diretório da banda que são arquivos e terminam com ".nc"
+            glm_list = [f for f in os.listdir(f'{dir_in}glm') if os.path.isfile(os.path.join(f'{dir_in}glm', f)) and re.match('^OR_GLM-L2-LCFA_G16_s.+_e.+_c.+.nc$', f)]
+            # Ordena a lista
+            glm_list.sort()
+            # Filtra os arq glm para pegar somente os no intervalo ini < glm < fim
+            glm_list = filtrar_imagens_por_intervalo(glm_list, ch13)
+            
+            if len(glm_list) > 0:
+                # Tenta realizar o processamento da imagem
+                bands['19'] = True
+                logging.info('Novas imagens GLM')
+            else:
+                bands['19'] = False
+                logging.info('Sem novas imagens GLM')
     else:
         bands['19'] = False
         logging.info('Sem novas imagens GLM')
@@ -125,27 +165,34 @@ def checar_glm(bands, dir_in):
 def checar_ndvi(bands, dir_in):
     
     old_bands = abrir_old_json()
-    
     # Checagem de novas imagens ndvi (Band 20)
     if bands['02'] and bands['03']:
+        
         # Carrega os arquivos de processamento das bandas para composicao do ndvi
         file_ch02 = old_bands['02']
+        # Converte o nome do arquivo da banda 02 para o formato da banda 03
+        file_ch03 = file_ch02[0:43].replace('M6C02', 'M6C03')
         
         # Listar arquivos no diretório da pasta "band03"
         file_ch03_dir = f'{dir_in}band03/'
         file_ch03_list = os.listdir(file_ch03_dir)
-
+        
+        # Verifica date now, nosso dia colocando horario 13h utc, e end 18h utc
         date_now = datetime.datetime.now()
         date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, 13, 0)
-        date_end = date_ini + datetime.timedelta(hours=5, minutes=1)
-
+        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00)) + datetime.timedelta(hours=5, minutes=1)
+        
+        # Data do file band02 para fazer a verificação da hora
         date_file = datetime.datetime.strptime(file_ch02[file_ch02.find("M6C02_G16_s") + 11:file_ch02.find("_e") - 1], '%Y%j%H%M%S')
-
+        
+        # Processa apenas se o arquivo estiver entre 13h utc as 18h utc
         if date_ini <= date_file <= date_end:
-            # Verifica se há arquivo correspondente na banda 03
-            matches_ch03 = [z for z in file_ch03_list if z.startswith(file_ch02[0:43].replace('M6C02', 'M6C03'))]
             
-            if file_ch02 and matches_ch03:
+            # Verifica se há pelo menos um arquivo correspondente na banda 03
+            found_match = any(file_ch03_candidate.startswith(file_ch03) for file_ch03_candidate in file_ch03_list)
+            
+            # Se encontrar um arquivo correspondente
+            if found_match:
                 bands['20'] = True
                 logging.info(f'Novas imagens NDVI')
             else:
@@ -157,7 +204,7 @@ def checar_ndvi(bands, dir_in):
 
 
 def checar_fdcf(bands, dir_in):  
-    
+
     # Checagem de novas imagens fdcf (Band 21)
     if bands['17']:
         # Coleto o nome das novas bandas
@@ -168,10 +215,9 @@ def checar_fdcf(bands, dir_in):
         ftime = (datetime.datetime.strptime(ch01[ch01.find("M6C01_G16_s") + 11:ch01.find("_e") - 1], '%Y%j%H%M%S'))
         try:
             # Download arquivo fdcf
-            name_fdcf = download_prod(datetime.datetime.strftime(ftime, '%Y%m%d%H%M'), "ABI-L2-FDCF", f'{dir_in}fdcf/')
-            
-            # Modifica o arquivo JSON com a imagem mais recente.               
-            modificar_chave_old_bands(f'oldBands.json', '21', name_fdcf)
+            download_prod(datetime.datetime.strftime(ftime, '%Y%m%d%H%M'), "ABI-L2-FDCF", f'{dir_in}fdcf/')
+            # Compara as datas do arquivo fdcf se true oldband '21': x 
+            checar_pasta_fdcf(ftime, dir_in)
             bands['21'] = True
             logging.info(f'novas imagens FDCF')
         except:
@@ -207,3 +253,5 @@ def checar_imagens(bands, dir_in):
     return bands
 
 # ========================================#     Main     #========================================== #
+
+# 
