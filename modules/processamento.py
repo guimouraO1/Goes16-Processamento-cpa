@@ -995,6 +995,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
             fo.write(str(len(matriz_pixels_fogo)))
 
     logging.info(f'fdcf_diario: {fdcf_diario}')
+    
     if fdcf_diario:
         # Reiniciar contagem para verificar imagem com maior quantidade de pontos no dia
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
@@ -1368,40 +1369,39 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in):
             # Filtra os arq glm para pegar somente os no intervalo ini < glm < fim
             glm_list = filtrar_imagens_por_intervalo(glm_list, ch13)
             
-            if len(glm_list) > 0:
-                # Tenta realizar o processamento da imagem
-                try:
-                    # Cria o processo com a funcao de processamento
-                    process = Process(target=process_glm, args=(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', glm_list, "br"))
-                    # Adiciona o processo na lista de controle do processamento paralelo
-                    process_br.append(process)
-                    # Inicia o processo
-                    process.start()
-                # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
-                except Exception as e:
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process = Process(target=process_glm, args=(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', glm_list, "br"))
+                # Adiciona o processo na lista de controle do processamento paralelo
+                process_br.append(process)
+                # Inicia o processo
+                process.start()
+            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+            except Exception as e:
+                # Realiza o log do erro
+                logging.info(f'Erro {e} Arquivo ')
+                # Remove a imagem com erro de processamento
+                os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
+        
+            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+            for process in process_br:
+                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+                process.join()
+            # Limpa a lista de processos
+            process_br.clear()
+            
+            # pasta glm para excluír os arq glm
+            pasta_glm = f'{dir_in}glm/'
+            # Apaga os arq que já foram processados
+            try:
+                apagar_itens_da_pasta(pasta_glm, glm_list)
+            except Exception as e:
                     # Realiza o log do erro
-                    logging.info(f'Erro {e} Arquivo ')
-                    # Remove a imagem com erro de processamento
-                    os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
-            
-                # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-                for process in process_br:
-                    # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-                    process.join()
-                # Limpa a lista de processos
-                process_br.clear()
-                
-                # pasta glm para excluír os arq glm
-                pasta_glm = f'{dir_in}glm/'
-                # Apaga os arq que já foram processados
-                try:
-                    apagar_itens_da_pasta(pasta_glm, glm_list)
-                except Exception as e:
-                        # Realiza o log do erro
-                        logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
-            
-            else:
-                logging.info(f'Sem imagens correspondentes a data para glm ')
+                    logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
+        
+    else:
+        logging.info(f'Sem imagens correspondentes a data para glm ')
         
         
 def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
@@ -1414,11 +1414,12 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
 
     # Checagem se e possivel gerar imagem NDVI
     if bands['20']:
-        ndvi_diario = False
+        
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             logging.info('')
             logging.info('PROCESSANDO IMAGENS NDVI...')
+            
             # Captura a data do arquivo
             date_file = (datetime.datetime.strptime(ch02[ch02.find("M6C02_G16_s") + 11:ch02.find("_e") - 1], '%Y%j%H%M%S'))
             # Captura a data atual
@@ -1430,11 +1431,16 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in):
             if date_file >= date:
                 # Adiciona true para a variavel de processamento semanal
                 ndvi_diario = True
+            else:
+                ndvi_diario = False
             
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_ndvi, args=(ndvi_diario, f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br"))
+                process = Process(target=process_ndvi, 
+                                  args=(ndvi_diario, 
+                                        f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', 
+                                        f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br"))
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_br.append(process)
                 # Inicia o processo
@@ -1467,7 +1473,10 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
             # Coleta o nome das novas bandas
             old_bands = abrir_old_json()
             # Pegando nome das bands 01, 02, 03
-            ch01, ch02, ch03 = old_bands['01'], old_bands['02'], old_bands['03']
+            ch01 = old_bands['01']
+            ch02 = old_bands['02']
+            ch03 = old_bands['03']
+            
             # Pega o nome do arquivo band01 para fazer comparação
             fdcf = old_bands['21']
             
@@ -1478,7 +1487,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
             date_file = (datetime.datetime.strptime(fdcf[fdcf.find("ABI-L2-FDCF-M6_G16_s") + 20:fdcf.find("_e") - 1], '%Y%j%H%M%S'))
             # Captura a data atual
             date_now = datetime.datetime.now()
-            # Aponta o horario 23h50 para o dia anterior
+            # Aponta o horario 23h50 para o dia anterior                           
             date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
             
             # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
@@ -1495,10 +1504,15 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in):
                 fdcf_diario = False
                 logging.info(f'fdcf_diario: {fdcf_diario}')
             
+            
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf}.nc', f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br", fdcf_diario))
+                process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf}', 
+                                                             f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 
+                                                             f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', 
+                                                             f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br", fdcf_diario))
+                
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_br.append(process)
                 # Inicia o processo
