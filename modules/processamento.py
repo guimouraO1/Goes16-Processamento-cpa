@@ -135,7 +135,7 @@ def adicionando_logos(fig):
 
 def abrir_old_json():
     # Função para abrir o arquivo.json
-    with open('new_bands.json', 'r') as jsonOld:
+    with open('oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 
@@ -1520,7 +1520,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
 
 # ========================================#     Main     #========================================== #
 
-def processamento_das_imagens(bands, p_br, p_sp, dir_in, new_bands): 
+def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
    
     # Cria lista vazia para controle do processamento paralelo
     process_br = []

@@ -217,7 +217,7 @@ def checar_fdcf(bands, dir_in):
             # Compara as datas do arquivo fdcf se true oldband '21': x 
             checar_pasta_fdcf(ftime, dir_in)
             bands['21'] = True
-            logging.info(f'novas imagens FDCF')
+            logging.info(f'Novas imagens FDCF')
         except:
             bands['21'] = False
             logging.info(f'Sem novas imagens FDCF')
