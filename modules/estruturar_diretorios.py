@@ -1,4 +1,4 @@
-from modules.dirs import get_dirs
+from dirs import get_dirs
 import os
 
 dirs = get_dirs()
