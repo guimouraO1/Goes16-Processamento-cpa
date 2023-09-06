@@ -44,8 +44,8 @@ br = True
 sp = True
 #==================================#     Dicionário das bandas   #==================================#
 
-# Script Antigo - tamanho em linhas: 2644 | velocidade rodando todas as bandas: 4m30s média | 
-# Script Atual  - tamanho em linhas: 2468 | velocidade rodando todas as bandas: 6m26s média | 
+# Script Antigo - tamanho em linhas: 2644 | velocidade todas as bandas: 225 segundos média | 
+# Script Atual  - tamanho em linhas: 2468 | velocidade todas as bandas: 151 segundos média | 
 
 # ========================================#     Main     #========================================== #
 # configura o log

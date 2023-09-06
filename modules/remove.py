@@ -81,6 +81,9 @@ def remover_imagens(bands, dir_in):
             os.remove(f'{dir_in}fdcf/ch02.nc')
             os.remove(f'{dir_in}fdcf/ch03.nc')
         except FileNotFoundError as e:
-            # Realiza o log do erro
-            logging.info(f'Erro Arquivo - FileNotFoundError - {ch21}')
             logging.info(str(e))
+            dir_fdcf = os.listdir(f'{dir_in}fdcf/')
+            if len(dir_fdcf) > 15:
+                logging.info(f'{dir_fdcf} quatidade acima do normal, apagando produtos....')
+                shutil.rmtree(f'{dir_in}fdcf/')
+                os.mkdir(f'{dir_in}fdcf/')

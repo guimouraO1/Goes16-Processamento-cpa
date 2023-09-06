@@ -45,6 +45,7 @@ arq_log = dirs['arq_log']
 # ============================================# Diretórios ========================================= #
 
 
+
 def apagar_itens_da_pasta(pasta_glm, glm_list):
     # Esta função remove arquivos da pasta_glm que estão na lista glm_list e já foram processados
     [os.remove(os.path.join(pasta_glm, arquivo)) for arquivo in os.listdir(pasta_glm) if arquivo in glm_list]
