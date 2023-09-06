@@ -82,7 +82,10 @@ Before using the script, make sure you have the following packages and tools ins
 
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 - [FFmpeg](https://ffmpeg.org/)
-
+In linux
+```bash
+apt install ffmpeg
+```
 You can create a Conda environment with required packages using the following command:
 
 ```bash
