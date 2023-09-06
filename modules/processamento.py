@@ -135,8 +135,8 @@ def adicionando_logos(fig):
 
 
 def abrir_old_json():
-    # Função para abrir o arquivo.json
-    with open('oldBands.json', 'r') as jsonOld:
+    global dir_main
+    with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 

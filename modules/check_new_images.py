@@ -5,6 +5,13 @@ import logging  # Importa a biblioteca logging para registrar informações.
 import shutil
 import datetime
 from modules.utilities import download_prod
+from modules.dirs import get_dirs
+
+# ============================================# Diretórios ========================================= #
+dirs = get_dirs()
+
+# Acessando os diretórios usando as chaves do dicionário
+dir_main = dirs['dir_main']
 
 # filtra arquivos glm para verificar se correspondem a data
 def filtrar_imagens_por_intervalo(images, ch13):
@@ -49,8 +56,10 @@ def remover_todos_exceto(nome_arquivo, pasta):
 
 
 # Função para abrir o arquivo "oldBands.json" e retornar a lista de "oldImagesName".
+# Abre o json para pegar o nome dos arquivos
 def abrir_old_json():
-    with open('oldBands.json', 'r') as jsonOld:
+    global dir_main
+    with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 

@@ -4,10 +4,17 @@ import json
 import shutil
 import datetime
 import re
+from modules.dirs import get_dirs
 
-# Abre o json para pegar o nome dos arquivos
+# ============================================# Diretórios ========================================= #
+dirs = get_dirs()
+
+# Acessando os diretórios usando as chaves do dicionário
+dir_main = dirs['dir_main']
+
 def abrir_old_json():
-    with open('oldBands.json', 'r') as jsonOld:
+    global dir_main
+    with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 
