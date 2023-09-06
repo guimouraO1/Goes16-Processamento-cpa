@@ -13,6 +13,15 @@ dirs = get_dirs()
 # Acessando os diretórios usando as chaves do dicionário
 dir_main = dirs['dir_main']
 
+
+# Função para abrir o arquivo "oldBands.json" e retornar a lista de "oldImagesName".
+# Abre o json para pegar o nome dos arquivos
+def abrir_old_json():
+    global dir_main
+    with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
+        oldImages = json.load(jsonOld)['oldImagesName']
+        return oldImages
+
 # filtra arquivos glm para verificar se correspondem a data
 def filtrar_imagens_por_intervalo(images, ch13):
     # Extrai a data e hora da string 'ch13' e define um intervalo de 9 minutos e 59 segundos a partir dela.
@@ -53,15 +62,6 @@ def remover_todos_exceto(nome_arquivo, pasta):
         # Verifica se o arquivo é um arquivo e se não é o arquivo especificado.
         if os.path.isfile(caminho_arquivo) and arquivo != nome_arquivo and len(arquivo) > 1:
             os.remove(caminho_arquivo)
-
-
-# Função para abrir o arquivo "oldBands.json" e retornar a lista de "oldImagesName".
-# Abre o json para pegar o nome dos arquivos
-def abrir_old_json():
-    global dir_main
-    with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
-        oldImages = json.load(jsonOld)['oldImagesName']
-        return oldImages
 
 
 # Função para modificar um valor em um arquivo JSON.
