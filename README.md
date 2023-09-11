@@ -162,13 +162,13 @@ The directory structure of this repository is as follows:
 │   ├── dirs.py
 │   ├── logs.py
 │   ├── process_gif.py
-│   ├── process.py
+│   ├── processamento.py
 │   ├── quantity_products.py
 │   ├── remove.py
 │   ├── send_products.py
 │   └── utilities.py
 ├── oldBands.json
-├── Processamento.py
+├── main.py
 └── README.md
 ```
 
