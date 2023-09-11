@@ -1394,9 +1394,11 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands):
                     logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
         
     else:
+        logging.info(f'')
         logging.info(f'Sem imagens correspondentes a data para glm ')
-        
-        
+        logging.info(f'')
+
+
 def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
     # Pega o nome netCDF das bandas 02, 03
     ch02 = new_bands['02']
