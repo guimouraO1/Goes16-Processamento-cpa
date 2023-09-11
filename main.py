@@ -24,11 +24,6 @@ dirs = get_dirs()
 
 dir_in = dirs['dir_in']
 dir_out = dirs['dir_out']
-dir_main = dirs['dir_main']
-dir_shapefiles = dirs['dir_shapefiles']
-dir_colortables = dirs['dir_colortables']
-dir_logos = dirs['dir_logos']
-dir_temp = dirs['dir_temp']
 arq_log = dirs['arq_log']
 #==================================#           Dicionário        #==================================#
 
