@@ -12,12 +12,18 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
 
     # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
     def create_gif_cmi(banda, roi):
-        os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}band{banda}/band{banda}_*_*_{roi}.png" "{dir_out}band{banda}/band{banda}_{roi}.gif"')
+        try:
+            os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}band{banda}/band{banda}_*_*_{roi}.png" "{dir_out}band{banda}/band{banda}_{roi}.gif"')
+        except Exception as e:
+            logging.error(f'Erro ao criar GIF: {str(e)}')
 
     # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
     def create_gif(file_type, roi):
-        os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}{file_type}/{file_type}_*_*_{roi}.png" "{dir_out}{file_type}/{file_type}_{roi}.gif"')
-
+        try:
+            os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}{file_type}/{file_type}_*_*_{roi}.png" "{dir_out}{file_type}/{file_type}_{roi}.gif"')
+        except Exception as e:
+            logging.error(f'Erro ao criar GIF: {str(e)}')
+            
     # Se a variavel de controle de processamento do brasil for True, cria o gif
     if g_br:
         logging.info('')
@@ -95,20 +101,19 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
             # Cria o processo com a funcao gif
             create_gif("glm", "br")
 
-    # if g_bands["20"]:
-    #     if g_br:
-    #         logging.info('')
-    #         logging.info('CRIANDO GIF ANIMADO NDVI "BR"...')
-    #         # Cria o processo com a funcao gif
-    #         create_gif("ndvi", "br")
+    if g_bands["20"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO NDVI "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("ndvi", "br")
 
-    # if g_bands["21"]:
-    #     if g_br:
-    #         logging.info('')
-    #         logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
-    #         # Cria o processo com a funcao gif
-    #         create_gif("fdcf", "br")
-
+    if g_bands["21"]:
+        if g_br:
+            logging.info('')
+            logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
+            # Cria o processo com a funcao gif
+            create_gif("fdcf", "br")
 
 
 #  Esse código é uma implementação Python que utiliza o software FFmpeg para criar arquivos GIF animados a partir de uma sequência de imagens PNG. 
@@ -133,4 +138,6 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
 # 4. `os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}{file_type}/{file_type}_*_*_{roi}.png" "{dir_out}{file_type}/{file_type}_{roi}.gif"')`
 #    - Essa linha é semelhante à anterior, mas é usada para criar um GIF animado a partir de arquivos de imagem PNG em um diretório específico. Os argumentos são praticamente os mesmos, mas aqui você está usando as variáveis `file_type` e `roi` para construir os nomes dos diretórios e arquivos de entrada e saída.
 
-# Em resumo, essas duas funções são responsáveis por chamar o FFmpeg para criar GIFs animados a partir de uma sequência de imagens PNG, com configurações específicas de taxa de quadros e tratamento de arquivos de entrada e saída. As funções aceitam parâmetros que permitem criar GIFs com base em diferentes tipos de arquivos e regiões de interesse (ROI).
+# Em resumo, essas duas funções são responsáveis por chamar o FFmpeg para criar GIFs animados a partir de uma sequência de imagens PNG, com configurações específicas de 
+# taxa de quadros e tratamento de arquivos de entrada e saída. As funções aceitam parâmetros que permitem criar GIFs com base em diferentes tipos de arquivos e regiões de 
+# interesse (ROI).
