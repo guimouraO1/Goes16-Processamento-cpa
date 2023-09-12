@@ -75,6 +75,7 @@ def modificar_chave_old_bands(caminho_arquivo, chave, novo_valor):
 
 # Checa bandas 1-16
 def checar_bandas(bands, dir_in):
+    
     # Obtém as imagens antigas.
     old_bands = abrir_old_json()
     # Checagem imagens ABI 1-16
@@ -113,7 +114,7 @@ def checar_bandas(bands, dir_in):
 
 # Checa se há bandas 1, 2, 3 para true color
 def checar_truecolor(bands):
-        # Checagem de novas imagens truecolor (Band 17) se todas as bands 1, 2, 3 forem True
+    # Checagem de novas imagens truecolor (Band 17) se todas as bands 1, 2, 3 forem True
     if all(bands[str(x).zfill(2)] for x in range(1, 4)):
         # Se Todas as três bandas são True
         bands['17'] = True

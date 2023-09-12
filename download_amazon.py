@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from osgeo import gdal  # Utilitario para a biblioteca GDAL
-from modules.utilities import download_prod  # Funcao para download dos produtos do goes disponiveis na amazon
+from modules.utilities import download_glm # Funcao para download dos produtos do goes disponiveis na amazon
 from modules.utilities import download_cmi_joao
 import datetime
 from datetime import timedelta
@@ -59,6 +59,9 @@ for x in range(1,17):
     except Exception as e:
         print(f'{e}')
         continue
+
+
+download_glm(data_hora_download_file, dir_in + f'glm')
 
 
 # Função para renomear arquivos

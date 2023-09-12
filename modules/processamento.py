@@ -966,6 +966,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     p_lon = lon[selected_fires]
     brasil = (shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
     brasil_geometries = list(sg.shape(geometry) for geometry in brasil)
+    
     # Alteração Guilherme
     for i in range(len(p_lat)):
         point = sg.Point(p_lon[i], p_lat[i])
@@ -973,7 +974,6 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
             p = (p_lat[i], p_lon[i])
             matriz_pixels_fogo.append(p)
 
-    
     save_txt(matriz_pixels_fogo, f'fdcf_{date.strftime("%Y%m%d_%H%M%S")}_br')
     
     # Le o arquivo de controle de quantidade de pontos
@@ -1494,7 +1494,6 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
                 fdcf_diario = False
                 logging.info(f'fdcf_diario: {fdcf_diario}')
             
-            
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
@@ -1507,6 +1506,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
                 process_br.append(process)
                 # Inicia o processo
                 process.start()
+                
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except Exception as e:
                 # Realiza o log do erro
