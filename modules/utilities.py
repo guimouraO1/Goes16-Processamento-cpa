@@ -8,7 +8,7 @@ import boto3  # Amazon Web Services (AWS) SDK for Python
 from botocore import UNSIGNED  # boto3 config
 from botocore.config import Config  # boto3 config
 import math  # Mathematical functions
-from datetime import datetime  # Basic Dates and time types
+from datetime import datetime, timedelta  # Basic Dates and time types
 from osgeo import osr  # Python bindings for GDAL
 from osgeo import gdal  # Python bindings for GDAL
 # -----------------------------------------------------------------------------------------------------------

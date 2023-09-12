@@ -46,12 +46,6 @@ arq_log = dirs['arq_log']
 
 
 
-def apagar_itens_da_pasta(pasta_glm, glm_list):
-    # Esta função remove arquivos da pasta_glm que estão na lista glm_list e já foram processados
-    [os.remove(os.path.join(pasta_glm, arquivo)) for arquivo in os.listdir(pasta_glm) if arquivo in glm_list]
-    logging.info('Arquivos já processados da glm_lista foram excluídos com sucesso! ')
-
-
 def filtrar_imagens_por_intervalo(images, ch13):
     # Extrai a data e hora da string 'ch13' e define um intervalo de 9 minutos e 59 segundos a partir dela.
     glm_list = [] 
@@ -1382,17 +1376,7 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands):
                 # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
                 process.join()
             # Limpa a lista de processos
-            process_br.clear()
-            
-            # pasta glm para excluír os arq glm
-            pasta_glm = f'{dir_in}glm/'
-            # Apaga os arq que já foram processados
-            try:
-                apagar_itens_da_pasta(pasta_glm, glm_list)
-            except Exception as e:
-                    # Realiza o log do erro
-                    logging.info(f'Erro {e} ao apagar arquivos processados glm_list ')
-        
+            process_br.clear()        
     else:
         logging.info(f'')
         logging.info(f'Sem imagens correspondentes a data para glm ')
