@@ -128,7 +128,7 @@ dirs.py
 ```python
 dir_main = '/home/myDirs/'
 dirs = {
-    'dir_in': '/home/myDirs/goes/',
+    'dir_in': dir_main + 'goes/',
     'dir_main': dir_main,
     'dir_out': dir_main + 'output/',
     'dir_libs': dir_main + 'libs/',
@@ -136,7 +136,7 @@ dirs = {
     'dir_colortables': dir_main + 'colortables/',
     'dir_logos': dir_main + 'logos/',
     'dir_temp': dir_main + 'temp/',
-    'arq_log': '/home/myDirs/logs/Processamento-GOES_' + str(datetime.date.today()) + '.log'
+    'arq_log': dir_main + 'logs/Processamento-GOES_' + str(datetime.date.today()) + '.log'
 }
 ```
 
