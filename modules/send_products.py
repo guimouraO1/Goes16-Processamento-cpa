@@ -12,7 +12,7 @@ def send_products(s_br, s_sp, dir_out):
         # Criar objeto cliente SSH
         ssh = paramiko.SSHClient()
         # Carrega as chaves disponiveis no sistema
-        ssh.load_system_host_keys()
+        ssh.load_system_host_keys() # find / -name known_hosts 2>/dev/null -----> acha aonde estão as chaves do sistema
         # Cria a conexao com o endereco informando, na porta informada e com o usuario informado
         ssh.connect('143.106.227.94', username="cpaunicamp", port=22000)
         # Cria o objeto cliente SCP com a conexao SSH
