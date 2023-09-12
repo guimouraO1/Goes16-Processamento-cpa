@@ -45,7 +45,6 @@ arq_log = dirs['arq_log']
 # ============================================# Diretórios ========================================= #
 
 
-
 def filtrar_imagens_por_intervalo(images, ch13):
     # Extrai a data e hora da string 'ch13' e define um intervalo de 9 minutos e 59 segundos a partir dela.
     glm_list = [] 
