@@ -15,12 +15,12 @@ dir_main = dirs['dir_main']
 
 
 # Função para abrir o arquivo "oldBands.json" e retornar a lista de "oldImagesName".
-# Abre o json para pegar o nome dos arquivos
 def abrir_old_json():
     global dir_main
     with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
+
 
 # filtra arquivos glm para verificar se correspondem a data
 def filtrar_imagens_por_intervalo(images, ch13):

@@ -23,6 +23,7 @@ def remover_imagens(bands, dir_in):
     logging.info("")
     logging.info('REMOVENDO IMAGENS PROCESSADAS')
     oldBands = abrir_old_json()
+    
     # Contador para remover imagens nas 16 bandas
     for x in range(1, 17):
         # Transforma o inteiro contador em string e com 2 digitos
