@@ -114,7 +114,7 @@ def adicionando_descricao_imagem(description, institution, ax, fig, cruz=False):
     cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
     if cruz:
         cruzStr = '+'
-        cax1.text(0.178, 0.13, cruzStr, color='red', size=12)  # Adicionando simbolo "+"
+        cax1.text(0.190, 0.13, cruzStr, color='red', size=12)  # Adicionando simbolo "+"
     cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
     cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
     cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
@@ -135,6 +135,93 @@ def abrir_old_json():
     with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
+
+
+def save_txt(array, nome_arquivo_txt):
+    # Checa se a matriz é vazia
+    if len(array) == 0:
+        logging.info(f'{nome_arquivo_txt} vazia')
+        pass
+    else:
+        # Criando nome do arquivo e diretório -- Mudar as barras para Linux
+        with open(f"{dir_out}fdcf/{nome_arquivo_txt}.txt", 'w') as file:  # tomar cuidado se não ele fica criando diretorio
+            for valor in array:
+                valor = f"{valor[0]},{valor[1]}\n"
+                file.write(valor)
+
+
+def save_log_erro(array_errors, nome_arquivo_txt):
+    # Checa se a matriz é vazia
+    if len(array_errors) == 0:
+        pass
+    else:
+        # Criando nome do arquivo e diretório -- Mudar as barras para Linux
+        with open(f"{dir_out}fdcf/{nome_arquivo_txt}.txt", 'w') as file:
+            for valor in array_errors:
+                erro = f"{valor}\n"
+                file.write(erro)
+
+
+def fdcf_tabela_hot_spots(date, ax):    
+    # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.txt$"
+    fdcf_list = [name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match(f'^fdcf_{date.strftime("%Y%m%d")}_.+_br.txt$', name)]
+
+    # Cria matriz diária de pontos e log. de erros e faz o ‘loop’ nos arquivos do diretório.
+    matriz_diaria = []
+
+    ## Captura a lista com os "contornos" dos estados para separar o total de pontos individual
+    geometry_estados = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm40_BRA_1.shp").geometries())
+
+    ## Os 26 estados estão em ordem alfabética no arquivo shapefile e o indice 27 armazena o total diário
+    lista_totalpixels_uf = [0 for i in range(28)]
+    log_erro = []
+    for name in fdcf_list:
+        try:
+            with open(f'{dir_out}fdcf/{name}', 'r') as file:
+                for linha in file.readlines():
+                    linha = linha.split(',')
+                    p = [float(linha[0]), float(linha[1])]  # Ponto em lat,lon
+                    ## Checkagem para evitar contagem de pontos duplicados
+                    if not (p in matriz_diaria):   
+                        ax.plot(float(linha[1]), float(linha[0]), 'r+', ms=2.5, transform=ccrs.PlateCarree())  # plotando em lon,lat
+                        matriz_diaria.append(p)
+                        ## Contagem do total por estado
+                        for j in range(27):
+                            estado = geometry_estados[j]
+                            if estado.covers(Point(float(linha[1]),float(linha[0]))):
+                                lista_totalpixels_uf[j]+=1
+                                break
+                    else:
+                        continue
+        except Exception as erro:
+            logging.info(f'Erro no processamento da matriz diária: {erro}')
+            log_erro.append(f'{name} - Error: {erro}')
+            pass
+
+    # Calcula a soma do total de focos incendios diário
+    lista_totalpixels_uf[27]+= np.sum(lista_totalpixels_uf)
+
+    ### Manipulação dos dados para tabela
+    lista_siglas_UF = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
+                'RS','RO','RR','SC','SP','SE','TO','Total']
+    columns = ('UF', 'Hot Spot')
+    data = []
+    for i in range(28):
+        table_value = (lista_siglas_UF[i],lista_totalpixels_uf[i])
+        data.append(table_value)
+    
+    ## Cria a tabela com os dados separados anteriormente
+    tabela= matplotlib.table.table(ax =ax,cellText=data,colLabels=columns,cellLoc ='center',loc='lower right',rowLoc='center',
+                            colLoc='center')
+    tabela.auto_set_column_width(col=list(range(len(data))))
+
+    # Cria os nomes dos arquivos diários e salva no "directory".
+
+    logging.info("save_txt: matriz_diaria")
+    save_txt(matriz_diaria, f'fdcf_{date.strftime("%Y%m%d")}_br')
+    save_log_erro(log_erro, f'fdcf_{date.strftime("%Y%m%d")}_errors')
+
+    return fdcf_list
 
 
 def reproject(reproj_file, reproj_var, reproj_extent, reproj_resolution, dir_in):
@@ -872,93 +959,6 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     logging.info(f'{ch02[0:59].replace("M6C02", "M6C0*")} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
-def save_txt(array, nome_arquivo_txt):
-    # Checa se a matriz é vazia
-    if len(array) == 0:
-        logging.info(f'{nome_arquivo_txt} vazia')
-        pass
-    else:
-        # Criando nome do arquivo e diretório -- Mudar as barras para Linux
-        with open(f"{dir_out}fdcf/{nome_arquivo_txt}.txt", 'w') as file:  # tomar cuidado se não ele fica criando diretorio
-            for valor in array:
-                valor = f"{valor[0]},{valor[1]}\n"
-                file.write(valor)
-
-
-def save_log_erro(array_errors, nome_arquivo_txt):
-    # Checa se a matriz é vazia
-    if len(array_errors) == 0:
-        pass
-    else:
-        # Criando nome do arquivo e diretório -- Mudar as barras para Linux
-        with open(f"{dir_out}fdcf/{nome_arquivo_txt}.txt", 'w') as file:
-            for valor in array_errors:
-                erro = f"{valor}\n"
-                file.write(erro)
-
-
-def fdcf_tabela_hot_spots(date, ax):    
-    # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.txt$"
-    fdcf_list = [name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match(f'^fdcf_{date.strftime("%Y%m%d")}_.+_br.txt$', name)]
-
-    # Cria matriz diária de pontos e log. de erros e faz o ‘loop’ nos arquivos do diretório.
-    matriz_diaria = []
-
-    ## Captura a lista com os "contornos" dos estados para separar o total de pontos individual
-    geometry_estados = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm40_BRA_1.shp").geometries())
-
-    ## Os 26 estados estão em ordem alfabética no arquivo shapefile e o indice 27 armazena o total diário
-    lista_totalpixels_uf = [0 for i in range(28)]
-    log_erro = []
-    for name in fdcf_list:
-        try:
-            with open(f'{dir_out}fdcf/{name}', 'r') as file:
-                for linha in file.readlines():
-                    linha = linha.split(',')
-                    p = [float(linha[0]), float(linha[1])]  # Ponto em lat,lon
-                    ## Checkagem para evitar contagem de pontos duplicados
-                    if not (p in matriz_diaria):   
-                        ax.plot(float(linha[1]), float(linha[0]), 'r+', ms=2.5, transform=ccrs.PlateCarree())  # plotando em lon,lat
-                        matriz_diaria.append(p)
-                        ## Contagem do total por estado
-                        for j in range(27):
-                            estado = geometry_estados[j]
-                            if estado.covers(Point(float(linha[1]),float(linha[0]))):
-                                lista_totalpixels_uf[j]+=1
-                                break
-                    else:
-                        continue
-        except Exception as erro:
-            logging.info(f'Erro no processamento da matriz diária: {erro}')
-            log_erro.append(f'{name} - Error: {erro}')
-            pass
-
-    # Calcula a soma do total de focos incendios diário
-    lista_totalpixels_uf[27]+= np.sum(lista_totalpixels_uf)
-
-    ### Manipulação dos dados para tabela
-    lista_siglas_UF = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
-                'RS','RO','RR','SC','SP','SE','TO','Total']
-    columns = ('UF', 'Hot Spot')
-    data = []
-    for i in range(28):
-        table_value = (lista_siglas_UF[i],lista_totalpixels_uf[i])
-        data.append(table_value)
-    
-    ## Cria a tabela com os dados separados anteriormente
-    tabela= matplotlib.table.table(ax =ax,cellText=data,colLabels=columns,cellLoc ='center',loc='lower right',rowLoc='center',
-                            colLoc='center')
-    tabela.auto_set_column_width(col=list(range(len(data))))
-
-    # Cria os nomes dos arquivos diários e salva no "directory".
-
-    logging.info("save_txt: matriz_diaria")
-    save_txt(matriz_diaria, f'fdcf_{date.strftime("%Y%m%d")}_br')
-    save_log_erro(log_erro, f'fdcf_{date.strftime("%Y%m%d")}_errors')
-
-    return fdcf_list
-
-
 def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     
     global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
@@ -998,6 +998,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         return lat, lon
 
     file_var = 'FDCF'
+    
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
     
@@ -1466,7 +1467,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(12), int(10))
+            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
             
             # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
             logging.info(f'date_file: {date_file}')
