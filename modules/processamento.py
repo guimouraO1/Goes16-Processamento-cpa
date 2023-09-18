@@ -897,67 +897,66 @@ def save_log_erro(array_errors, nome_arquivo_txt):
                 file.write(erro)
 
 
-def fdcf_tabela_hot_spots(date, ax):
+def fdcf_tabela_hot_spots(date, ax):    
+    # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.txt$"
+    fdcf_list = [name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match(f'^fdcf_{date.strftime("%Y%m%d")}_.+_br.txt$', name)]
+
+    # Cria matriz diária de pontos e log. de erros e faz o ‘loop’ nos arquivos do diretório.
+    matriz_diaria = []
+
+    ## Captura a lista com os "contornos" dos estados para separar o total de pontos individual
+    geometry_estados = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm40_BRA_1.shp").geometries())
+
+    ## Os 26 estados estão em ordem alfabética no arquivo shapefile e o indice 27 armazena o total diário
+    lista_totalpixels_uf = [0 for i in range(28)]
+    log_erro = []
+    for name in fdcf_list:
+        try:
+            with open(f'{dir_out}fdcf/{name}', 'r') as file:
+                for linha in file.readlines():
+                    linha = linha.split(',')
+                    p = [float(linha[0]), float(linha[1])]  # Ponto em lat,lon
+                    ## Checkagem para evitar contagem de pontos duplicados
+                    if not (p in matriz_diaria):   
+                        ax.plot(float(linha[1]), float(linha[0]), 'r+', ms=2.5, transform=ccrs.PlateCarree())  # plotando em lon,lat
+                        matriz_diaria.append(p)
+                        ## Contagem do total por estado
+                        for j in range(27):
+                            estado = geometry_estados[j]
+                            if estado.covers(Point(float(linha[1]),float(linha[0]))):
+                                lista_totalpixels_uf[j]+=1
+                                break
+                    else:
+                        continue
+        except Exception as erro:
+            logging.info(f'Erro no processamento da matriz diária: {erro}')
+            log_erro.append(f'{name} - Error: {erro}')
+            pass
+
+    # Calcula a soma do total de focos incendios diário
+    lista_totalpixels_uf[27]+= np.sum(lista_totalpixels_uf)
+
+    ### Manipulação dos dados para tabela
+    lista_siglas_UF = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
+                'RS','RO','RR','SC','SP','SE','TO','Total']
+    columns = ('UF', 'Hot Spot')
+    data = []
+    for i in range(28):
+        table_value = (lista_siglas_UF[i],lista_totalpixels_uf[i])
+        data.append(table_value)
     
-        # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^fdcf_.+_.+_br.txt$"
-        fdcf_list = [name for name in os.listdir(f'{dir_out}fdcf') if os.path.isfile(os.path.join(f'{dir_out}fdcf', name)) and re.match(f'^fdcf_{date.strftime("%Y%m%d")}_.+_br.txt$', name)]
+    ## Cria a tabela com os dados separados anteriormente
+    tabela= matplotlib.table.table(ax =ax,cellText=data,colLabels=columns,cellLoc ='center',loc='lower right',rowLoc='center',
+                            colLoc='center')
+    tabela.auto_set_column_width(col=list(range(len(data))))
 
-        # Cria matriz diária de pontos e log. de erros e faz o ‘loop’ nos arquivos do diretório.
-        matriz_diaria = []
+    # Cria os nomes dos arquivos diários e salva no "directory".
 
-        ## Captura a lista com os "contornos" dos estados para separar o total de pontos individual
-        geometry_estados = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm40_BRA_1.shp").geometries())
+    logging.info("save_txt: matriz_diaria")
+    save_txt(matriz_diaria, f'fdcf_{date.strftime("%Y%m%d")}_br')
+    save_log_erro(log_erro, f'fdcf_{date.strftime("%Y%m%d")}_errors')
 
-        ## Os 26 estados estão em ordem alfabética no arquivo shapefile e o indice 27 armazena o total diário
-        lista_totalpixels_uf = [0 for i in range(28)]
-        log_erro = []
-        for name in fdcf_list:
-            try:
-                with open(f'{dir_out}fdcf/{name}', 'r') as file:
-                    for linha in file.readlines():
-                        linha = linha.split(',')
-                        p = [float(linha[0]), float(linha[1])]  # Ponto em lat,lon
-                        ## Checkagem para evitar contagem de pontos duplicados
-                        if not (p in matriz_diaria):   
-                            ax.plot(float(linha[1]), float(linha[0]), 'r+', ms=2.5, transform=ccrs.PlateCarree())  # plotando em lon,lat
-                            matriz_diaria.append(p)
-                            ## Contagem do total por estado
-                            for j in range(27):
-                                estado = geometry_estados[j]
-                                if estado.covers(Point(float(linha[1]),float(linha[0]))):
-                                    lista_totalpixels_uf[j]+=1
-                                    break
-                        else:
-                            continue
-            except Exception as erro:
-                logging.info(f'Erro no processamento da matriz diária: {erro}')
-                log_erro.append(f'{name} - Error: {erro}')
-                pass
-
-        # Calcula a soma do total de focos incendios diário
-        lista_totalpixels_uf[27]+= np.sum(lista_totalpixels_uf)
-
-        ### Manipulação dos dados para tabela
-        lista_siglas_UF = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
-                   'RS','RO','RR','SC','SP','SE','TO','Total']
-        columns = ('UF', 'Hot Spot')
-        data = []
-        for i in range(28):
-            table_value = (lista_siglas_UF[i],lista_totalpixels_uf[i])
-            data.append(table_value)
-        
-        ## Cria a tabela com os dados separados anteriormente
-        tabela= matplotlib.table.table(ax =ax,cellText=data,colLabels=columns,cellLoc ='center',loc='lower right',rowLoc='center',
-                               colLoc='center')
-        tabela.auto_set_column_width(col=list(range(len(data))))
-
-        # Cria os nomes dos arquivos diários e salva no "directory".
-
-        logging.info("save_txt: matriz_diaria")
-        save_txt(matriz_diaria, f'fdcf_{date.strftime("%Y%m%d")}_br')
-        save_log_erro(log_erro, f'fdcf_{date.strftime("%Y%m%d")}_errors')
-
-        return fdcf_list
+    return fdcf_list
 
 
 def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
