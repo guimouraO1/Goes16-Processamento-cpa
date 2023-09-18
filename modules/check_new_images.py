@@ -251,7 +251,7 @@ def checar_imagens(bands, dir_in):
     
     checar_glm(bands, dir_in)   
     
-    checar_ndvi(bands, dir_in)
+    # checar_ndvi(bands, dir_in)
 
     checar_fdcf(bands, dir_in)
     
@@ -261,5 +261,3 @@ def checar_imagens(bands, dir_in):
     return bands
 
 # ========================================#     Main     #========================================== #
-
-# 

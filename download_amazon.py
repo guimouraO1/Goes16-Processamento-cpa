@@ -42,7 +42,7 @@ logging.info("")
 data_hora_atual = datetime.datetime.utcnow()
 
 #Atrasa 10 min para entrar em conformidade com Amazon
-data_10_min = datetime.datetime.strftime(data_hora_atual-timedelta(minutes=220),'%Y%m%d%H%M')
+data_10_min = datetime.datetime.strftime(data_hora_atual-timedelta(minutes=10),'%Y%m%d%H%M')
 
 #Correção para poder fazer download em qualquer horário
 data_hora_download_file = data_10_min[0:11]+ '0'
