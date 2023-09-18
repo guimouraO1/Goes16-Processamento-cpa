@@ -42,13 +42,13 @@ logging.info("")
 data_hora_atual = datetime.datetime.utcnow()
 
 #Atrasa 10 min para entrar em conformidade com Amazon
-data_10_min = datetime.datetime.strftime(data_hora_atual-timedelta(minutes=10),'%Y%m%d%H%M')
+data_10_min = datetime.datetime.strftime(data_hora_atual-timedelta(minutes=220),'%Y%m%d%H%M')
 
 #Correção para poder fazer download em qualquer horário
 data_hora_download_file = data_10_min[0:11]+ '0'
 
 # Contador para download das 16 bandas
-for x in range(1,17):
+for x in range(1,4):
     # Transforma o inteiro contador em string e com 2 digitos
     b = str(x).zfill(2)
     # Download band
@@ -61,7 +61,7 @@ for x in range(1,17):
         continue
 
 
-download_glm(data_hora_download_file, dir_in + f'glm')
+#download_glm(data_hora_download_file, dir_in + f'glm')
 
 
 # Função para renomear arquivos
@@ -84,7 +84,7 @@ def renomear_arquivos(diretorio):
 
 
 # Percorra as subpastas "band01" até "band16"
-for band_folder in range(1, 17):
+for band_folder in range(1, 4):
     subdiretorio = os.path.join(dir_in, f"band{band_folder:02d}")
     
     if os.path.exists(subdiretorio):

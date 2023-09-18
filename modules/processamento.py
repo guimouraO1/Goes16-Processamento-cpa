@@ -982,16 +982,18 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     logging.info(f'Len matriz_pixels_fogo:{len(matriz_pixels_fogo)}  int control:  {int(control)}')
     date_ini = datetime.datetime(date.year, date.month, date.day, int(13), int(00))
     date_end = datetime.datetime(date.year, date.month, date.day, int(18), int(1))
+    
+    # Pega a imagem com mais incidencia e salva
     if len(matriz_pixels_fogo) > int(control) and date_ini <= date <= date_end:
         copyfile(ch01, f'{dir_in}fdcf/ch01.nc')
         copyfile(ch02, f'{dir_in}fdcf/ch02.nc')
         copyfile(ch03, f'{dir_in}fdcf/ch03.nc')
+        logging.info('Copiando bands 01 a 03 para fdcf')
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
             fo.write(str(len(matriz_pixels_fogo)))
-
-    logging.info(f'fdcf_diario: {fdcf_diario}')
     
     if fdcf_diario:
+        
         # Reiniciar contagem para verificar imagem com maior quantidade de pontos no dia
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
             fo.write(str(0))
@@ -1000,9 +1002,11 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         reproject_ch01 = Dataset(f'{dir_in}fdcf/ch01.nc')
         reproject_ch02 = Dataset(f'{dir_in}fdcf/ch02.nc')
         reproject_ch03 = Dataset(f'{dir_in}fdcf/ch03.nc')
+        
         data_ch01 = reproject_ch01.variables['Band1'][:]
         data_ch02 = reproject_ch02.variables['Band1'][:]
         data_ch03 = reproject_ch03.variables['Band1'][:]
+        
         reproject_ch01 = None
         del reproject_ch01
         reproject_ch02 = None
@@ -1440,6 +1444,7 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
 
 
 def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
+    
     if bands['21']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br: 

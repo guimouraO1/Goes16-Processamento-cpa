@@ -85,9 +85,6 @@ def remover_imagens(bands, dir_in):
         logging.info(f'Removendo imagens FDCF')
         try:
             os.remove(f'{dir_in}fdcf/{ch21}')
-            os.remove(f'{dir_in}fdcf/ch01.nc')
-            os.remove(f'{dir_in}fdcf/ch02.nc')
-            os.remove(f'{dir_in}fdcf/ch03.nc')
         except FileNotFoundError as e:
             logging.info(str(e))
             dir_fdcf = os.listdir(f'{dir_in}fdcf/')
