@@ -175,6 +175,7 @@ def checar_ndvi(bands, dir_in):
     # Checagem de novas imagens ndvi (Band 20)
     if bands['02'] and bands['03']:
         old_bands = abrir_old_json()
+        
         # Carrega os arquivos de processamento das bandas para composicao do ndvi
         file_ch02 = old_bands['02']
         # Converte o nome do arquivo da banda 02 para o formato da banda 03
@@ -186,8 +187,8 @@ def checar_ndvi(bands, dir_in):
         
         # Verifica date now, nosso dia colocando horario 13h utc, e end 18h utc
         date_now = datetime.datetime.now()
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, 13, 0)
-        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00)) + datetime.timedelta(hours=5, minutes=1)
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(10), int(00))
+        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00)) + datetime.timedelta(hours=5, minutes=1)
         
         # Data do file band02 para fazer a verificação da hora
         date_file = datetime.datetime.strptime(file_ch02[file_ch02.find("M6C02_G16_s") + 11:file_ch02.find("_e") - 1], '%Y%j%H%M%S')
@@ -247,13 +248,13 @@ def checar_imagens(bands, dir_in):
 
     checar_truecolor(bands)
     
-    checar_rrqpef(bands, dir_in)
+    #checar_rrqpef(bands, dir_in)
     
-    checar_glm(bands, dir_in)   
+    #checar_glm(bands, dir_in)   
     
     checar_ndvi(bands, dir_in)
 
-    #checar_fdcf(bands, dir_in)
+    # checar_fdcf(bands, dir_in)
     
     print(bands)
     

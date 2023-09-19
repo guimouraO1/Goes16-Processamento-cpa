@@ -744,10 +744,9 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     #  Abrindo o Dataset do arquivo da mascara
     reproject_mask = Dataset(f'{dir_in}clsm/{r_file}')
 
+
     data_ch02 = reproject_ch02.variables['Band1'][:]
     data_ch03 = reproject_ch03.variables['Band1'][:]
-
-    #
     data_mask = reproject_mask.variables['Band1'][:]
 
     reproject_ch02 = None
@@ -787,6 +786,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
 
 
     if ndvi_diario and datetime.datetime.now().isoweekday() == 6:
+        
         # Captura a data atual e calculando data inicial e final
         date_now = datetime.datetime.now()
         date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
@@ -826,7 +826,6 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
                 
         NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br_fmax.npy')
         
-
         # Captura a data atual e calculando data inicial e final do acumulado da semana
         date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59)) - datetime.timedelta(days=6, hours=23, minutes=59)
         date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59))
@@ -911,12 +910,12 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
         plt.savefig(f'{dir_out}ndvi/ndvi_{date_end.strftime("%Y%m%d_%H%M%S")}_br.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
         # Fecha a janela para limpar a memoria
         plt.close()
-
-    elif ndvi_diario:
         
+    #   Cria o arquivo sem ser a imagem 
+    elif ndvi_diario:
         # Captura a data atual e calculando data inicial e final
         date_now = datetime.datetime.now()
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(10), int(00))
         date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
