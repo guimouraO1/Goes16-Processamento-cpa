@@ -789,7 +789,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
         
         # Captura a data atual e calculando data inicial e final
         date_now = datetime.datetime.now()
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(12), int(00))
         date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
@@ -915,7 +915,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     elif ndvi_diario:
         # Captura a data atual e calculando data inicial e final
         date_now = datetime.datetime.now()
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(10), int(00))
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(12), int(00))
         date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
@@ -1393,7 +1393,6 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
 
     # Checagem se e possivel gerar imagem NDVI
     if bands['20']:
-        
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             logging.info('')
