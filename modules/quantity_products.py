@@ -15,7 +15,6 @@ def remove_excess_products(dir_out, product_type):
 
         # Se houver produtos em excesso, eles serão removidos.
         if result_br > 0 or result_sp > 0:
-            aux = True
             prod_br = [name for name in os.listdir(f'{dir_out}{product_type}') if os.path.isfile(os.path.join(f'{dir_out}{product_type}', name)) and re.match(f'^{product_type}_.+_.+_br.png$', name)]
             prod_sp = [name for name in os.listdir(f'{dir_out}{product_type}') if os.path.isfile(os.path.join(f'{dir_out}{product_type}', name)) and re.match(f'^{product_type}_.+_.+_sp.png$', name)]
             prod_br.sort()
