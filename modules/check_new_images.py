@@ -248,13 +248,13 @@ def checar_imagens(bands, dir_in):
 
     checar_truecolor(bands)
     
-    #checar_rrqpef(bands, dir_in)
+    checar_rrqpef(bands, dir_in)
     
-    #checar_glm(bands, dir_in)   
+    checar_glm(bands, dir_in)   
     
     checar_ndvi(bands, dir_in)
 
-    # checar_fdcf(bands, dir_in)
+    checar_fdcf(bands, dir_in)
     
     print(bands)
     
