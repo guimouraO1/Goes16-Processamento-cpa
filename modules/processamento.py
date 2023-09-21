@@ -56,7 +56,7 @@ def filtrar_imagens_por_intervalo(images, ch13):
     glm_list = [] 
     ch13_data = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
     date_ini = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
-    date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + datetime.timedelta(minutes=9, seconds=59)
+    date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + datetime.datetime.timedelta(minutes=9, seconds=59)
     # Percorre a lista de nomes de imagens e verifica se a data e hora de cada imagem estão dentro do intervalo.
     for x in images:
         xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
@@ -113,25 +113,16 @@ def adicionando_linhas(ax):
     gl.right_labels = False
 
 
-def adicionando_descricao_imagem(description, institution, ax, fig, cruz=False, truecolor=False):
-    if truecolor:
-        cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-        cax1.patch.set_color('black') 
-        cax1.text(0, 0.13, description, color='white', size=6)  # Adicionando texto
-        cax1.text(0.85, 0.13, institution, color='yellow', size=6)  # Adicionando texto
-        cax1.xaxis.set_visible(False)  # Removendo rótulos do eixo X
-        cax1.yaxis.set_visible(False)  # Removendo rótulos do eixo Y
-    # Criando novos eixos de acordo com a posição da imagem   
-    else:
-        cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-        cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-        cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-        if cruz:
-            cruzStr = '+'
-            cax1.text(0.190, 0.13, cruzStr, color='red', size=12)  # Adicionando símbolo "+"
-        cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-        cax1.xaxis.set_visible(False)  # Removendo rótulos do eixo X
-        cax1.yaxis.set_visible(False)  # Removendo rótulos do eixo Y
+def adicionando_descricao_imagem(description, institution, ax, fig, cruz=False):
+    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
+    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
+    if cruz:
+        cruzStr = '+'
+        cax1.text(0.190, 0.13, cruzStr, color='red', size=12)  # Adicionando símbolo "+"
+    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
+    cax1.xaxis.set_visible(False)  # Removendo rótulos do eixo X
+    cax1.yaxis.set_visible(False)  # Removendo rótulos do eixo Y
 
 
 def calculating_lons_lats(date, extent, data_ch01, data_ch02, data_ch03):
@@ -604,6 +595,9 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     RGB = np.stack([R, G, B], axis=2)		
     #------------------------------------------------------------------------------------------------------
 
+    # Nome do produto
+    product = rgb_type
+
     # Formatando a descricao a ser plotada na imagem
     description = f' GOES-{satellite} Natural True Color {date_img}'
     institution = "CEPAGRI - UNICAMP"
@@ -634,8 +628,12 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     ax.imshow(RGB, origin='upper', extent=img_extent, zorder=1)
 
     if v_extent == 'sp':
-        # Adicionando descricao da imagem para sp
-        adicionando_descricao_imagem(description, institution, ax, fig, truecolor=True)
+        cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+        cax1.patch.set_color('black') 
+        cax1.text(0, 0.13, description, color='white', size=6)  # Adicionando texto
+        cax1.text(0.85, 0.13, institution, color='yellow', size=6)  # Adicionando texto
+        cax1.xaxis.set_visible(False)  # Removendo rótulos do eixo X
+        cax1.yaxis.set_visible(False)  # Removendo rótulos do eixo Y
     else:
         # Adicionando descricao da imagem para br
         adicionando_descricao_imagem(description, institution, ax, fig)
@@ -930,7 +928,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             # Monta a data/hora do arquivo
             date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
-            if date_ini <= date_file <= date_end + datetime.timedelta(minutes=1):
+            if date_ini <= date_file <= date_end + datetime.datetime.timedelta(minutes=1):
                 # logging.info(f, date_file)
                 # Le o arquivo NDVI
                 NDVI_file = np.load(f'{dir_in}ndvi/{f}', allow_pickle=True)
@@ -945,7 +943,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
         NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br_fmax.npy')
         
         # Captura a data atual e calculando data inicial e final do acumulado da semana
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59)) - datetime.timedelta(days=6, hours=23, minutes=59)
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59)) - datetime.datetime.timedelta(days=6, hours=23, minutes=59)
         date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59))
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
@@ -1056,7 +1054,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             # Monta a data/hora do arquivo
             date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
-            if date_ini <= date_file <= date_end + datetime.timedelta(minutes=1):
+            if date_ini <= date_file <= date_end + datetime.datetime.timedelta(minutes=1):
                 # logging.info(f, date_file)
                 # Le o arquivo NDVI
                 NDVI_file = np.load(f'{dir_in}ndvi/{f}', allow_pickle=True)
