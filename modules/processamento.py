@@ -23,6 +23,12 @@ from modules.utilities import download_prod
 from shapely.geometry import Point
 import shapely.geometry as sg
 from shutil import copyfile  # Utilitario para copia de arquivos
+from pyorbital import astronomy
+from pyspectral.rayleigh import Rayleigh                     # Correção atmosférica no espectro visível 
+from pyorbital.astronomy import get_alt_az
+from pyorbital.orbital import get_observer_look
+from modules.remap import remap
+import math
 # Configurar o NumPy para ignorar os avisos
 np.seterr(invalid='ignore')
 
@@ -107,18 +113,97 @@ def adicionando_linhas(ax):
     gl.right_labels = False
 
 
-def adicionando_descricao_imagem(description, institution, ax, fig, cruz=False):
-    # Criando novos eixos de acordo com a posicao da imagem
-    cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-    cax1.patch.set_color('black')  # Alterando a cor do novo eixo
-    cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
-    if cruz:
-        cruzStr = '+'
-        cax1.text(0.190, 0.13, cruzStr, color='red', size=12)  # Adicionando simbolo "+"
-    cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
-    cax1.xaxis.set_visible(False)  # Removendo rotulos do eixo X
-    cax1.yaxis.set_visible(False)  # Removendo rotulos do eixo Y
+def adicionando_descricao_imagem(description, institution, ax, fig, cruz=False, truecolor=False):
+    if truecolor:
+        cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+        cax1.patch.set_color('black') 
+        cax1.text(0, 0.13, description, color='white', size=6)  # Adicionando texto
+        cax1.text(0.85, 0.13, institution, color='yellow', size=6)  # Adicionando texto
+        cax1.xaxis.set_visible(False)  # Removendo rótulos do eixo X
+        cax1.yaxis.set_visible(False)  # Removendo rótulos do eixo Y
+    # Criando novos eixos de acordo com a posição da imagem   
+    else:
+        cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
+        cax1.patch.set_color('black')  # Alterando a cor do novo eixo
+        cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
+        if cruz:
+            cruzStr = '+'
+            cax1.text(0.190, 0.13, cruzStr, color='red', size=12)  # Adicionando símbolo "+"
+        cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
+        cax1.xaxis.set_visible(False)  # Removendo rótulos do eixo X
+        cax1.yaxis.set_visible(False)  # Removendo rótulos do eixo Y
+
+
+def calculating_lons_lats(date, extent, data_ch01, data_ch02, data_ch03):
+        
+    year = date.strftime('%Y')
+    month = date.strftime('%m')
+    day = date.strftime('%d')
+    hour = date.strftime('%H')
+    minutes = date.strftime('%M')
     
+    # Criar as latitudes e longitudes com base na extensão
+    lat = np.linspace(extent[3], extent[1], data_ch01.shape[0])
+    lon = np.linspace(extent[0], extent[2], data_ch01.shape[1])
+    xx,yy = np.meshgrid(lon,lat)
+    lons = xx.reshape(data_ch01.shape[0], data_ch01.shape[1])
+    lats = yy.reshape(data_ch01.shape[0], data_ch01.shape[1])
+
+    # Obter o ano, mês, dia, hora e minuto para aplicar a correção zenital
+    utc_time = datetime.datetime(int(year), int(month), int(day), int(hour), int(minutes))
+    sun_zenith = np.zeros((data_ch01.shape[0], data_ch01.shape[1]))
+    sun_zenith = astronomy.sun_zenith_angle(utc_time, lons, lats)
+
+    # Aplicar a correção zenital do sol
+    data_ch01 = (data_ch01)/(np.cos(np.deg2rad(sun_zenith)))
+    data_ch02 = (data_ch02)/(np.cos(np.deg2rad(sun_zenith)))
+    data_ch03 = (data_ch03)/(np.cos(np.deg2rad(sun_zenith)))
+
+    return utc_time, lats, lons, sun_zenith, data_ch01, data_ch02, data_ch03
+
+
+def applying_rayleigh_correction(file_ch01, utc_time, lons, lats, sun_zenith, data_ch01, data_ch02, longitude):
+    # Altitude do satélite
+    sat_h = file_ch01.variables['goes_imager_projection'].perspective_point_height
+
+    sunalt, suna = get_alt_az(utc_time, lons, lats)
+    suna = np.rad2deg(suna)
+    #sata, satel = get_observer_look(sat_lon, sat_lat, sat_alt, vis.attrs['start_time'], lons, lats, 0)
+    sata, satel = get_observer_look(longitude, 0.0, sat_h, utc_time, lons, lats, 0)
+    satz = 90 - satel
+
+    # Correção de Rayleigh
+    atmosphere = 'us-standard'
+    aerosol_type = 'rayleigh_only'
+    corrector = Rayleigh('GOES-16', 'abi', atmosphere=atmosphere, aerosol_type=aerosol_type)
+
+    sata = sata % 360.
+    suna = suna % 360.
+    ssadiff = np.absolute(suna - sata)
+    ssadiff = np.minimum(ssadiff, 360 - ssadiff)
+
+    red = data_ch02 * 100
+
+    refl_cor_band_c01 = corrector.get_reflectance(sun_zenith, satz, ssadiff, 'C01', redband=red)
+    data_ch01 = data_ch01 - (refl_cor_band_c01 / 100)
+
+    refl_cor_band_c02 = corrector.get_reflectance(sun_zenith, satz, ssadiff, 'C02', redband=red)
+    data_ch02 = data_ch02 - (refl_cor_band_c02 / 100)
+
+    return data_ch01, data_ch02 
+
+
+def apply_cira_stretch(band_data):
+    
+    log_root = np.log10(0.0223)
+    denom = (1.0 - log_root) * 0.75
+    band_data *= 0.01
+    band_data = band_data.clip(np.finfo(float).eps)
+    band_data = np.log10(band_data)
+    band_data -= log_root
+    band_data /= denom
+    return 1 + band_data
+
 
 def adicionando_logos(fig):
     # Adicionando os logos
@@ -435,101 +520,134 @@ def process_band_cmi(file, ch, v_extent):
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
-def process_band_rgb(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
-    global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
-    # Captura a hora para contagem do tempo de processamento da imagem
-    processing_start_time = time.time()
+def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     
-    # Area de interesse para recorte
+    start = time.time() 
+    
+    # Lê a imagem da banda 01
+    file_ch01 = Dataset(ch01)
+
+    # Lê o identificador do satélite
+    satellite = getattr(file_ch01, 'platform_ID')
+
+    # Resolução
+    resolution = 3.0
+
+    # Lê a resolução da banda
+    band_resolution_km = getattr(file_ch01, 'spatial_resolution')
+    band_resolution_km = float(band_resolution_km[:band_resolution_km.find("km")])
+
+    # Fator de divisão para reduzir o tamanho da imagem
+    f = math.ceil(float(resolution / band_resolution_km))
+    # Limpando memória
+    del band_resolution_km
+
+    # Lê a longitude central
+    longitude = file_ch01.variables['goes_imager_projection'].longitude_of_projection_origin
+    # Lê o semi-eixo maior
+    a = file_ch01.variables['goes_imager_projection'].semi_major_axis
+    # Lê o semi-eixo menor
+    b = file_ch01.variables['goes_imager_projection'].semi_minor_axis
+    # Calcular a extensão da imagem
+    h = file_ch01.variables['goes_imager_projection'].perspective_point_height
+
+    # Lê a data do arquivo
+    add_seconds = int(file_ch01.variables['time_bounds'][0])
+    date = datetime.datetime(2000,1,1,12) + datetime.timedelta(seconds=add_seconds)
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+
     extent, resolution = area_para_recorte(v_extent)
 
-    if rgb_type == 'truecolor':
-        # https://rammb.cira.colostate.edu/training/visit/quick_guides/
-        # http://cimss.ssec.wisc.edu/goes/OCLOFactSheetPDFs/ABIQuickGuide_CIMSSRGB_v2.pdf
-        # Lendo imagem CMI reprojetada
-        
-        reproject_ch01 = Dataset(ch01)
-        reproject_ch02 = Dataset(ch02)
-        reproject_ch03 = Dataset(ch03)
-        
-        # Coletando do nome da imagem o satelite e a data/hora
-        satellite_ch01 = (ch01[ch01.find("M6C01_G") + 7:ch01.find("_s")])
-        dtime_ch01 = ch01[ch01.find("M6C01_G16_s") + 11:ch01.find("_e") - 1]
+    #------------------------------------------------------------------------------------------------------#
+    #-------------------------------------------Reprojetando----------------------------------------------#
+    #------------------------------------------------------------------------------------------------------#
+    # band01
+    variable = "CMI"
+    # reprojetando band 01
+    grid = remap(ch01, variable, extent, resolution, h, a, b, longitude)
+    # Lê o retorno da função
+    data_ch01 = grid.ReadAsArray()
 
-        data_ch01 = reproject_ch01.variables['Band1'][:]
-        data_ch02 = reproject_ch02.variables['Band1'][:]
-        data_ch03 = reproject_ch03.variables['Band1'][:]
-        reproject_ch01 = None
-        del reproject_ch01
-        reproject_ch02 = None
-        del reproject_ch02
-        reproject_ch03 = None
-        del reproject_ch03
+    #------------------------------------------------------------------------------------------------------
+    # reprojetando band 02
+    grid = remap(ch02, variable, extent, resolution, h, a, b, longitude)
+    # Lê o retorno da função
+    data_ch02 = grid.ReadAsArray()
 
-        # RGB Components
-        R = data_ch02
-        G = data_ch03
-        B = data_ch01
+    #------------------------------------------------------------------------------------------------------
+    # reprojetando band 03
+    grid = remap(ch03, variable, extent, resolution, h, a, b, longitude)
+    # Lê o retorno da função 
+    data_ch03 = grid.ReadAsArray()
+    #------------------------------------------------------------------------------------------------------
 
-        R = np.clip(R, 0, 1)
-        G = np.clip(G, 0, 1)
-        B = np.clip(B, 0, 1)
-        
-        gamma = 2.2
-        R = np.power(R, 1/gamma)
-        G = np.power(G, 1/gamma)
-        B = np.power(B, 1/gamma)
 
-        G_true = 0.48358168 * R + 0.45706946 * B + 0.06038137 * G
-        G_true = np.clip(G_true, 0, 1)  # apply limits again, just in case.
-        
-        # Create the RGB
-        RGB = np.dstack([R, G_true, B])
+    #------------------------------------------------------------------------------------------------------
+    # Calculando correção zenith
+    utc_time, lats, lons, sun_zenith, data_ch01, data_ch02, data_ch03 = calculating_lons_lats(date, extent, data_ch01, data_ch02, data_ch03)
 
-    else:
-        return False
+    # Aplicando a correção de Rayleigh
+    data_ch01, data_ch02 = applying_rayleigh_correction(file_ch01, utc_time, lons, lats, sun_zenith, data_ch01, data_ch02, longitude)
 
-    # Formatando data para plotar na imagem e salvar o arquivo
-    date = (datetime.datetime.strptime(dtime_ch01, '%Y%j%H%M%S'))
-    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
-    date_file = date.strftime('%Y%m%d_%H%M%S')
+    # Calculando as cores verdadeiras (True color)
+    R = data_ch02
+    G = (data_ch01 + data_ch02) / 2 * 0.93 + 0.07 * data_ch03 
+    B = data_ch01
+
+    # Aplicando o estiramento CIRA
+    R = apply_cira_stretch(R)
+    G = apply_cira_stretch(G)
+    B = apply_cira_stretch(B)
+
+    # Create the RGB
+    RGB = np.stack([R, G, B], axis=2)		
+    #------------------------------------------------------------------------------------------------------
 
     # Formatando a descricao a ser plotada na imagem
-    description = f' GOES-{satellite_ch01} Natural True Color {date_img}'
+    description = f' GOES-{satellite} Natural True Color {date_img}'
     institution = "CEPAGRI - UNICAMP"
 
-    # Definindo tamanho da imagem de saida
-    d_p_i = 150
-    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+    #------------------------------------------------------------------------------------------------------  
+    # Formato da imagem
+    dpi = 150
+    fig = plt.figure(figsize=(data_ch01.shape[1]/float(dpi + 5), data_ch01.shape[0]/float(dpi)), dpi=dpi, frameon=True, edgecolor='black', facecolor='black')
 
-    # Utilizando projecao geoestacionaria no cartopy
-    ax = plt.axes(projection=ccrs.PlateCarree())
+    # Define a projeção
+    proj = ccrs.PlateCarree()
+
+    # Modificar caso a imagem esteja fora da área 
+    ax = plt.axes([0, 0.02, 1, 1], projection=proj)
+    # Não sei o que muda :(
+    ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
 
     # Adicionando o shapefile dos estados brasileiros
-    adicionando_shapefile(v_extent, ax)
+    adicionando_shapefile('br', ax)
 
     # Adicionando  linhas dos litorais
     adicionando_linhas(ax)
 
-    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
-    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
+    # Pega a extensão da imagem
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]
 
-    # Plotando a imagem
-    ax.imshow(RGB, origin='upper', extent=img_extent)
+    # Plota a imagem
+    ax.imshow(RGB, origin='upper', extent=img_extent, zorder=1)
 
-    # Adicionando descricao da imagem
-    adicionando_descricao_imagem(description, institution, ax, fig)
-
-    # Adicionando os logos
+    if v_extent == 'sp':
+        # Adicionando descricao da imagem para sp
+        adicionando_descricao_imagem(description, institution, ax, fig, truecolor=True)
+    else:
+        # Adicionando descricao da imagem para br
+        adicionando_descricao_imagem(description, institution, ax, fig)
+        
+    # Adicionando as logos
     adicionando_logos(fig)
-    
+
     # Salvando a imagem de saida
-    plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
-    
-    # Fecha a janela para limpar a memoria
-    plt.close()
-    # Realiza o log do calculo do tempo de processamento da imagem
-    logging.info(f'{ch01[0:59].replace("M6C01", "M6C0*")} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
+    plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', facecolor='black')
+
+    # Tempo de processamento True color
+    logging.info('Total processing time:', round((time.time() - start),2), 'seconds.') 
 
 
 def process_rrqpef(rrqpef, ch13, v_extent):
@@ -1225,12 +1343,13 @@ def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_ba
             ch02 = new_bands['02']
             ch03 = new_bands['03']
             # Montando dicionario de argumentos
-            kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', 
-                      'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}'}
+            kwargs = {'ch01': f'{dir_in}band01/{ch01}', 
+                      'ch02': f'{dir_in}band02/{ch02}', 
+                      'ch03': f'{dir_in}band03/{ch03}'}
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_band_rgb, args=("truecolor", "br"), kwargs=kwargs)
+                process = Process(target=process_truecolor, args=("truecolor", "br"), kwargs=kwargs)
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_br.append(process)
                 # Inicia o processo
@@ -1255,12 +1374,12 @@ def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_ba
             ch02 = new_bands['02']
             ch03 = new_bands['03']
             # Montando dicionario de argumentos
-            kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_sp.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_sp.nc")}', 
-                      'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_sp.nc")}'}
+            kwargs = {'ch01': f'{dir_in}band01/{ch01}', 'ch02': f'{dir_in}band02/{ch02}', 
+                      'ch03': f'{dir_in}band03/{ch03}'}
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_band_rgb, args=("truecolor", "sp"), kwargs=kwargs)
+                process = Process(target=process_truecolor, args=("truecolor", "sp"), kwargs=kwargs)
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_sp.append(process)
                 # Inicia o processo
