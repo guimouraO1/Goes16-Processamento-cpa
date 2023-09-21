@@ -48,7 +48,7 @@ data_10_min = datetime.datetime.strftime(data_hora_atual-timedelta(minutes=10),'
 data_hora_download_file = data_10_min[0:11]+ '0'
 
 # Contador para download das 16 bandas
-for x in range(2, 4):
+for x in range(1, 17):
     # Transforma o inteiro contador em string e com 2 digitos
     b = str(x).zfill(2)
     # Download band
@@ -61,40 +61,8 @@ for x in range(2, 4):
         continue
 
 
-#download_glm(data_hora_download_file, dir_in + f'glm')
+download_glm(data_hora_download_file, dir_in + f'glm')
 
-
-# Função para renomear arquivos
-def renomear_arquivos(diretorio):
-    for nome_arquivo in os.listdir(diretorio):
-        caminho_arquivo = os.path.join(diretorio, nome_arquivo)
-        
-        # Verifique se é um diretório
-        if os.path.isdir(caminho_arquivo):
-            # Se for um diretório, chame recursivamente a função
-            renomear_arquivos(caminho_arquivo)
-        else:
-            # Verifique se o nome do arquivo contém "OR_"
-            if "OR_" in nome_arquivo:
-                # Construa o novo nome de arquivo substituindo "OR_" por "CG_"
-                novo_nome = nome_arquivo.replace("OR_", "CG_")
-                
-                # Renomeie o arquivo
-                os.rename(caminho_arquivo, os.path.join(diretorio, novo_nome))
-
-
-# Percorra as subpastas "band01" até "band16"
-for band_folder in range(2, 4):
-    subdiretorio = os.path.join(dir_in, f"band{band_folder:02d}")
-    
-    if os.path.exists(subdiretorio):
-        # Chame a função para renomear os arquivos na subpasta
-        renomear_arquivos(subdiretorio)
-
-print("Arquivos renomeados com sucesso!")
-
-        
-        
 def finalize(s):
     # Capturando data/hora final
     fim = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
