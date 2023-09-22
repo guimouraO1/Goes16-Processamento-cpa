@@ -744,7 +744,8 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', facecolor='black')
 
     # Tempo de processamento True color
-    logging.info('Total processing time:', round((time.time() - start),2), 'seconds.') 
+    logging.info(f'Total processing time:{round((time.time() - start))} seconds.') 
+    
 
 
 def process_rrqpef(rrqpef, ch13, v_extent):
