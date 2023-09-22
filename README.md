@@ -164,11 +164,14 @@ The directory structure of this repository is as follows:
 │   ├── process_gif.py
 │   ├── processamento.py
 │   ├── quantity_products.py
+│   ├── remap.py
 │   ├── remove.py
 │   ├── send_products.py
-│   └── utilities.py
-├── oldBands.json
-├── main.py
+│   ├── utilities.py
+├── oldBands.json             
+├── download_amazon.py        
+├── main.py                   
+├── processamento.sh          
 └── README.md
 ```
 
