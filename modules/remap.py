@@ -29,7 +29,7 @@ def getScaleOffset(path, variable):
     return scale, offset
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------    
-def remap(path, variable, extent, resolution, h, a, b, longitude):
+def remap(path, variable, extent, resolution):
     
     # Default scale    
     scale = 1
@@ -51,15 +51,13 @@ def remap(path, variable, extent, resolution, h, a, b, longitude):
 	
     # Lendo os metadados do cabecalho
     raw = gdal.Open(connectionInfo, gdal.GA_ReadOnly)          
-
-
-    # GOES Spatial Reference System
+    
+    # GOES-16 Spatial Reference System
     sourcePrj = osr.SpatialReference()
-    sourcePrj.ImportFromProj4('+proj=geos +h=' + str(h) + ' ' + '+a=' + str(a) + ' ' + '+b=' + str(b) + ' ' + '+lon_0=' + str(longitude) + ' ' + '+sweep=x')
-
+    sourcePrj.ImportFromProj4('+proj=geos +h=35786023.0 +a=6378137.0 +b=6356752.31414 +f=0.00335281068119356027 +lat_0=0.0 +lon_0=-75 +sweep=x +no_defs')
     # Lat/lon WSG84 Spatial Reference System
     targetPrj = osr.SpatialReference()
-    targetPrj.ImportFromProj4('+proj=latlong +datum=WGS84')
+    targetPrj.ImportFromProj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
 
     # Setup projection and geo-transformation
     raw.SetProjection(sourcePrj.ExportToWkt())
@@ -80,9 +78,8 @@ def remap(path, variable, extent, resolution, h, a, b, longitude):
     grid.SetProjection(targetPrj.ExportToWkt())
     grid.SetGeoTransform(getGeoT(extent, grid.RasterYSize, grid.RasterXSize))
     
-    
     gdal.ReprojectImage(raw, grid, sourcePrj.ExportToWkt(), targetPrj.ExportToWkt(), gdal.GRA_NearestNeighbour, options=['NUM_THREADS=ALL_CPUS']) 
-               
+
     # Read grid data
     array = grid.ReadAsArray()
     

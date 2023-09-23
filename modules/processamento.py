@@ -612,6 +612,7 @@ def process_band_cmi(file, ch, v_extent):
 
 def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     
+    # Calcula o tempo de processamento True Color
     start = time.time() 
     
     # Lê a imagem da banda 01
@@ -620,26 +621,8 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     # Lê o identificador do satélite
     satellite = getattr(file_ch01, 'platform_ID')
 
-    # Resolução
-    resolution = 3.0
-
-    # Lê a resolução da banda
-    band_resolution_km = getattr(file_ch01, 'spatial_resolution')
-    band_resolution_km = float(band_resolution_km[:band_resolution_km.find("km")])
-
-    # Fator de divisão para reduzir o tamanho da imagem
-    f = math.ceil(float(resolution / band_resolution_km))
-    # Limpando memória
-    del band_resolution_km
-
     # Lê a longitude central
     longitude = file_ch01.variables['goes_imager_projection'].longitude_of_projection_origin
-    # Lê o semi-eixo maior
-    a = file_ch01.variables['goes_imager_projection'].semi_major_axis
-    # Lê o semi-eixo menor
-    b = file_ch01.variables['goes_imager_projection'].semi_minor_axis
-    # Calcular a extensão da imagem
-    h = file_ch01.variables['goes_imager_projection'].perspective_point_height
 
     # Lê a data do arquivo
     add_seconds = int(file_ch01.variables['time_bounds'][0])
@@ -652,26 +635,26 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     #------------------------------------------------------------------------------------------------------#
     #-------------------------------------------Reprojetando----------------------------------------------#
     #------------------------------------------------------------------------------------------------------#
+    
     # band01
     variable = "CMI"
     # reprojetando band 01
-    grid = remap(ch01, variable, extent, resolution, h, a, b, longitude)
+    grid = remap(ch01, variable, extent, resolution)
     # Lê o retorno da função
     data_ch01 = grid.ReadAsArray()
 
     #------------------------------------------------------------------------------------------------------
     # reprojetando band 02
-    grid = remap(ch02, variable, extent, resolution, h, a, b, longitude)
+    grid = remap(ch02, variable, extent, resolution)
     # Lê o retorno da função
     data_ch02 = grid.ReadAsArray()
 
     #------------------------------------------------------------------------------------------------------
     # reprojetando band 03
-    grid = remap(ch03, variable, extent, resolution, h, a, b, longitude)
+    grid = remap(ch03, variable, extent, resolution)
     # Lê o retorno da função 
     data_ch03 = grid.ReadAsArray()
     #------------------------------------------------------------------------------------------------------
-
 
     #------------------------------------------------------------------------------------------------------
     # Calculando correção zenith
@@ -694,59 +677,43 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     RGB = np.stack([R, G, B], axis=2)		
     #------------------------------------------------------------------------------------------------------
 
-    # Nome do produto
-    product = rgb_type
-
     # Formatando a descricao a ser plotada na imagem
     description = f' GOES-{satellite} Natural True Color {date_img}'
     institution = "CEPAGRI - UNICAMP"
 
-    #------------------------------------------------------------------------------------------------------  
-    # Formato da imagem
-    dpi = 150
-    fig = plt.figure(figsize=(data_ch01.shape[1]/float(dpi + 5), data_ch01.shape[0]/float(dpi)), dpi=dpi, frameon=True, edgecolor='black', facecolor='black')
+    d_p_i = 150
+    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
 
-    # Define a projeção
-    proj = ccrs.PlateCarree()
-
-    # Modificar caso a imagem esteja fora da área 
-    ax = plt.axes([0, 0.02, 1, 1], projection=proj)
-    # Não sei o que muda :(
-    ax.set_extent([extent[0], extent[2], extent[1], extent[3]], ccrs.PlateCarree())
+    # Utilizando projecao geoestacionaria no cartopy
+    ax = plt.axes(projection=ccrs.PlateCarree())
 
     # Adicionando o shapefile dos estados brasileiros
-    adicionando_shapefile('br', ax)
+    adicionando_shapefile(v_extent, ax)
 
     # Adicionando  linhas dos litorais
     adicionando_linhas(ax)
 
-    # Pega a extensão da imagem
-    img_extent = [extent[0], extent[2], extent[1], extent[3]]
+    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
 
-    # Plota a imagem
-    ax.imshow(RGB, origin='upper', extent=img_extent, zorder=1)
+    # Plotando a imagem
+    ax.imshow(RGB, origin='upper', extent=img_extent)
 
-    if v_extent == 'sp':
-        cax1 = fig.add_axes([ax.get_position().x0 + 0.003, ax.get_position().y0 - 0.026, ax.get_position().width - 0.003, 0.0125])
-        cax1.patch.set_color('black') 
-        cax1.text(0, 0.13, description, color='white', size=6)  # Adicionando texto
-        cax1.text(0.85, 0.13, institution, color='yellow', size=6)  # Adicionando texto
-        cax1.xaxis.set_visible(False)  # Removendo rótulos do eixo X
-        cax1.yaxis.set_visible(False)  # Removendo rótulos do eixo Y
-    else:
-        # Adicionando descricao da imagem para br
-        adicionando_descricao_imagem(description, institution, ax, fig)
-        
-    # Adicionando as logos
+    # Adicionando descricao da imagem
+    adicionando_descricao_imagem(description, institution, ax, fig)
+
+    # Adicionando os logos
     adicionando_logos(fig)
-
+    
     # Salvando a imagem de saida
-    plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', facecolor='black')
+    plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+    
+    # Fecha a janela para limpar a memoria
+    plt.close()
 
     # Tempo de processamento True color
-    logging.info(f'Total processing time:{round((time.time() - start))} seconds.') 
+    logging.info('Total processing time True Color:', round((time.time() - start),2), 'seconds.') 
     
-
 
 def process_rrqpef(rrqpef, ch13, v_extent):
     
@@ -1428,69 +1395,6 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
         # Limpa a lista de processos
         process_sp.clear()
 
-# true color antigo
-# def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands):
-#     # Checagem se e possivel gerar imagem TrueColor
-#     if bands['17']:
-#         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
-#         if p_br:
-#             logging.info("")
-#             logging.info('PROCESSANDO IMAGENS TRUECOLOR "BR"...')
-#             # Pegando nome das bandas 01, 02, 03
-#             ch01 = new_bands['01']
-#             ch02 = new_bands['02']
-#             ch03 = new_bands['03']
-#             # Montando dicionario de argumentos
-#             kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', 
-#                       'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}'}
-#             # Tenta realizar o processamento da imagem
-#             try:
-#                 # Cria o processo com a funcao de processamento
-#                 process = Process(target=process_band_rgb, args=("truecolor", "br"), kwargs=kwargs)
-#                 # Adiciona o processo na lista de controle do processamento paralelo
-#                 process_br.append(process)
-#                 # Inicia o processo
-#                 process.start()
-#             # Caso seja retornado algum erro do processamento, realiza o log 
-#             except Exception as e:
-#                 # Registra detalhes da exceção, como mensagem e tipo
-#                 logging.error(f"Erro ao criar processo: {e}")
-#         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-#         for process in process_br:
-#             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-#             process.join()
-#         # Limpa a lista de processos
-#         process_br.clear()
-        
-#         # Se a variavel de controle de processamento sp for True, realiza o processamento
-#         if p_sp:
-#             logging.info("")
-#             logging.info('PROCESSANDO IMAGENS TRUECOLOR "SP"...')
-#             # Pegando nome das bandas 01, 02, 03
-#             ch01 = new_bands['01']
-#             ch02 = new_bands['02']
-#             ch03 = new_bands['03']
-#             # Montando dicionario de argumentos
-#             kwargs = {'ch01': f'{dir_in}band01/{ch01.replace(".nc", "_reproj_sp.nc")}', 'ch02': f'{dir_in}band02/{ch02.replace(".nc", "_reproj_sp.nc")}', 
-#                       'ch03': f'{dir_in}band03/{ch03.replace(".nc", "_reproj_sp.nc")}'}
-#             # Tenta realizar o processamento da imagem
-#             try:
-#                 # Cria o processo com a funcao de processamento
-#                 process = Process(target=process_band_rgb, args=("truecolor", "sp"), kwargs=kwargs)
-#                 # Adiciona o processo na lista de controle do processamento paralelo
-#                 process_sp.append(process)
-#                 # Inicia o processo
-#                 process.start()
-#             # Caso seja retornado algum erro do processamento, realiza o log 
-#             except Exception as e:
-#                 # Registra detalhes da exceção, como mensagem e tipo
-#                 logging.error(f"Erro ao criar processo: {e}")
-#         # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-#         for process in process_sp:
-#             # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-#             process.join()
-#         # Limpa a lista de processos
-#         process_sp.clear()
 
 def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands):
     # Checagem se e possivel gerar imagem TrueColor
