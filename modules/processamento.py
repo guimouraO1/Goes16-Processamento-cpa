@@ -614,7 +614,7 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
 
     # Tempo de processamento True color
     logging.info(f'Total processing time True Color:{round((time.time() - start),2)} seconds.') 
-    
+
 
 def process_rrqpef(rrqpef, ch13, v_extent):
     
@@ -1149,45 +1149,63 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
             fo.write(str(0))
 
-        # Lendo imagem CMI reprojetada
-        reproject_ch01 = Dataset(f'{dir_in}fdcf/ch01.nc')
-        reproject_ch02 = Dataset(f'{dir_in}fdcf/ch02.nc')
-        reproject_ch03 = Dataset(f'{dir_in}fdcf/ch03.nc')
-        
-        data_ch01 = reproject_ch01.variables['Band1'][:]
-        data_ch02 = reproject_ch02.variables['Band1'][:]
-        data_ch03 = reproject_ch03.variables['Band1'][:]
+        file_ch01 = Dataset(ch01)
+        # Lê o identificador do satélite
+        satellite = getattr(file_ch01, 'platform_ID')
+        # Lê a longitude central
+        longitude = file_ch01.variables['goes_imager_projection'].longitude_of_projection_origin
 
-        reproject_ch01 = None
-        del reproject_ch01
-        reproject_ch02 = None
-        del reproject_ch02
-        reproject_ch03 = None
-        del reproject_ch03
+        # Lê a data do arquivo
+        add_seconds = int(file_ch01.variables['time_bounds'][0])
+        date = datetime.datetime(2000,1,1,12) + datetime.timedelta(seconds=add_seconds)
+        date_file = date.strftime('%Y%m%d_%H%M%S')
+        date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+
+        # Area de interesse para recorte
+        extent, resolution = area_para_recorte(v_extent)
+        variable = "CMI"
         
-        # RGB Components
+        #------------------------------------------------------------------------------------------------------#
+        #-------------------------------------------Reprojetando----------------------------------------------#
+        #------------------------------------------------------------------------------------------------------#
+        # reprojetando band 01
+        grid = remap(ch01, variable, extent, resolution)
+        # Lê o retorno da função
+        data_ch01 = grid.ReadAsArray()
+        #------------------------------------------------------------------------------------------------------
+        #------------------------------------------------------------------------------------------------------
+        # reprojetando band 02
+        grid = remap(ch02, variable, extent, resolution)
+        # Lê o retorno da função
+        data_ch02 = grid.ReadAsArray()
+        #------------------------------------------------------------------------------------------------------
+        #------------------------------------------------------------------------------------------------------
+        # reprojetando band 03
+        grid = remap(ch03, variable, extent, resolution)
+        # Lê o retorno da função 
+        data_ch03 = grid.ReadAsArray()
+        #------------------------------------------------------------------------------------------------------
+        #------------------------------------------------------------------------------------------------------
+
+        #------------------------------------------------------------------------------------------------------
+        # Calculando correção zenith
+        utc_time, lats, lons, sun_zenith, data_ch01, data_ch02, data_ch03 = calculating_lons_lats(date, extent, data_ch01, data_ch02, data_ch03)
+
+        # Aplicando a correção de Rayleigh
+        data_ch01, data_ch02 = applying_rayleigh_correction(file_ch01, utc_time, lons, lats, sun_zenith, data_ch01, data_ch02, longitude)
+
+        # Calculando as cores verdadeiras (True color)
         R = data_ch02
-        G = data_ch03
+        G = (data_ch01 + data_ch02) / 2 * 0.93 + 0.07 * data_ch03 
         B = data_ch01
-        
-        R = np.clip(R, 0, 1)
-        G = np.clip(G, 0, 1)
-        B = np.clip(B, 0, 1)
-        
-        gamma = 2.2
-        R = np.power(R, 1/gamma)
-        G = np.power(G, 1/gamma)
-        B = np.power(B, 1/gamma)
-        
-        G_true = 0.48358168 * R + 0.45706946 * B + 0.06038137 * G
-        G_true = np.clip(G_true, 0, 1)  # apply limits again, just in case.
-        
+
+        # Aplicando o estiramento CIRA
+        R = apply_cira_stretch(R)
+        G = apply_cira_stretch(G)
+        B = apply_cira_stretch(B)
+
         # Create the RGB
-        RGB = np.dstack([R, G_true, B])
-        
-        # Eliminate values outside the globe
-        mask = (RGB == [R[0, 0], G[0, 0], B[0, 0]]).all(axis=2)
-        RGB[mask] = np.nan
+        RGB = np.stack([R, G, B], axis=2)		
 
         # Adicionando descricao da imagem.
         description = f"GOES-16 Natural True Color,     Fire Hot Spot em {date_img}"  # Esse espaço é necessário para adicionar o caractere na imagem
@@ -1570,9 +1588,9 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             try:
                 # Cria o processo com a funcao de processamento
                 process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf}', 
-                                                             f'{dir_in}band01/{ch01.replace(".nc", "_reproj_br.nc")}', 
-                                                             f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', 
-                                                             f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br", fdcf_diario))
+                                                             f'{dir_in}band01/{ch01}', 
+                                                             f'{dir_in}band02/{ch02}', 
+                                                             f'{dir_in}band03/{ch03}', "br", fdcf_diario))
                 
                 # Adiciona o processo na lista de controle do processamento paralelo
                 process_br.append(process)
