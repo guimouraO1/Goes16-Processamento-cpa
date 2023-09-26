@@ -14,7 +14,7 @@ dir_main = dirs['dir_main']
 
 def abrir_old_json():
     global dir_main
-    with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
+    with open(f'{dir_main}old_bands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 

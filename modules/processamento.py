@@ -208,7 +208,7 @@ def adicionando_logos(fig):
 
 def abrir_old_json():
     global dir_main
-    with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
+    with open(f'{dir_main}old_bands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 
@@ -1568,7 +1568,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
+            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
             
             # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
             logging.info(f'date_file: {date_file}')

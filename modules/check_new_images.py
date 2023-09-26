@@ -17,7 +17,7 @@ dir_main = dirs['dir_main']
 # Função para abrir o arquivo "oldBands.json" e retornar a lista de "oldImagesName".
 def abrir_old_json():
     global dir_main
-    with open(f'{dir_main}oldBands.json', 'r') as jsonOld:
+    with open(f'{dir_main}old_bands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
 
