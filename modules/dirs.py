@@ -2,10 +2,9 @@ import datetime
 
 # Modifique aqui os diretórios para uso
 def get_dirs():
-    dir_main = '/home/guimoura/download_amazon/'
-    #dir_main = '/mnt/c/Users/Gui/OneDrive/Documentos/processamentopy/'
+    dir_main = '/Scripts/goes16/Processamento/'
     dirs = {
-        'dir_in': dir_main + 'goes/',
+        'dir_in': 'home/goes/',
         'dir_main': dir_main,
         'dir_out': dir_main + 'output/',
         'dir_shapefiles': dir_main + 'shapefiles/',

@@ -39,8 +39,6 @@ br = True
 sp = True
 #==================================#     Dicionário das bandas   #==================================#
 
-# Script Antigo - 06/09/2023 11:39:06 Tempo gasto 423.605 segundos |
-# Script Atual  - 06/09/2023 11:31:15 Tempo gasto 291.632 segundos  | - Sem o envio de imagens para o site
 
 # ========================================#     Main     #========================================== #
 # configura o log
@@ -61,6 +59,8 @@ try:
         quantity_products(dir_out)
         # Processa o gif
         process_gif(bands, br, sp, dir_out)
+        # Envia produtos para o site
+        send_products(br, sp, dir_out)
     else:
         logging.info('Sem arquivos para processamento. \n')
 except Exception as error:

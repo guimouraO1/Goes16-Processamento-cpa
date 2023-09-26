@@ -28,7 +28,7 @@ from pyspectral.rayleigh import Rayleigh                     # Correção atmosf
 from pyorbital.astronomy import get_alt_az
 from pyorbital.orbital import get_observer_look
 from modules.remap import remap
-import math
+
 # Configurar o NumPy para ignorar os avisos
 np.seterr(invalid='ignore')
 

@@ -48,7 +48,7 @@ data_10_min = datetime.datetime.strftime(data_hora_atual-timedelta(minutes=10),'
 data_hora_download_file = data_10_min[0:11]+ '0'
 
 # Contador para download das 16 bandas
-for x in range(1, 4):
+for x in range(1, 17):
     # Transforma o inteiro contador em string e com 2 digitos
     b = str(x).zfill(2)
     # Download band
