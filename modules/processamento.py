@@ -28,6 +28,7 @@ from pyspectral.rayleigh import Rayleigh                     # Correção atmosf
 from pyorbital.astronomy import get_alt_az
 from pyorbital.orbital import get_observer_look
 from modules.remap import remap
+from matplotlib.colors import LinearSegmentedColormap, to_rgba
 
 # Configurar o NumPy para ignorar os avisos
 np.seterr(invalid='ignore')
@@ -1249,6 +1250,165 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     logging.info(f'{fdcf} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
+def process_airmass(rgb_type, v_extent, path_ch08=None, path_ch10=None, path_ch12=None, path_ch13=None):
+    global dir_out
+    start = time.time()  
+
+    # Read the file using the NetCDF library
+    file_ch08 = Dataset(path_ch08)
+
+    # Lê o identificador do satélite
+    satellite = getattr(file_ch08, 'platform_ID')
+    variable = "CMI"
+    
+    # Area de interesse para recorte
+    extent, resolution = area_para_recorte(v_extent)
+
+    # Read the resolution
+    band_resolution_km = getattr(file_ch08, 'spatial_resolution')
+    band_resolution_km = float(band_resolution_km[:band_resolution_km.find("km")])
+
+    # Getting the file time and date
+    add_seconds = int(file_ch08.variables['time_bounds'][0])
+    date = datetime(2000,1,1,12) + datetime.timedelta(seconds=add_seconds)
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+
+
+    #------------------------------------------------------------------------------------------------------#
+    #-------------------------------------------Reprojetando----------------------------------------------#
+    #------------------------------------------------------------------------------------------------------#
+    # Call the reprojection funcion
+    grid = remap(path_ch08, variable, extent, resolution)
+    # Read the data returned by the function 
+    data_ch08 = grid.ReadAsArray() - 273.15
+    #------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------------------
+    # Call the reprojection funcion
+    grid = remap(path_ch10, variable, extent, resolution)
+    # Read the data returned by the function 
+    data_ch10 = grid.ReadAsArray() - 273.15
+    #------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------------------
+    # Call the reprojection funcion
+    grid = remap(path_ch12, variable, extent, resolution)
+    # Read the data returned by the function 
+    data_ch12 = grid.ReadAsArray() - 273.15
+    #------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------------------
+    # Call the reprojection funcion
+    grid = remap(path_ch13, variable, extent, resolution)
+    # Read the data returned by the function 
+    data_ch13 = grid.ReadAsArray() - 273.15
+    #------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------------------
+
+    #------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------------------
+    # RGB Components
+    R = data_ch08 - data_ch10
+    G = data_ch12 - data_ch13
+    B = data_ch08
+
+    # Minimuns and Maximuns
+    Rmin = -26.2
+    Rmax = 0.6
+    
+    Gmin = -43.2
+    Gmax = 6.7
+
+    Bmin = -29.25
+    Bmax = -64.65
+
+    R[R<Rmin] = Rmin
+    R[R>Rmax] = Rmax
+
+    G[G<Gmin] = Gmin
+    G[G>Gmax] = Gmax
+
+    B[B<Bmax] = Bmax
+    B[B>Bmin] = Bmin
+
+    # Choose the gamma
+    gamma = 1
+
+    # Normalize the data
+    R = ((R - Rmin) / (Rmax - Rmin)) ** (1/gamma)
+    G = ((G - Gmin) / (Gmax - Gmin)) ** (1/gamma)
+    B = ((B - Bmin) / (Bmax - Bmin)) ** (1/gamma) 
+
+    # Create the RGB
+    RGB = np.stack([R, G, B], axis=2)
+    #------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------------------
+
+    # Formatando a descricao a ser plotada na imagem
+    description = f' GOES-{satellite} Air Mass {date_img}'
+    institution = "CEPAGRI - UNICAMP"
+
+    # Definindo tamanho da imagem de saida
+    d_p_i = 150
+    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+
+    # Utilizando projecao geoestacionaria no cartopy
+    ax = plt.axes(projection=ccrs.PlateCarree())
+
+    # Adicionando o shapefile dos estados brasileiros
+    adicionando_shapefile(v_extent, ax)
+
+    # Adicionando  linhas dos litorais
+    adicionando_linhas(ax)    
+    
+    # Defina as cores da colorbar
+    colors = ['#b62007','#6f008b', '#0a0a8e', '#538234','#5C8C3A','#335a25', '#704c02', '#b57350', '#ffffff']
+
+    # Crie uma lista de posições normalizadas para as cores
+    color_positions = np.linspace(0, 1, len(colors))
+
+    # Crie um dicionário de cores segmentadas
+    cmap_dict = {'red': [], 'green': [], 'blue': [], 'alpha': []}
+
+    for color in colors:
+        rgba = to_rgba(color)  # Use a função to_rgba para converter a cor
+        cmap_dict['red'].append((color_positions[colors.index(color)], rgba[0], rgba[0]))
+        cmap_dict['green'].append((color_positions[colors.index(color)], rgba[1], rgba[1]))
+        cmap_dict['blue'].append((color_positions[colors.index(color)], rgba[2], rgba[2]))
+        cmap_dict['alpha'].append((color_positions[colors.index(color)], rgba[3], rgba[3]))
+
+    # Crie a paleta de cores personalizada
+    custom_cmap = LinearSegmentedColormap('CustomCmap', cmap_dict)
+    
+    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]
+
+    # Plot the image
+    img = ax.imshow(RGB, origin='upper', cmap=custom_cmap, extent=img_extent)
+        
+    # Adicionando barra da paleta de cores de acordo com o canal
+    cax0 = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.01325, ax.get_position().width, 0.0125])
+    cb = plt.colorbar(img, orientation="horizontal", cax=cax0, ticks=[0.2, 0.4, 0.6, 0.8])
+    cb.ax.set_xticklabels(['0.2', '0.4', '0.6','0.8'])
+    cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+    cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
+    cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
+    cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de coreses
+    
+    # Adicionando descricao da imagem
+    adicionando_descricao_imagem(description, institution, ax, fig)
+
+    # Adicionando os logos
+    adicionando_logos(fig)
+
+    # Salvando a imagem de saida
+    plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+
+    # Fecha a janela para limpar a memoria
+    plt.close()
+
+    # Tempo de processamento True color
+    logging.info(f'Total processing time Airmass: {round((time.time() - start),2)} seconds.') 
+
+
 def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
     
     # Checagem se e possivel gerar imagem bandas 1-16
@@ -1611,6 +1771,79 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
         process_br.clear()
 
 
+def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands):
+    # Checagem se e possivel gerar imagem Air Mass
+    if bands['22']:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS AIR MASS "BR"...')
+            # Pegando nome das bandas 08, 10, 12, 13
+            ch08 = new_bands['08']
+            ch10 = new_bands['10']
+            ch12 = new_bands['12']
+            ch13 = new_bands['13']
+            
+            # Montando dicionario de argumentos
+            kwargs = {'path_ch08': f'{dir_in}band08/{ch08}', 
+                      'path_ch10': f'{dir_in}band10/{ch10}', 
+                      'path_ch12': f'{dir_in}band12/{ch12}',
+                      'path_ch13': f'{dir_in}band13/{ch13}'
+                      }
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process = Process(target=process_airmass, args=("airmass", "br"), kwargs=kwargs)
+                # Adiciona o processo na lista de controle do processamento paralelo
+                process_br.append(process)
+                # Inicia o processo
+                process.start()
+            # Caso seja retornado algum erro do processamento, realiza o log 
+            except Exception as e:
+                # Registra detalhes da exceção, como mensagem e tipo
+                logging.error(f"Erro ao criar processo: {e}")
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_br:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa a lista de processos
+        process_br.clear()
+        
+        # Se a variavel de controle de processamento sp for True, realiza o processamento
+        if p_sp:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS AirMass "SP"...')
+                        # Pegando nome das bandas 08, 10, 12, 13
+            ch08 = new_bands['08']
+            ch10 = new_bands['10']
+            ch12 = new_bands['12']
+            ch13 = new_bands['13']
+            
+            # Montando dicionario de argumentos
+            kwargs = {'path_ch08': f'{dir_in}band08/{ch08}', 
+                      'path_ch10': f'{dir_in}band10/{ch10}', 
+                      'path_ch12': f'{dir_in}band12/{ch12}',
+                      'path_ch13': f'{dir_in}band13/{ch13}'
+                      }
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process = Process(target=process_airmass, args=("airmass", "sp"), kwargs=kwargs)
+                # Adiciona o processo na lista de controle do processamento paralelo
+                process_sp.append(process)
+                # Inicia o processo
+                process.start()
+            # Caso seja retornado algum erro do processamento, realiza o log 
+            except Exception as e:
+                # Registra detalhes da exceção, como mensagem e tipo
+                logging.error(f"Erro ao criar processo: {e}")
+        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
+        for process in process_sp:
+            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
+            process.join()
+        # Limpa a lista de processos
+        process_sp.clear()
+
 # ========================================#     Main     #========================================== #
 
 def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
@@ -1634,6 +1867,8 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands)
         
         iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands)
+        
+        iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands)
         
     except Exception as e:
         logging.info(f'Ocorrou um Erro {e} no Processamento')

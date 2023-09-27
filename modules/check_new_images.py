@@ -213,7 +213,6 @@ def checar_ndvi(bands, dir_in):
 
 # Checa se há bandas 1, 2, 3 (truecolor) para fdcf
 def checar_fdcf(bands, dir_in):  
-
     # Checagem de novas imagens fdcf (Band 21)
     if bands['17']:
         # Coleto o nome das novas bandas
@@ -235,6 +234,17 @@ def checar_fdcf(bands, dir_in):
     else:
         bands['21'] = False
         logging.info(f'Sem novas imagens FDCF')
+        
+# Checa se há bandas  bandas 08, 10, 12, 13 (truecolor) para Airmass
+def checar_airmass(bands):  
+    # Checagem de novas imagens fdcf (Band 22)
+    if bands['08'] and bands['10'] and bands['12'] and bands['13']:
+            bands['22'] = True
+            logging.info(f'Novas imagens AirMass')
+    else:
+        bands['22'] = False
+        logging.info(f'Sem novas imagens FDCF')
+        
 
 
 # ========================================#     Main     #========================================== #
@@ -255,6 +265,8 @@ def checar_imagens(bands, dir_in):
     checar_ndvi(bands, dir_in)
 
     checar_fdcf(bands, dir_in)
+    
+    checar_airmass(bands)
     
     print(bands)
     

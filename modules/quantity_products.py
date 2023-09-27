@@ -62,6 +62,9 @@ def quantity_products(dir_out):
 
         if remove_excess_products(dir_out, 'fdcf'):
             aux = True
+        
+        if remove_excess_products(dir_out, 'airmass'):
+            aux = True
 
         # Registra se produtos em excesso foram removidos com sucesso ou não.
         if aux:

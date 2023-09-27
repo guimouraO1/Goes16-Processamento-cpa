@@ -121,30 +121,18 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
                 create_gif("fdcf", "br")
         except:
             logging.info('Não existe imagens para process gif FDCF')
-
-
-#  Esse código é uma implementação Python que utiliza o software FFmpeg para criar arquivos GIF animados a partir de uma sequência de imagens PNG. 
-
-# 1. `def create_gif_cmi(banda, roi):`
-#    - Isso define uma função chamada `create_gif_cmi` que aceita dois argumentos: `banda` e `roi`.
-
-# 2. `os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}band{banda}/band{banda}_*_*_{roi}.png" "{dir_out}band{banda}/band{banda}_{roi}.gif"')`
-#   
-#    - Essa linha utiliza o módulo `os.system` para chamar o FFmpeg a partir do terminal do sistema operacional.
-#    - `/usr/bin/ffmpeg` é o caminho para o executável do FFmpeg.
-#    - `-y` indica que o FFmpeg deve sobrescrever o arquivo de saída se ele já existir.
-#    - `-v warning` configura o nível de log para "aviso" (warning), o que significa que o FFmpeg mostrará mensagens apenas de nível de aviso ou superior.
-#    - `-framerate 4` define a taxa de quadros do GIF como 4 quadros por segundo.
-#    - `-pattern_type glob` indica que o FFmpeg deve usar padrões de nomeação de arquivo com asterisco ("*") para corresponder aos nomes dos arquivos de entrada.
-#    - `-i "{dir_out}band{banda}/band{banda}_*_*_{roi}.png"` especifica o padrão dos nomes dos arquivos de entrada. Ele procura por arquivos correspondentes a esse padrão no diretório especificado.
-#    - `"{dir_out}band{banda}/band{banda}_{roi}.gif"` especifica o nome do arquivo GIF de saída que será criado.
-
-# 3. `def create_gif(file_type, roi):`
-#    - Isso define outra função chamada `create_gif` que aceita dois argumentos: `file_type` e `roi`.
-
-# 4. `os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}{file_type}/{file_type}_*_*_{roi}.png" "{dir_out}{file_type}/{file_type}_{roi}.gif"')`
-#    - Essa linha é semelhante à anterior, mas é usada para criar um GIF animado a partir de arquivos de imagem PNG em um diretório específico. Os argumentos são praticamente os mesmos, mas aqui você está usando as variáveis `file_type` e `roi` para construir os nomes dos diretórios e arquivos de entrada e saída.
-
-# Em resumo, essas duas funções são responsáveis por chamar o FFmpeg para criar GIFs animados a partir de uma sequência de imagens PNG, com configurações específicas de 
-# taxa de quadros e tratamento de arquivos de entrada e saída. As funções aceitam parâmetros que permitem criar GIFs com base em diferentes tipos de arquivos e regiões de 
-# interesse (ROI).
+            
+    if g_bands["22"]:
+        try:
+            if g_br:
+                logging.info('')
+                logging.info('CRIANDO GIF ANIMADO Airmass "BR"...')
+                # Cria o processo com a funcao gif
+                create_gif("airmass", "br")
+            if g_sp:
+                logging.info('')
+                logging.info('CRIANDO GIF ANIMADO Airmass "BR"...')
+                # Cria o processo com a funcao gif
+                create_gif("airmass", "sp")
+        except:
+            logging.info('Não existe imagens para process gif Airmass')

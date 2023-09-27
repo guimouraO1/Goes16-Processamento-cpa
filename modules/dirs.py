@@ -4,7 +4,7 @@ import datetime
 def get_dirs():
     dir_main = '/home/guimoura/processamento/'
     dirs = {
-        'dir_in': 'home/goes/',
+        'dir_in': dir_main + 'goes/',
         'dir_main': dir_main,
         'dir_out': dir_main + 'output/',
         'dir_shapefiles': dir_main + 'shapefiles/',

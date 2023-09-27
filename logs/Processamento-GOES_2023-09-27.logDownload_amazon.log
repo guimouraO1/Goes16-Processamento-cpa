@@ -1,0 +1,32 @@
+27/09/2023 10:09:18 INFO 
+27/09/2023 10:09:18 INFO 
+27/09/2023 10:09:18 INFO ==================================================================================================================
+27/09/2023 10:09:18 INFO =                                  DOWNLOAD IMAGENS GOES AS 27/09/2023-10:09:18                                  =
+27/09/2023 10:09:18 INFO ==================================================================================================================
+27/09/2023 10:09:18 INFO 
+27/09/2023 10:09:18 INFO 
+27/09/2023 10:09:18 INFO Tentando download Band08...
+27/09/2023 10:09:19 INFO Downloading file /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232701250209_e20232701259517_c20232701259592.nc
+27/09/2023 10:09:26 INFO 
+27/09/2023 10:09:26 INFO Tentando download Band09...
+27/09/2023 10:09:27 INFO Downloading file /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232701250209_e20232701259523_c20232701259585.nc
+27/09/2023 10:09:34 INFO 
+27/09/2023 10:09:34 INFO Tentando download Band10...
+27/09/2023 10:09:35 INFO Downloading file /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232701250209_e20232701259529_c20232701259593.nc
+27/09/2023 10:09:41 INFO 
+27/09/2023 10:09:41 INFO Tentando download Band11...
+27/09/2023 10:09:42 INFO Downloading file /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232701250209_e20232701259517_c20232701259575.nc
+27/09/2023 10:09:47 INFO 
+27/09/2023 10:09:47 INFO Tentando download Band12...
+27/09/2023 10:09:48 INFO Downloading file /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232701250209_e20232701259523_c20232701259576.nc
+27/09/2023 10:09:55 INFO 
+27/09/2023 10:09:55 INFO Tentando download Band13...
+27/09/2023 10:09:55 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232701250209_e20232701259528_c20232701259595.nc
+27/09/2023 10:10:05 INFO 
+27/09/2023 10:10:05 INFO Tempo gasto 47.0949 segundos
+27/09/2023 10:10:05 INFO 
+27/09/2023 10:10:05 INFO ==================================================================================================================
+27/09/2023 10:10:05 INFO =                             PROCESSAMENTO ENCERRADO GOES AS 27/09/2023-10:10:05                                =
+27/09/2023 10:10:05 INFO ==================================================================================================================
+27/09/2023 10:10:05 INFO 
+27/09/2023 10:10:05 INFO 
