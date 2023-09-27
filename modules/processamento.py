@@ -1568,7 +1568,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
+            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
             
             # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
             logging.info(f'date_file: {date_file}')

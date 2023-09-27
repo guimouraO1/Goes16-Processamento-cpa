@@ -49,7 +49,7 @@ def checar_pasta_fdcf(ftime, dir_in):
         # compara com arquivo baixado com a banda
         if ftime == f_fdcf_time:
             # Modifica o arquivo JSON com a imagem mais recente.               
-            modificar_chave_old_bands(f'oldBands.json', '21', x)
+            modificar_chave_old_bands(f'old_bands.json', '21', x)
         else:
             os.remove(f'{dir_in}fdcf/{x}')
             continue
@@ -99,7 +99,7 @@ def checar_bandas(bands, dir_in):
                     remover_todos_exceto(latestBand, f'{dir_in}band{b}/') 
                 
                 # Modifica o arquivo JSON com a imagem mais recente.               
-                modificar_chave_old_bands('oldBands.json', b, latestBand)  
+                modificar_chave_old_bands('old_bands.json', b, latestBand)  
                 # Atualiza o dicionário "bands" com true para novas imagens.
                 bands[b] = True
             else:
