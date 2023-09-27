@@ -1270,7 +1270,7 @@ def process_airmass(rgb_type, v_extent, path_ch08=None, path_ch10=None, path_ch1
 
     # Getting the file time and date
     add_seconds = int(file_ch08.variables['time_bounds'][0])
-    date = datetime(2000,1,1,12) + datetime.timedelta(seconds=add_seconds)
+    date = datetime.datetime(2000,1,1,12) + datetime.timedelta(seconds=add_seconds)
     date_file = date.strftime('%Y%m%d_%H%M%S')
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
 
@@ -1771,7 +1771,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
         process_br.clear()
 
 
-def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands):
+def iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_bands):
     # Checagem se e possivel gerar imagem Air Mass
     if bands['22']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1868,7 +1868,7 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         
         iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands)
         
-        iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands)
+        iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_bands)
         
     except Exception as e:
         logging.info(f'Ocorrou um Erro {e} no Processamento')

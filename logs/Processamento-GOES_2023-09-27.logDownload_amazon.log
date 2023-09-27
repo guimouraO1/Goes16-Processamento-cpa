@@ -30,3 +30,123 @@
 27/09/2023 10:10:05 INFO ==================================================================================================================
 27/09/2023 10:10:05 INFO 
 27/09/2023 10:10:05 INFO 
+27/09/2023 10:19:35 INFO 
+27/09/2023 10:19:35 INFO 
+27/09/2023 10:19:35 INFO ==================================================================================================================
+27/09/2023 10:19:35 INFO =                                  DOWNLOAD IMAGENS GOES AS 27/09/2023-10:19:35                                  =
+27/09/2023 10:19:35 INFO ==================================================================================================================
+27/09/2023 10:19:35 INFO 
+27/09/2023 10:19:35 INFO 
+27/09/2023 10:19:35 INFO Tentando download Band08...
+27/09/2023 10:19:36 INFO Downloading file /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232701300209_e20232701309517_c20232701309590.nc
+27/09/2023 10:19:42 INFO 
+27/09/2023 10:19:42 INFO Tentando download Band09...
+27/09/2023 10:19:42 INFO Downloading file /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232701300209_e20232701309523_c20232701309584.nc
+27/09/2023 10:19:49 INFO 
+27/09/2023 10:19:49 INFO Tentando download Band10...
+27/09/2023 10:19:50 INFO Downloading file /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232701300209_e20232701309529_c20232701309590.nc
+27/09/2023 10:19:55 INFO 
+27/09/2023 10:19:55 INFO Tentando download Band11...
+27/09/2023 10:19:56 INFO Downloading file /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232701300209_e20232701309517_c20232701309584.nc
+27/09/2023 10:20:06 INFO 
+27/09/2023 10:20:06 INFO Tentando download Band12...
+27/09/2023 10:20:06 INFO Downloading file /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232701300209_e20232701309523_c20232701309583.nc
+27/09/2023 10:20:15 INFO 
+27/09/2023 10:20:15 INFO Tentando download Band13...
+27/09/2023 10:20:16 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232701300209_e20232701309529_c20232701310004.nc
+27/09/2023 10:20:27 INFO 
+27/09/2023 10:20:27 INFO Tempo gasto 52.0314 segundos
+27/09/2023 10:20:27 INFO 
+27/09/2023 10:20:27 INFO ==================================================================================================================
+27/09/2023 10:20:27 INFO =                             PROCESSAMENTO ENCERRADO GOES AS 27/09/2023-10:20:27                                =
+27/09/2023 10:20:27 INFO ==================================================================================================================
+27/09/2023 10:20:27 INFO 
+27/09/2023 10:20:27 INFO 
+27/09/2023 10:21:56 INFO 
+27/09/2023 10:21:56 INFO 
+27/09/2023 10:21:56 INFO ==================================================================================================================
+27/09/2023 10:21:56 INFO =                                  DOWNLOAD IMAGENS GOES AS 27/09/2023-10:21:56                                  =
+27/09/2023 10:21:56 INFO ==================================================================================================================
+27/09/2023 10:21:56 INFO 
+27/09/2023 10:21:56 INFO 
+27/09/2023 10:21:56 INFO Tentando download Band08...
+27/09/2023 10:21:57 INFO Downloading file /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232701310209_e20232701319517_c20232701319590.nc
+27/09/2023 10:22:05 INFO 
+27/09/2023 10:22:05 INFO Tentando download Band09...
+27/09/2023 10:22:06 INFO Downloading file /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232701310209_e20232701319523_c20232701319591.nc
+27/09/2023 10:22:10 INFO 
+27/09/2023 10:22:10 INFO Tentando download Band10...
+27/09/2023 10:22:11 INFO Downloading file /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232701310209_e20232701319529_c20232701319580.nc
+27/09/2023 10:22:17 INFO 
+27/09/2023 10:22:17 INFO Tentando download Band11...
+27/09/2023 10:22:18 INFO Downloading file /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232701310209_e20232701319517_c20232701319571.nc
+27/09/2023 10:22:24 INFO 
+27/09/2023 10:22:24 INFO Tentando download Band12...
+27/09/2023 10:22:25 INFO Downloading file /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232701310209_e20232701319524_c20232701319581.nc
+27/09/2023 10:22:30 INFO 
+27/09/2023 10:22:30 INFO Tentando download Band13...
+27/09/2023 10:22:31 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232701310209_e20232701319530_c20232701320001.nc
+27/09/2023 10:22:45 INFO 
+27/09/2023 10:22:45 INFO Tempo gasto 49.0733 segundos
+27/09/2023 10:22:45 INFO 
+27/09/2023 10:22:45 INFO ==================================================================================================================
+27/09/2023 10:22:45 INFO =                             PROCESSAMENTO ENCERRADO GOES AS 27/09/2023-10:22:45                                =
+27/09/2023 10:22:45 INFO ==================================================================================================================
+27/09/2023 10:22:45 INFO 
+27/09/2023 10:22:45 INFO 
+27/09/2023 11:06:47 INFO 
+27/09/2023 11:06:47 INFO 
+27/09/2023 11:06:47 INFO ==================================================================================================================
+27/09/2023 11:06:47 INFO =                                  DOWNLOAD IMAGENS GOES AS 27/09/2023-11:06:47                                  =
+27/09/2023 11:06:47 INFO ==================================================================================================================
+27/09/2023 11:06:47 INFO 
+27/09/2023 11:06:47 INFO 
+27/09/2023 11:06:47 INFO Tentando download Band08...
+27/09/2023 11:06:48 INFO Downloading file /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232701350209_e20232701359517_c20232701359589.nc
+27/09/2023 11:06:54 INFO 
+27/09/2023 11:06:54 INFO Tentando download Band09...
+27/09/2023 11:06:55 INFO Downloading file /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232701350209_e20232701359523_c20232701359592.nc
+27/09/2023 11:07:00 INFO 
+27/09/2023 11:07:00 INFO Tentando download Band10...
+27/09/2023 11:07:01 INFO Downloading file /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232701350209_e20232701359530_c20232701359599.nc
+27/09/2023 11:07:06 INFO 
+27/09/2023 11:07:06 INFO Tentando download Band11...
+27/09/2023 11:07:07 INFO Downloading file /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232701350209_e20232701359517_c20232701359581.nc
+27/09/2023 11:07:17 INFO 
+27/09/2023 11:07:17 INFO Tentando download Band12...
+27/09/2023 11:07:18 INFO Downloading file /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232701350209_e20232701359523_c20232701359571.nc
+27/09/2023 11:07:26 INFO 
+27/09/2023 11:07:26 INFO Tentando download Band13...
+27/09/2023 11:07:27 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232701350209_e20232701359529_c20232701400002.nc
+27/09/2023 11:07:42 INFO 
+27/09/2023 11:07:42 INFO 
+27/09/2023 11:07:42 INFO ==================================================================================================================
+27/09/2023 11:07:42 INFO =                                  DOWNLOAD IMAGENS GOES AS 27/09/2023-11:07:42                                  =
+27/09/2023 11:07:42 INFO ==================================================================================================================
+27/09/2023 11:07:42 INFO 
+27/09/2023 11:07:42 INFO 
+27/09/2023 11:07:42 INFO Tentando download Band08...
+27/09/2023 11:07:42 INFO File /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232701350209_e20232701359517_c20232701359589.nc exists
+27/09/2023 11:07:42 INFO 
+27/09/2023 11:07:42 INFO Tentando download Band09...
+27/09/2023 11:07:43 INFO File /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232701350209_e20232701359523_c20232701359592.nc exists
+27/09/2023 11:07:43 INFO 
+27/09/2023 11:07:43 INFO Tentando download Band10...
+27/09/2023 11:07:44 INFO File /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232701350209_e20232701359530_c20232701359599.nc exists
+27/09/2023 11:07:44 INFO 
+27/09/2023 11:07:44 INFO Tentando download Band11...
+27/09/2023 11:07:44 INFO File /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232701350209_e20232701359517_c20232701359581.nc exists
+27/09/2023 11:07:44 INFO 
+27/09/2023 11:07:44 INFO Tentando download Band12...
+27/09/2023 11:07:45 INFO File /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232701350209_e20232701359523_c20232701359571.nc exists
+27/09/2023 11:07:45 INFO 
+27/09/2023 11:07:45 INFO Tentando download Band13...
+27/09/2023 11:07:46 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232701350209_e20232701359529_c20232701400002.nc
+27/09/2023 11:07:56 INFO 
+27/09/2023 11:07:56 INFO Tempo gasto 14.8155 segundos
+27/09/2023 11:07:56 INFO 
+27/09/2023 11:07:56 INFO ==================================================================================================================
+27/09/2023 11:07:56 INFO =                             PROCESSAMENTO ENCERRADO GOES AS 27/09/2023-11:07:56                                =
+27/09/2023 11:07:56 INFO ==================================================================================================================
+27/09/2023 11:07:56 INFO 
+27/09/2023 11:07:56 INFO 
