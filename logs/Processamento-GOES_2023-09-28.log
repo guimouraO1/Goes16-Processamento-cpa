@@ -1,0 +1,635 @@
+28/09/2023 08:16:56 INFO 
+28/09/2023 08:16:56 INFO 
+28/09/2023 08:16:56 INFO =========================================================================================================
+28/09/2023 08:16:56 INFO =                             PROCESSANDO IMAGENS GOES AS 28/09/2023-08:16:56                           =
+28/09/2023 08:16:56 INFO =========================================================================================================
+28/09/2023 08:16:56 INFO 
+28/09/2023 08:16:56 INFO VERIFICANDO NOVAS IMAGENS
+28/09/2023 08:16:56 INFO Sem imagens para o dia band01
+28/09/2023 08:16:56 INFO Sem imagens para o dia band02
+28/09/2023 08:16:56 INFO Sem imagens para o dia band03
+28/09/2023 08:16:56 INFO Sem imagens para o dia band04
+28/09/2023 08:16:56 INFO Sem imagens para o dia band05
+28/09/2023 08:16:56 INFO Sem imagens para o dia band06
+28/09/2023 08:16:56 INFO Sem imagens para o dia band07
+28/09/2023 08:16:56 INFO Novas imagens para o dia band08
+28/09/2023 08:16:56 INFO Novas imagens para o dia band09
+28/09/2023 08:16:56 INFO Novas imagens para o dia band10
+28/09/2023 08:16:56 INFO Novas imagens para o dia band11
+28/09/2023 08:16:56 INFO Novas imagens para o dia band12
+28/09/2023 08:16:56 INFO Novas imagens para o dia band13
+28/09/2023 08:16:56 INFO Sem imagens para o dia band14
+28/09/2023 08:16:56 INFO Sem imagens para o dia band15
+28/09/2023 08:16:56 INFO Sem imagens para o dia band16
+28/09/2023 08:16:56 INFO Sem novas imagens TRUECOLOR
+28/09/2023 08:16:58 INFO Novas imagens RRQPEF
+28/09/2023 08:16:58 INFO Novas imagens GLM
+28/09/2023 08:16:58 INFO Sem novas imagens FDCF
+28/09/2023 08:16:58 INFO Novas imagens AirMass
+28/09/2023 08:16:58 INFO 
+28/09/2023 08:16:58 INFO PROCESSANDO IMAGENS "BR"...
+28/09/2023 08:17:16 INFO /home/guimoura/processamento/goes/band08/CG_ABI-L2-CMIPF-M6C08_G16_s20232711100209_e20232711109518_c20232711109590.nc - br - 17.8076 segundos
+28/09/2023 08:17:16 INFO /home/guimoura/processamento/goes/band12/CG_ABI-L2-CMIPF-M6C12_G16_s20232711100209_e20232711109523_c20232711109585.nc - br - 18.1186 segundos
+28/09/2023 08:17:16 INFO /home/guimoura/processamento/goes/band10/CG_ABI-L2-CMIPF-M6C10_G16_s20232711100209_e20232711109529_c20232711109573.nc - br - 18.153 segundos
+28/09/2023 08:17:16 INFO /home/guimoura/processamento/goes/band09/CG_ABI-L2-CMIPF-M6C09_G16_s20232711100209_e20232711109523_c20232711109585.nc - br - 18.3204 segundos
+28/09/2023 08:17:16 INFO /home/guimoura/processamento/goes/band13/CG_ABI-L2-CMIPF-M6C13_G16_s20232711100209_e20232711109529_c20232711109585.nc - br - 18.3023 segundos
+28/09/2023 08:17:16 INFO /home/guimoura/processamento/goes/band11/CG_ABI-L2-CMIPF-M6C11_G16_s20232711100209_e20232711109518_c20232711109575.nc - br - 18.3309 segundos
+28/09/2023 08:17:16 INFO 
+28/09/2023 08:17:16 INFO PROCESSANDO IMAGENS "SP"...
+28/09/2023 08:17:28 INFO /home/guimoura/processamento/goes/band10/CG_ABI-L2-CMIPF-M6C10_G16_s20232711100209_e20232711109529_c20232711109573.nc - sp - 12.0017 segundos
+28/09/2023 08:17:29 INFO /home/guimoura/processamento/goes/band12/CG_ABI-L2-CMIPF-M6C12_G16_s20232711100209_e20232711109523_c20232711109585.nc - sp - 12.2462 segundos
+28/09/2023 08:17:29 INFO /home/guimoura/processamento/goes/band11/CG_ABI-L2-CMIPF-M6C11_G16_s20232711100209_e20232711109518_c20232711109575.nc - sp - 12.7056 segundos
+28/09/2023 08:17:29 INFO /home/guimoura/processamento/goes/band08/CG_ABI-L2-CMIPF-M6C08_G16_s20232711100209_e20232711109518_c20232711109590.nc - sp - 12.9122 segundos
+28/09/2023 08:17:30 INFO /home/guimoura/processamento/goes/band13/CG_ABI-L2-CMIPF-M6C13_G16_s20232711100209_e20232711109529_c20232711109585.nc - sp - 13.0242 segundos
+28/09/2023 08:17:30 INFO /home/guimoura/processamento/goes/band09/CG_ABI-L2-CMIPF-M6C09_G16_s20232711100209_e20232711109523_c20232711109585.nc - sp - 13.1432 segundos
+28/09/2023 08:17:30 INFO 
+28/09/2023 08:17:30 INFO PROCESSANDO IMAGENS RRQPEF "BR"...
+28/09/2023 08:17:38 INFO /home/guimoura/processamento/goes/rrqpef/OR_ABI-L2-RRQPEF-M6_G16_s20232711100209_e20232711109518_c20232711110009.nc - br - 8.5061 segundos
+28/09/2023 08:17:38 INFO 
+28/09/2023 08:17:38 INFO PROCESSANDO IMAGENS RRQPEF "SP"...
+28/09/2023 08:17:45 INFO /home/guimoura/processamento/goes/rrqpef/OR_ABI-L2-RRQPEF-M6_G16_s20232711100209_e20232711109518_c20232711110009.nc - sp - 6.4328 segundos
+28/09/2023 08:17:45 INFO 
+28/09/2023 08:17:45 INFO PROCESSANDO IMAGENS GLM "BR"...
+28/09/2023 08:17:45 INFO Ocorrou um Erro type object 'datetime.datetime' has no attribute 'timedelta' no Processamento
+28/09/2023 08:17:45 INFO 
+28/09/2023 08:17:45 INFO PROCESSAMENTO ENCERRADO
+28/09/2023 08:17:45 INFO 
+28/09/2023 08:17:45 INFO REMOVENDO IMAGENS PROCESSADAS
+28/09/2023 08:17:45 INFO Arquivo CG_ABI-L2-CMIPF-M6C08_G16_s20232711100209_e20232711109518_c20232711109590.nc removido com sucesso!
+28/09/2023 08:17:45 INFO Arquivo CG_ABI-L2-CMIPF-M6C09_G16_s20232711100209_e20232711109523_c20232711109585.nc removido com sucesso!
+28/09/2023 08:17:45 INFO Arquivo CG_ABI-L2-CMIPF-M6C10_G16_s20232711100209_e20232711109529_c20232711109573.nc removido com sucesso!
+28/09/2023 08:17:45 INFO Arquivo CG_ABI-L2-CMIPF-M6C11_G16_s20232711100209_e20232711109518_c20232711109575.nc removido com sucesso!
+28/09/2023 08:17:45 INFO Arquivo CG_ABI-L2-CMIPF-M6C12_G16_s20232711100209_e20232711109523_c20232711109585.nc removido com sucesso!
+28/09/2023 08:17:45 INFO Arquivo CG_ABI-L2-CMIPF-M6C13_G16_s20232711100209_e20232711109529_c20232711109585.nc removido com sucesso!
+28/09/2023 08:17:45 INFO Removendo netCDF-rrqpef processadas
+28/09/2023 08:17:45 INFO Removendo imagens GLM
+28/09/2023 08:17:45 INFO Quantidade de produtos dentro do limite
+28/09/2023 08:17:45 INFO 
+28/09/2023 08:17:45 INFO VERIFICANDO NUMERO DE PRODUTOS...
+28/09/2023 08:17:45 INFO Quantidade de produtos dentro do limite
+28/09/2023 08:17:45 INFO 
+28/09/2023 08:17:45 INFO CRIANDO GIF ANIMADO "BR"...
+28/09/2023 08:17:45 INFO Gif BR banda 08
+28/09/2023 08:17:45 INFO Gif BR banda 09
+28/09/2023 08:17:45 INFO Gif BR banda 10
+28/09/2023 08:17:45 INFO Gif BR banda 11
+28/09/2023 08:17:45 INFO Gif BR banda 12
+28/09/2023 08:17:45 INFO Gif BR banda 13
+28/09/2023 08:17:46 INFO 
+28/09/2023 08:17:46 INFO CRIANDO GIF ANIMADO "SP"...
+28/09/2023 08:17:46 INFO Gif SP banda 08
+28/09/2023 08:17:46 INFO Gif SP banda 09
+28/09/2023 08:17:46 INFO Gif SP banda 10
+28/09/2023 08:17:46 INFO Gif SP banda 11
+28/09/2023 08:17:46 INFO Gif SP banda 12
+28/09/2023 08:17:46 INFO Gif SP banda 13
+28/09/2023 08:17:46 INFO 
+28/09/2023 08:17:46 INFO CRIANDO GIF ANIMADO RRQPEF "BR"...
+28/09/2023 08:17:48 INFO 
+28/09/2023 08:17:48 INFO CRIANDO GIF ANIMADO RRQPEF "SP"...
+28/09/2023 08:17:49 INFO 
+28/09/2023 08:17:49 INFO CRIANDO GIF ANIMADO GLM "BR"...
+28/09/2023 08:17:49 INFO 
+28/09/2023 08:17:49 INFO CRIANDO GIF ANIMADO Airmass "BR"...
+28/09/2023 08:17:49 INFO 
+28/09/2023 08:17:49 INFO CRIANDO GIF ANIMADO Airmass "BR"...
+28/09/2023 08:17:49 INFO 
+28/09/2023 08:17:49 INFO Tempo gasto 53.2205 segundos
+28/09/2023 08:17:49 INFO 
+28/09/2023 08:17:49 INFO =========================================================================================================
+28/09/2023 08:17:49 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:17:49                           =
+28/09/2023 08:17:49 INFO =========================================================================================================
+28/09/2023 08:17:49 INFO 
+28/09/2023 08:17:49 INFO 
+28/09/2023 08:30:20 INFO 
+28/09/2023 08:30:20 INFO 
+28/09/2023 08:30:20 INFO ==================================================================================================================
+28/09/2023 08:30:20 INFO =                                  DOWNLOAD IMAGENS GOES AS 28/09/2023-08:30:20                                  =
+28/09/2023 08:30:20 INFO ==================================================================================================================
+28/09/2023 08:30:20 INFO 
+28/09/2023 08:30:20 INFO 
+28/09/2023 08:30:20 INFO Tentando download Band08...
+28/09/2023 08:30:21 INFO Downloading file /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232711120209_e20232711129517_c20232711129579.nc
+28/09/2023 08:30:26 INFO 
+28/09/2023 08:30:26 INFO Tentando download Band09...
+28/09/2023 08:30:27 INFO Downloading file /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232711120209_e20232711129523_c20232711129588.nc
+28/09/2023 08:30:34 INFO 
+28/09/2023 08:30:34 INFO Tentando download Band10...
+28/09/2023 08:30:35 INFO Downloading file /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232711120209_e20232711129529_c20232711129579.nc
+28/09/2023 08:30:40 INFO 
+28/09/2023 08:30:40 INFO Tentando download Band11...
+28/09/2023 08:30:41 INFO Downloading file /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232711120209_e20232711129517_c20232711129579.nc
+28/09/2023 08:30:49 INFO 
+28/09/2023 08:30:49 INFO Tentando download Band12...
+28/09/2023 08:30:49 INFO Downloading file /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232711120209_e20232711129523_c20232711129578.nc
+28/09/2023 08:30:56 INFO 
+28/09/2023 08:30:56 INFO Tentando download Band13...
+28/09/2023 08:30:56 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232711120209_e20232711129529_c20232711129598.nc
+28/09/2023 08:31:04 INFO 
+28/09/2023 08:31:04 INFO Tempo gasto 44.2402 segundos
+28/09/2023 08:31:04 INFO 
+28/09/2023 08:31:04 INFO ==================================================================================================================
+28/09/2023 08:31:04 INFO =                             PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:31:04                                =
+28/09/2023 08:31:04 INFO ==================================================================================================================
+28/09/2023 08:31:04 INFO 
+28/09/2023 08:31:04 INFO 
+28/09/2023 08:32:09 INFO 
+28/09/2023 08:32:09 INFO 
+28/09/2023 08:32:09 INFO =========================================================================================================
+28/09/2023 08:32:09 INFO =                             PROCESSANDO IMAGENS GOES AS 28/09/2023-08:32:09                           =
+28/09/2023 08:32:09 INFO =========================================================================================================
+28/09/2023 08:32:09 INFO 
+28/09/2023 08:32:09 INFO VERIFICANDO NOVAS IMAGENS
+28/09/2023 08:32:09 INFO Sem imagens para o dia band01
+28/09/2023 08:32:09 INFO Sem imagens para o dia band02
+28/09/2023 08:32:09 INFO Sem imagens para o dia band03
+28/09/2023 08:32:09 INFO Sem imagens para o dia band04
+28/09/2023 08:32:09 INFO Sem imagens para o dia band05
+28/09/2023 08:32:09 INFO Sem imagens para o dia band06
+28/09/2023 08:32:09 INFO Sem imagens para o dia band07
+28/09/2023 08:32:09 INFO Novas imagens para o dia band08
+28/09/2023 08:32:09 INFO Novas imagens para o dia band09
+28/09/2023 08:32:09 INFO Novas imagens para o dia band10
+28/09/2023 08:32:09 INFO Novas imagens para o dia band11
+28/09/2023 08:32:09 INFO Novas imagens para o dia band12
+28/09/2023 08:32:09 INFO Novas imagens para o dia band13
+28/09/2023 08:32:09 INFO Sem imagens para o dia band14
+28/09/2023 08:32:09 INFO Sem imagens para o dia band15
+28/09/2023 08:32:09 INFO Sem imagens para o dia band16
+28/09/2023 08:32:09 INFO Sem novas imagens TRUECOLOR
+28/09/2023 08:32:11 INFO Novas imagens RRQPEF
+28/09/2023 08:32:11 INFO Sem novas imagens GLM
+28/09/2023 08:32:11 INFO Sem novas imagens FDCF
+28/09/2023 08:32:11 INFO Novas imagens AirMass
+28/09/2023 08:32:11 INFO 
+28/09/2023 08:32:11 INFO PROCESSANDO IMAGENS "BR"...
+28/09/2023 08:32:13 INFO 
+28/09/2023 08:32:13 INFO PROCESSANDO IMAGENS "SP"...
+28/09/2023 08:32:14 INFO 
+28/09/2023 08:32:14 INFO PROCESSANDO IMAGENS RRQPEF "BR"...
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO PROCESSANDO IMAGENS RRQPEF "SP"...
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO Sem imagens correspondentes a data para glm 
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO PROCESSANDO IMAGENS AIR MASS "BR"...
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO PROCESSANDO IMAGENS AirMass "SP"...
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO PROCESSAMENTO ENCERRADO
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO REMOVENDO IMAGENS PROCESSADAS
+28/09/2023 08:32:15 INFO Arquivo CG_ABI-L2-CMIPF-M6C08_G16_s20232711120209_e20232711129517_c20232711129579.nc removido com sucesso!
+28/09/2023 08:32:15 INFO Arquivo CG_ABI-L2-CMIPF-M6C09_G16_s20232711120209_e20232711129523_c20232711129588.nc removido com sucesso!
+28/09/2023 08:32:15 INFO Arquivo CG_ABI-L2-CMIPF-M6C10_G16_s20232711120209_e20232711129529_c20232711129579.nc removido com sucesso!
+28/09/2023 08:32:15 INFO Arquivo CG_ABI-L2-CMIPF-M6C11_G16_s20232711120209_e20232711129517_c20232711129579.nc removido com sucesso!
+28/09/2023 08:32:15 INFO Arquivo CG_ABI-L2-CMIPF-M6C12_G16_s20232711120209_e20232711129523_c20232711129578.nc removido com sucesso!
+28/09/2023 08:32:15 INFO Arquivo CG_ABI-L2-CMIPF-M6C13_G16_s20232711120209_e20232711129529_c20232711129598.nc removido com sucesso!
+28/09/2023 08:32:15 INFO Removendo netCDF-rrqpef processadas
+28/09/2023 08:32:15 INFO Removendo imagens GLM
+28/09/2023 08:32:15 INFO Quantidade de produtos dentro do limite
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO VERIFICANDO NUMERO DE PRODUTOS...
+28/09/2023 08:32:15 INFO Quantidade de produtos dentro do limite
+28/09/2023 08:32:15 INFO 
+28/09/2023 08:32:15 INFO CRIANDO GIF ANIMADO "BR"...
+28/09/2023 08:32:15 INFO Gif BR banda 08
+28/09/2023 08:32:15 INFO Gif BR banda 09
+28/09/2023 08:32:15 INFO Gif BR banda 10
+28/09/2023 08:32:15 INFO Gif BR banda 11
+28/09/2023 08:32:15 INFO Gif BR banda 12
+28/09/2023 08:32:15 INFO Gif BR banda 13
+28/09/2023 08:32:16 INFO 
+28/09/2023 08:32:16 INFO CRIANDO GIF ANIMADO "SP"...
+28/09/2023 08:32:16 INFO Gif SP banda 08
+28/09/2023 08:32:16 INFO Gif SP banda 09
+28/09/2023 08:32:16 INFO Gif SP banda 10
+28/09/2023 08:32:16 INFO Gif SP banda 11
+28/09/2023 08:32:16 INFO Gif SP banda 12
+28/09/2023 08:32:16 INFO Gif SP banda 13
+28/09/2023 08:32:16 INFO 
+28/09/2023 08:32:16 INFO CRIANDO GIF ANIMADO RRQPEF "BR"...
+28/09/2023 08:32:18 INFO 
+28/09/2023 08:32:18 INFO CRIANDO GIF ANIMADO RRQPEF "SP"...
+28/09/2023 08:32:19 INFO 
+28/09/2023 08:32:19 INFO CRIANDO GIF ANIMADO Airmass "BR"...
+28/09/2023 08:32:19 INFO 
+28/09/2023 08:32:19 INFO CRIANDO GIF ANIMADO Airmass "BR"...
+28/09/2023 08:32:19 INFO 
+28/09/2023 08:32:19 INFO Tempo gasto 10.1059 segundos
+28/09/2023 08:32:19 INFO 
+28/09/2023 08:32:19 INFO =========================================================================================================
+28/09/2023 08:32:19 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:32:19                           =
+28/09/2023 08:32:19 INFO =========================================================================================================
+28/09/2023 08:32:19 INFO 
+28/09/2023 08:32:19 INFO 
+28/09/2023 08:40:35 INFO 
+28/09/2023 08:40:35 INFO 
+28/09/2023 08:40:35 INFO =========================================================================================================
+28/09/2023 08:40:35 INFO =                             PROCESSANDO IMAGENS GOES AS 28/09/2023-08:40:35                           =
+28/09/2023 08:40:35 INFO =========================================================================================================
+28/09/2023 08:40:35 INFO 
+28/09/2023 08:40:35 INFO VERIFICANDO NOVAS IMAGENS
+28/09/2023 08:40:35 INFO Sem imagens para o dia band01
+28/09/2023 08:40:35 INFO Sem imagens para o dia band02
+28/09/2023 08:40:35 INFO Sem imagens para o dia band03
+28/09/2023 08:40:35 INFO Sem imagens para o dia band04
+28/09/2023 08:40:35 INFO Sem imagens para o dia band05
+28/09/2023 08:40:35 INFO Sem imagens para o dia band06
+28/09/2023 08:40:35 INFO Sem imagens para o dia band07
+28/09/2023 08:40:35 INFO Sem imagens para o dia band08
+28/09/2023 08:40:35 INFO Sem imagens para o dia band09
+28/09/2023 08:40:35 INFO Sem imagens para o dia band10
+28/09/2023 08:40:35 INFO Sem imagens para o dia band11
+28/09/2023 08:40:35 INFO Sem imagens para o dia band12
+28/09/2023 08:40:35 INFO Sem imagens para o dia band13
+28/09/2023 08:40:35 INFO Sem imagens para o dia band14
+28/09/2023 08:40:35 INFO Sem imagens para o dia band15
+28/09/2023 08:40:35 INFO Sem imagens para o dia band16
+28/09/2023 08:40:35 INFO Sem novas imagens TRUECOLOR
+28/09/2023 08:40:35 INFO Sem novas imagens RRQPEF
+28/09/2023 08:40:35 INFO Sem novas imagens GLM
+28/09/2023 08:40:35 INFO Sem novas imagens FDCF
+28/09/2023 08:40:35 INFO Sem novas imagens FDCF
+28/09/2023 08:40:35 INFO Sem arquivos para processamento. 
+
+28/09/2023 08:40:35 INFO 
+28/09/2023 08:40:35 INFO Tempo gasto 0.0015 segundos
+28/09/2023 08:40:35 INFO 
+28/09/2023 08:40:35 INFO =========================================================================================================
+28/09/2023 08:40:35 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:40:35                           =
+28/09/2023 08:40:35 INFO =========================================================================================================
+28/09/2023 08:40:35 INFO 
+28/09/2023 08:40:35 INFO 
+28/09/2023 08:40:43 INFO 
+28/09/2023 08:40:43 INFO 
+28/09/2023 08:40:43 INFO ==================================================================================================================
+28/09/2023 08:40:43 INFO =                                  DOWNLOAD IMAGENS GOES AS 28/09/2023-08:40:43                                  =
+28/09/2023 08:40:43 INFO ==================================================================================================================
+28/09/2023 08:40:43 INFO 
+28/09/2023 08:40:43 INFO 
+28/09/2023 08:40:43 INFO Tentando download Band08...
+28/09/2023 08:40:44 INFO Downloading file /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232711130209_e20232711139518_c20232711139581.nc
+28/09/2023 08:40:51 INFO 
+28/09/2023 08:40:51 INFO Tentando download Band09...
+28/09/2023 08:40:52 INFO Downloading file /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232711130209_e20232711139523_c20232711139581.nc
+28/09/2023 08:40:57 INFO 
+28/09/2023 08:40:57 INFO Tentando download Band10...
+28/09/2023 08:40:58 INFO Downloading file /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232711130209_e20232711139529_c20232711139581.nc
+28/09/2023 08:41:04 INFO 
+28/09/2023 08:41:04 INFO Tentando download Band11...
+28/09/2023 08:41:04 INFO Downloading file /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232711130209_e20232711139518_c20232711139581.nc
+28/09/2023 08:41:11 INFO 
+28/09/2023 08:41:11 INFO Tentando download Band12...
+28/09/2023 08:41:12 INFO Downloading file /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232711130209_e20232711139523_c20232711139591.nc
+28/09/2023 08:41:20 INFO 
+28/09/2023 08:41:20 INFO Tentando download Band13...
+28/09/2023 08:41:21 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232711130209_e20232711139529_c20232711139591.nc
+28/09/2023 08:41:30 INFO 
+28/09/2023 08:41:30 INFO Tempo gasto 46.4595 segundos
+28/09/2023 08:41:30 INFO 
+28/09/2023 08:41:30 INFO ==================================================================================================================
+28/09/2023 08:41:30 INFO =                             PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:41:30                                =
+28/09/2023 08:41:30 INFO ==================================================================================================================
+28/09/2023 08:41:30 INFO 
+28/09/2023 08:41:30 INFO 
+28/09/2023 08:44:06 INFO 
+28/09/2023 08:44:06 INFO 
+28/09/2023 08:44:06 INFO =========================================================================================================
+28/09/2023 08:44:06 INFO =                             PROCESSANDO IMAGENS GOES AS 28/09/2023-08:44:06                           =
+28/09/2023 08:44:06 INFO =========================================================================================================
+28/09/2023 08:44:06 INFO 
+28/09/2023 08:44:06 INFO VERIFICANDO NOVAS IMAGENS
+28/09/2023 08:44:06 INFO Sem imagens para o dia band01
+28/09/2023 08:44:06 INFO Sem imagens para o dia band02
+28/09/2023 08:44:06 INFO Sem imagens para o dia band03
+28/09/2023 08:44:06 INFO Sem imagens para o dia band04
+28/09/2023 08:44:06 INFO Sem imagens para o dia band05
+28/09/2023 08:44:06 INFO Sem imagens para o dia band06
+28/09/2023 08:44:06 INFO Sem imagens para o dia band07
+28/09/2023 08:44:06 INFO Novas imagens para o dia band08
+28/09/2023 08:44:06 INFO Novas imagens para o dia band09
+28/09/2023 08:44:06 INFO Novas imagens para o dia band10
+28/09/2023 08:44:06 INFO Novas imagens para o dia band11
+28/09/2023 08:44:06 INFO Novas imagens para o dia band12
+28/09/2023 08:44:06 INFO Novas imagens para o dia band13
+28/09/2023 08:44:06 INFO Sem imagens para o dia band14
+28/09/2023 08:44:06 INFO Sem imagens para o dia band15
+28/09/2023 08:44:06 INFO Sem imagens para o dia band16
+28/09/2023 08:44:06 INFO Sem novas imagens TRUECOLOR
+28/09/2023 08:44:09 INFO Novas imagens RRQPEF
+28/09/2023 08:44:09 INFO Sem novas imagens GLM
+28/09/2023 08:44:09 INFO Sem novas imagens FDCF
+28/09/2023 08:44:09 INFO Novas imagens AirMass
+28/09/2023 08:44:09 INFO 
+28/09/2023 08:44:09 INFO PROCESSANDO IMAGENS "BR"...
+28/09/2023 08:44:11 INFO 
+28/09/2023 08:44:11 INFO PROCESSANDO IMAGENS "SP"...
+28/09/2023 08:44:12 INFO 
+28/09/2023 08:44:12 INFO PROCESSANDO IMAGENS RRQPEF "BR"...
+28/09/2023 08:44:12 INFO 
+28/09/2023 08:44:12 INFO PROCESSANDO IMAGENS RRQPEF "SP"...
+28/09/2023 08:44:13 INFO 
+28/09/2023 08:44:13 INFO Sem imagens correspondentes a data para glm 
+28/09/2023 08:44:13 INFO 
+28/09/2023 08:44:13 INFO 
+28/09/2023 08:44:13 INFO PROCESSANDO IMAGENS AIR MASS "BR"...
+28/09/2023 08:44:13 INFO 
+28/09/2023 08:44:13 INFO PROCESSANDO IMAGENS AIRMASS "SP"...
+28/09/2023 08:44:13 INFO 
+28/09/2023 08:44:13 INFO PROCESSAMENTO ENCERRADO
+28/09/2023 08:44:13 INFO 
+28/09/2023 08:44:13 INFO REMOVENDO IMAGENS PROCESSADAS
+28/09/2023 08:44:13 INFO Arquivo CG_ABI-L2-CMIPF-M6C08_G16_s20232711130209_e20232711139518_c20232711139581.nc removido com sucesso!
+28/09/2023 08:44:13 INFO Arquivo CG_ABI-L2-CMIPF-M6C09_G16_s20232711130209_e20232711139523_c20232711139581.nc removido com sucesso!
+28/09/2023 08:44:13 INFO Arquivo CG_ABI-L2-CMIPF-M6C10_G16_s20232711130209_e20232711139529_c20232711139581.nc removido com sucesso!
+28/09/2023 08:44:13 INFO Arquivo CG_ABI-L2-CMIPF-M6C11_G16_s20232711130209_e20232711139518_c20232711139581.nc removido com sucesso!
+28/09/2023 08:44:13 INFO Arquivo CG_ABI-L2-CMIPF-M6C12_G16_s20232711130209_e20232711139523_c20232711139591.nc removido com sucesso!
+28/09/2023 08:44:13 INFO Arquivo CG_ABI-L2-CMIPF-M6C13_G16_s20232711130209_e20232711139529_c20232711139591.nc removido com sucesso!
+28/09/2023 08:44:13 INFO Removendo netCDF-rrqpef processadas
+28/09/2023 08:44:13 INFO Removendo imagens GLM
+28/09/2023 08:44:13 INFO Quantidade de produtos dentro do limite
+28/09/2023 08:44:13 INFO 
+28/09/2023 08:44:13 INFO VERIFICANDO NUMERO DE PRODUTOS...
+28/09/2023 08:44:13 INFO Quantidade de produtos dentro do limite
+28/09/2023 08:44:13 INFO 
+28/09/2023 08:44:13 INFO CRIANDO GIF ANIMADO "BR"...
+28/09/2023 08:44:13 INFO Gif BR banda 08
+28/09/2023 08:44:13 INFO Gif BR banda 09
+28/09/2023 08:44:13 INFO Gif BR banda 10
+28/09/2023 08:44:13 INFO Gif BR banda 11
+28/09/2023 08:44:13 INFO Gif BR banda 12
+28/09/2023 08:44:13 INFO Gif BR banda 13
+28/09/2023 08:44:14 INFO 
+28/09/2023 08:44:14 INFO CRIANDO GIF ANIMADO "SP"...
+28/09/2023 08:44:14 INFO Gif SP banda 08
+28/09/2023 08:44:14 INFO Gif SP banda 09
+28/09/2023 08:44:14 INFO Gif SP banda 10
+28/09/2023 08:44:14 INFO Gif SP banda 11
+28/09/2023 08:44:14 INFO Gif SP banda 12
+28/09/2023 08:44:14 INFO Gif SP banda 13
+28/09/2023 08:44:14 INFO 
+28/09/2023 08:44:14 INFO CRIANDO GIF ANIMADO RRQPEF "BR"...
+28/09/2023 08:44:16 INFO 
+28/09/2023 08:44:16 INFO CRIANDO GIF ANIMADO RRQPEF "SP"...
+28/09/2023 08:44:17 INFO 
+28/09/2023 08:44:17 INFO CRIANDO GIF ANIMADO Airmass "BR"...
+28/09/2023 08:44:17 INFO 
+28/09/2023 08:44:17 INFO CRIANDO GIF ANIMADO Airmass "BR"...
+28/09/2023 08:44:17 INFO 
+28/09/2023 08:44:17 INFO Tempo gasto 10.7463 segundos
+28/09/2023 08:44:17 INFO 
+28/09/2023 08:44:17 INFO =========================================================================================================
+28/09/2023 08:44:17 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:44:17                           =
+28/09/2023 08:44:17 INFO =========================================================================================================
+28/09/2023 08:44:17 INFO 
+28/09/2023 08:44:17 INFO 
+28/09/2023 08:46:13 INFO 
+28/09/2023 08:46:13 INFO 
+28/09/2023 08:46:13 INFO =========================================================================================================
+28/09/2023 08:46:13 INFO =                             PROCESSANDO IMAGENS GOES AS 28/09/2023-08:46:13                           =
+28/09/2023 08:46:13 INFO =========================================================================================================
+28/09/2023 08:46:13 INFO 
+28/09/2023 08:46:13 INFO VERIFICANDO NOVAS IMAGENS
+28/09/2023 08:46:13 INFO Sem imagens para o dia band01
+28/09/2023 08:46:13 INFO Sem imagens para o dia band02
+28/09/2023 08:46:13 INFO Sem imagens para o dia band03
+28/09/2023 08:46:13 INFO Sem imagens para o dia band04
+28/09/2023 08:46:13 INFO Sem imagens para o dia band05
+28/09/2023 08:46:13 INFO Sem imagens para o dia band06
+28/09/2023 08:46:13 INFO Sem imagens para o dia band07
+28/09/2023 08:46:13 INFO Sem imagens para o dia band08
+28/09/2023 08:46:13 INFO Sem imagens para o dia band09
+28/09/2023 08:46:13 INFO Sem imagens para o dia band10
+28/09/2023 08:46:13 INFO Sem imagens para o dia band11
+28/09/2023 08:46:13 INFO Sem imagens para o dia band12
+28/09/2023 08:46:13 INFO Sem imagens para o dia band13
+28/09/2023 08:46:13 INFO Sem imagens para o dia band14
+28/09/2023 08:46:13 INFO Sem imagens para o dia band15
+28/09/2023 08:46:13 INFO Sem imagens para o dia band16
+28/09/2023 08:46:13 INFO Sem novas imagens TRUECOLOR
+28/09/2023 08:46:13 INFO Sem novas imagens RRQPEF
+28/09/2023 08:46:13 INFO Sem novas imagens GLM
+28/09/2023 08:46:13 INFO Sem novas imagens FDCF
+28/09/2023 08:46:13 INFO Sem novas imagens FDCF
+28/09/2023 08:46:13 INFO Sem arquivos para processamento. 
+
+28/09/2023 08:46:13 INFO 
+28/09/2023 08:46:13 INFO Tempo gasto 0.0016 segundos
+28/09/2023 08:46:13 INFO 
+28/09/2023 08:46:13 INFO =========================================================================================================
+28/09/2023 08:46:13 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:46:13                           =
+28/09/2023 08:46:13 INFO =========================================================================================================
+28/09/2023 08:46:13 INFO 
+28/09/2023 08:46:13 INFO 
+28/09/2023 08:46:32 INFO 
+28/09/2023 08:46:32 INFO 
+28/09/2023 08:46:32 INFO =========================================================================================================
+28/09/2023 08:46:32 INFO =                             PROCESSANDO IMAGENS GOES AS 28/09/2023-08:46:32                           =
+28/09/2023 08:46:32 INFO =========================================================================================================
+28/09/2023 08:46:32 INFO 
+28/09/2023 08:46:32 INFO VERIFICANDO NOVAS IMAGENS
+28/09/2023 08:46:32 INFO Sem imagens para o dia band01
+28/09/2023 08:46:32 INFO Sem imagens para o dia band02
+28/09/2023 08:46:32 INFO Sem imagens para o dia band03
+28/09/2023 08:46:32 INFO Sem imagens para o dia band04
+28/09/2023 08:46:32 INFO Sem imagens para o dia band05
+28/09/2023 08:46:32 INFO Sem imagens para o dia band06
+28/09/2023 08:46:32 INFO Sem imagens para o dia band07
+28/09/2023 08:46:32 INFO Sem imagens para o dia band08
+28/09/2023 08:46:32 INFO Sem imagens para o dia band09
+28/09/2023 08:46:32 INFO Sem imagens para o dia band10
+28/09/2023 08:46:32 INFO Sem imagens para o dia band11
+28/09/2023 08:46:32 INFO Sem imagens para o dia band12
+28/09/2023 08:46:32 INFO Sem imagens para o dia band13
+28/09/2023 08:46:32 INFO Sem imagens para o dia band14
+28/09/2023 08:46:32 INFO Sem imagens para o dia band15
+28/09/2023 08:46:32 INFO Sem imagens para o dia band16
+28/09/2023 08:46:32 INFO Sem novas imagens TRUECOLOR
+28/09/2023 08:46:32 INFO Sem novas imagens RRQPEF
+28/09/2023 08:46:32 INFO Sem novas imagens GLM
+28/09/2023 08:46:32 INFO Sem novas imagens FDCF
+28/09/2023 08:46:32 INFO Sem novas imagens FDCF
+28/09/2023 08:46:32 INFO Sem arquivos para processamento. 
+
+28/09/2023 08:46:32 INFO 
+28/09/2023 08:46:32 INFO Tempo gasto 0.0017 segundos
+28/09/2023 08:46:32 INFO 
+28/09/2023 08:46:32 INFO =========================================================================================================
+28/09/2023 08:46:32 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:46:32                           =
+28/09/2023 08:46:32 INFO =========================================================================================================
+28/09/2023 08:46:32 INFO 
+28/09/2023 08:46:32 INFO 
+28/09/2023 08:46:45 INFO 
+28/09/2023 08:46:45 INFO 
+28/09/2023 08:46:45 INFO ==================================================================================================================
+28/09/2023 08:46:45 INFO =                                  DOWNLOAD IMAGENS GOES AS 28/09/2023-08:46:45                                  =
+28/09/2023 08:46:45 INFO ==================================================================================================================
+28/09/2023 08:46:45 INFO 
+28/09/2023 08:46:45 INFO 
+28/09/2023 08:46:45 INFO Tentando download Band08...
+28/09/2023 08:46:46 INFO Downloading file /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232711130209_e20232711139518_c20232711139581.nc
+28/09/2023 08:46:54 INFO 
+28/09/2023 08:46:54 INFO Tentando download Band09...
+28/09/2023 08:46:55 INFO Downloading file /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232711130209_e20232711139523_c20232711139581.nc
+28/09/2023 08:47:11 INFO 
+28/09/2023 08:47:11 INFO Tentando download Band10...
+28/09/2023 08:47:11 INFO Downloading file /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232711130209_e20232711139529_c20232711139581.nc
+28/09/2023 08:47:18 INFO 
+28/09/2023 08:47:18 INFO Tentando download Band11...
+28/09/2023 08:47:19 INFO Downloading file /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232711130209_e20232711139518_c20232711139581.nc
+28/09/2023 08:47:38 INFO 
+28/09/2023 08:47:38 INFO Tentando download Band12...
+28/09/2023 08:47:39 INFO Downloading file /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232711130209_e20232711139523_c20232711139591.nc
+28/09/2023 08:47:48 INFO 
+28/09/2023 08:47:48 INFO Tentando download Band13...
+28/09/2023 08:47:48 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232711130209_e20232711139529_c20232711139591.nc
+28/09/2023 08:48:05 INFO 
+28/09/2023 08:48:05 INFO Tempo gasto 79.9127 segundos
+28/09/2023 08:48:05 INFO 
+28/09/2023 08:48:05 INFO ==================================================================================================================
+28/09/2023 08:48:05 INFO =                             PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:48:05                                =
+28/09/2023 08:48:05 INFO ==================================================================================================================
+28/09/2023 08:48:05 INFO 
+28/09/2023 08:48:05 INFO 
+28/09/2023 08:48:21 INFO 
+28/09/2023 08:48:21 INFO 
+28/09/2023 08:48:21 INFO =========================================================================================================
+28/09/2023 08:48:21 INFO =                             PROCESSANDO IMAGENS GOES AS 28/09/2023-08:48:21                           =
+28/09/2023 08:48:21 INFO =========================================================================================================
+28/09/2023 08:48:21 INFO 
+28/09/2023 08:48:21 INFO VERIFICANDO NOVAS IMAGENS
+28/09/2023 08:48:21 INFO Sem imagens para o dia band01
+28/09/2023 08:48:21 INFO Sem imagens para o dia band02
+28/09/2023 08:48:21 INFO Sem imagens para o dia band03
+28/09/2023 08:48:21 INFO Sem imagens para o dia band04
+28/09/2023 08:48:21 INFO Sem imagens para o dia band05
+28/09/2023 08:48:21 INFO Sem imagens para o dia band06
+28/09/2023 08:48:21 INFO Sem imagens para o dia band07
+28/09/2023 08:48:21 INFO Novas imagens para o dia band08
+28/09/2023 08:48:21 INFO Novas imagens para o dia band09
+28/09/2023 08:48:22 INFO Novas imagens para o dia band10
+28/09/2023 08:48:22 INFO Novas imagens para o dia band11
+28/09/2023 08:48:22 INFO Novas imagens para o dia band12
+28/09/2023 08:48:22 INFO Novas imagens para o dia band13
+28/09/2023 08:48:22 INFO Sem imagens para o dia band14
+28/09/2023 08:48:22 INFO Sem imagens para o dia band15
+28/09/2023 08:48:22 INFO Sem imagens para o dia band16
+28/09/2023 08:48:22 INFO Sem novas imagens TRUECOLOR
+28/09/2023 08:48:26 INFO Novas imagens RRQPEF
+28/09/2023 08:48:26 INFO Sem novas imagens GLM
+28/09/2023 08:48:26 INFO Sem novas imagens FDCF
+28/09/2023 08:48:26 INFO Novas imagens AirMass
+28/09/2023 08:48:26 INFO 
+28/09/2023 08:48:26 INFO PROCESSANDO IMAGENS "BR"...
+28/09/2023 08:48:43 INFO /home/guimoura/processamento/goes/band08/CG_ABI-L2-CMIPF-M6C08_G16_s20232711130209_e20232711139518_c20232711139581.nc - br - 16.6355 segundos
+28/09/2023 08:48:43 INFO /home/guimoura/processamento/goes/band13/CG_ABI-L2-CMIPF-M6C13_G16_s20232711130209_e20232711139529_c20232711139591.nc - br - 17.3145 segundos
+28/09/2023 08:48:43 INFO /home/guimoura/processamento/goes/band10/CG_ABI-L2-CMIPF-M6C10_G16_s20232711130209_e20232711139529_c20232711139581.nc - br - 17.3402 segundos
+28/09/2023 08:48:44 INFO /home/guimoura/processamento/goes/band09/CG_ABI-L2-CMIPF-M6C09_G16_s20232711130209_e20232711139523_c20232711139581.nc - br - 17.7518 segundos
+28/09/2023 08:48:44 INFO /home/guimoura/processamento/goes/band12/CG_ABI-L2-CMIPF-M6C12_G16_s20232711130209_e20232711139523_c20232711139591.nc - br - 17.9041 segundos
+28/09/2023 08:48:44 INFO /home/guimoura/processamento/goes/band11/CG_ABI-L2-CMIPF-M6C11_G16_s20232711130209_e20232711139518_c20232711139581.nc - br - 18.1436 segundos
+28/09/2023 08:48:44 INFO 
+28/09/2023 08:48:44 INFO PROCESSANDO IMAGENS "SP"...
+28/09/2023 08:48:56 INFO /home/guimoura/processamento/goes/band09/CG_ABI-L2-CMIPF-M6C09_G16_s20232711130209_e20232711139523_c20232711139581.nc - sp - 11.5753 segundos
+28/09/2023 08:48:56 INFO /home/guimoura/processamento/goes/band11/CG_ABI-L2-CMIPF-M6C11_G16_s20232711130209_e20232711139518_c20232711139581.nc - sp - 11.7155 segundos
+28/09/2023 08:48:56 INFO /home/guimoura/processamento/goes/band10/CG_ABI-L2-CMIPF-M6C10_G16_s20232711130209_e20232711139529_c20232711139581.nc - sp - 11.8533 segundos
+28/09/2023 08:48:56 INFO /home/guimoura/processamento/goes/band08/CG_ABI-L2-CMIPF-M6C08_G16_s20232711130209_e20232711139518_c20232711139581.nc - sp - 12.141 segundos
+28/09/2023 08:48:56 INFO /home/guimoura/processamento/goes/band12/CG_ABI-L2-CMIPF-M6C12_G16_s20232711130209_e20232711139523_c20232711139591.nc - sp - 12.3313 segundos
+28/09/2023 08:48:57 INFO /home/guimoura/processamento/goes/band13/CG_ABI-L2-CMIPF-M6C13_G16_s20232711130209_e20232711139529_c20232711139591.nc - sp - 12.57 segundos
+28/09/2023 08:48:57 INFO 
+28/09/2023 08:48:57 INFO PROCESSANDO IMAGENS RRQPEF "BR"...
+28/09/2023 08:49:05 INFO /home/guimoura/processamento/goes/rrqpef/OR_ABI-L2-RRQPEF-M6_G16_s20232711130209_e20232711139518_c20232711140001.nc - br - 8.2875 segundos
+28/09/2023 08:49:05 INFO 
+28/09/2023 08:49:05 INFO PROCESSANDO IMAGENS RRQPEF "SP"...
+28/09/2023 08:49:12 INFO /home/guimoura/processamento/goes/rrqpef/OR_ABI-L2-RRQPEF-M6_G16_s20232711130209_e20232711139518_c20232711140001.nc - sp - 6.5482 segundos
+28/09/2023 08:49:12 INFO 
+28/09/2023 08:49:12 INFO Sem imagens correspondentes a data para glm 
+28/09/2023 08:49:12 INFO 
+28/09/2023 08:49:12 INFO 
+28/09/2023 08:49:12 INFO PROCESSANDO IMAGENS AIR MASS "BR"...
+28/09/2023 08:49:17 WARNING Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+28/09/2023 08:49:22 INFO Total processing time Airmass: 10.18 seconds.
+28/09/2023 08:49:22 INFO 
+28/09/2023 08:49:22 INFO PROCESSANDO IMAGENS AIRMASS "SP"...
+28/09/2023 08:49:28 INFO Total processing time Airmass: 6.55 seconds.
+28/09/2023 08:49:28 INFO 
+28/09/2023 08:49:28 INFO PROCESSAMENTO ENCERRADO
+28/09/2023 08:49:28 INFO 
+28/09/2023 08:49:28 INFO REMOVENDO IMAGENS PROCESSADAS
+28/09/2023 08:49:28 INFO Arquivo CG_ABI-L2-CMIPF-M6C08_G16_s20232711130209_e20232711139518_c20232711139581.nc removido com sucesso!
+28/09/2023 08:49:28 INFO Arquivo CG_ABI-L2-CMIPF-M6C09_G16_s20232711130209_e20232711139523_c20232711139581.nc removido com sucesso!
+28/09/2023 08:49:28 INFO Arquivo CG_ABI-L2-CMIPF-M6C10_G16_s20232711130209_e20232711139529_c20232711139581.nc removido com sucesso!
+28/09/2023 08:49:28 INFO Arquivo CG_ABI-L2-CMIPF-M6C11_G16_s20232711130209_e20232711139518_c20232711139581.nc removido com sucesso!
+28/09/2023 08:49:28 INFO Arquivo CG_ABI-L2-CMIPF-M6C12_G16_s20232711130209_e20232711139523_c20232711139591.nc removido com sucesso!
+28/09/2023 08:49:28 INFO Arquivo CG_ABI-L2-CMIPF-M6C13_G16_s20232711130209_e20232711139529_c20232711139591.nc removido com sucesso!
+28/09/2023 08:49:28 INFO Removendo netCDF-rrqpef processadas
+28/09/2023 08:49:28 INFO Removendo imagens GLM
+28/09/2023 08:49:28 INFO Quantidade de produtos dentro do limite
+28/09/2023 08:49:28 INFO 
+28/09/2023 08:49:28 INFO VERIFICANDO NUMERO DE PRODUTOS...
+28/09/2023 08:49:28 INFO Quantidade de produtos dentro do limite
+28/09/2023 08:49:28 INFO 
+28/09/2023 08:49:28 INFO CRIANDO GIF ANIMADO "BR"...
+28/09/2023 08:49:28 INFO Gif BR banda 08
+28/09/2023 08:49:28 INFO Gif BR banda 09
+28/09/2023 08:49:28 INFO Gif BR banda 10
+28/09/2023 08:49:28 INFO Gif BR banda 11
+28/09/2023 08:49:28 INFO Gif BR banda 12
+28/09/2023 08:49:28 INFO Gif BR banda 13
+28/09/2023 08:49:30 INFO 
+28/09/2023 08:49:30 INFO CRIANDO GIF ANIMADO "SP"...
+28/09/2023 08:49:30 INFO Gif SP banda 08
+28/09/2023 08:49:30 INFO Gif SP banda 09
+28/09/2023 08:49:30 INFO Gif SP banda 10
+28/09/2023 08:49:30 INFO Gif SP banda 11
+28/09/2023 08:49:30 INFO Gif SP banda 12
+28/09/2023 08:49:30 INFO Gif SP banda 13
+28/09/2023 08:49:30 INFO 
+28/09/2023 08:49:30 INFO CRIANDO GIF ANIMADO RRQPEF "BR"...
+28/09/2023 08:49:32 INFO 
+28/09/2023 08:49:32 INFO CRIANDO GIF ANIMADO RRQPEF "SP"...
+28/09/2023 08:49:33 INFO 
+28/09/2023 08:49:33 INFO CRIANDO GIF ANIMADO Airmass "BR"...
+28/09/2023 08:49:33 INFO 
+28/09/2023 08:49:33 INFO CRIANDO GIF ANIMADO Airmass "BR"...
+28/09/2023 08:49:33 INFO 
+28/09/2023 08:49:33 INFO Tempo gasto 71.9227 segundos
+28/09/2023 08:49:33 INFO 
+28/09/2023 08:49:33 INFO =========================================================================================================
+28/09/2023 08:49:33 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:49:33                           =
+28/09/2023 08:49:33 INFO =========================================================================================================
+28/09/2023 08:49:33 INFO 
+28/09/2023 08:49:33 INFO 
+28/09/2023 08:56:41 INFO 
+28/09/2023 08:56:41 INFO 
+28/09/2023 08:56:41 INFO ==================================================================================================================
+28/09/2023 08:56:41 INFO =                                  DOWNLOAD IMAGENS GOES AS 28/09/2023-08:56:41                                  =
+28/09/2023 08:56:41 INFO ==================================================================================================================
+28/09/2023 08:56:41 INFO 
+28/09/2023 08:56:41 INFO 
+28/09/2023 08:56:41 INFO Tentando download Band08...
+28/09/2023 08:56:42 INFO Downloading file /home/guimoura/processamento/goes/band08/OR_ABI-L2-CMIPF-M6C08_G16_s20232711140209_e20232711149518_c20232711149582.nc
+28/09/2023 08:56:52 INFO 
+28/09/2023 08:56:52 INFO Tentando download Band09...
+28/09/2023 08:56:52 INFO Downloading file /home/guimoura/processamento/goes/band09/OR_ABI-L2-CMIPF-M6C09_G16_s20232711140209_e20232711149523_c20232711149581.nc
+28/09/2023 08:56:58 INFO 
+28/09/2023 08:56:58 INFO Tentando download Band10...
+28/09/2023 08:56:58 INFO Downloading file /home/guimoura/processamento/goes/band10/OR_ABI-L2-CMIPF-M6C10_G16_s20232711140209_e20232711149529_c20232711149572.nc
+28/09/2023 08:57:04 INFO 
+28/09/2023 08:57:05 INFO Tentando download Band11...
+28/09/2023 08:57:05 INFO Downloading file /home/guimoura/processamento/goes/band11/OR_ABI-L2-CMIPF-M6C11_G16_s20232711140209_e20232711149518_c20232711149581.nc
+28/09/2023 08:57:15 INFO 
+28/09/2023 08:57:15 INFO Tentando download Band12...
+28/09/2023 08:57:16 INFO Downloading file /home/guimoura/processamento/goes/band12/OR_ABI-L2-CMIPF-M6C12_G16_s20232711140209_e20232711149524_c20232711149581.nc
+28/09/2023 08:57:22 INFO 
+28/09/2023 08:57:22 INFO Tentando download Band13...
+28/09/2023 08:57:22 INFO Downloading file /home/guimoura/processamento/goes/band13/OR_ABI-L2-CMIPF-M6C13_G16_s20232711140209_e20232711149529_c20232711149591.nc
+28/09/2023 08:57:33 INFO 
+28/09/2023 08:57:33 INFO Tempo gasto 51.6655 segundos
+28/09/2023 08:57:33 INFO 
+28/09/2023 08:57:33 INFO ==================================================================================================================
+28/09/2023 08:57:33 INFO =                             PROCESSAMENTO ENCERRADO GOES AS 28/09/2023-08:57:33                                =
+28/09/2023 08:57:33 INFO ==================================================================================================================
+28/09/2023 08:57:33 INFO 
+28/09/2023 08:57:33 INFO 

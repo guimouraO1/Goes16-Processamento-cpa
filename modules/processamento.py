@@ -29,6 +29,7 @@ from pyorbital.astronomy import get_alt_az
 from pyorbital.orbital import get_observer_look
 from modules.remap import remap
 from matplotlib.colors import LinearSegmentedColormap, to_rgba
+from datetime import timedelta
 
 # Configurar o NumPy para ignorar os avisos
 np.seterr(invalid='ignore')
@@ -57,7 +58,7 @@ def filtrar_imagens_por_intervalo(images, ch13):
     glm_list = [] 
     ch13_data = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
     date_ini = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
-    date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + datetime.datetime.timedelta(minutes=9, seconds=59)
+    date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + timedelta(minutes=9, seconds=59)
     # Percorre a lista de nomes de imagens e verifica se a data e hora de cada imagem estão dentro do intervalo.
     for x in images:
         xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
@@ -528,7 +529,7 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
 
     # Lê a data do arquivo
     add_seconds = int(file_ch01.variables['time_bounds'][0])
-    date = datetime.datetime(2000,1,1,12) + datetime.timedelta(seconds=add_seconds)
+    date = datetime.datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
     date_file = date.strftime('%Y%m%d_%H%M%S')
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
 
@@ -897,7 +898,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             # Monta a data/hora do arquivo
             date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
-            if date_ini <= date_file <= date_end + datetime.datetime.timedelta(minutes=1):
+            if date_ini <= date_file <= date_end + timedelta(minutes=1):
                 # logging.info(f, date_file)
                 # Le o arquivo NDVI
                 NDVI_file = np.load(f'{dir_in}ndvi/{f}', allow_pickle=True)
@@ -912,7 +913,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
         NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br_fmax.npy')
         
         # Captura a data atual e calculando data inicial e final do acumulado da semana
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59)) - datetime.datetime.timedelta(days=6, hours=23, minutes=59)
+        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59)) - timedelta(days=6, hours=23, minutes=59)
         date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59))
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
@@ -1023,7 +1024,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             # Monta a data/hora do arquivo
             date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
-            if date_ini <= date_file <= date_end + datetime.datetime.timedelta(minutes=1):
+            if date_ini <= date_file <= date_end + timedelta(minutes=1):
                 # logging.info(f, date_file)
                 # Le o arquivo NDVI
                 NDVI_file = np.load(f'{dir_in}ndvi/{f}', allow_pickle=True)
@@ -1158,7 +1159,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
         # Lê a data do arquivo
         add_seconds = int(file_ch01.variables['time_bounds'][0])
-        date = datetime.datetime(2000,1,1,12) + datetime.timedelta(seconds=add_seconds)
+        date = datetime.datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
         date_file = date.strftime('%Y%m%d_%H%M%S')
         date_img = date.strftime('%d-%b-%Y %H:%M UTC')
 
@@ -1270,7 +1271,7 @@ def process_airmass(rgb_type, v_extent, path_ch08=None, path_ch10=None, path_ch1
 
     # Getting the file time and date
     add_seconds = int(file_ch08.variables['time_bounds'][0])
-    date = datetime.datetime(2000,1,1,12) + datetime.timedelta(seconds=add_seconds)
+    date = datetime.datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
     date_file = date.strftime('%Y%m%d_%H%M%S')
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
 
@@ -1410,7 +1411,7 @@ def process_airmass(rgb_type, v_extent, path_ch08=None, path_ch10=None, path_ch1
 
 
 def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
-    
+    global dir_out
     # Checagem se e possivel gerar imagem bandas 1-16
     if p_br:
         logging.info('')
@@ -1812,7 +1813,7 @@ def iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_band
         # Se a variavel de controle de processamento sp for True, realiza o processamento
         if p_sp:
             logging.info("")
-            logging.info('PROCESSANDO IMAGENS AirMass "SP"...')
+            logging.info('PROCESSANDO IMAGENS AIRMASS "SP"...')
                         # Pegando nome das bandas 08, 10, 12, 13
             ch08 = new_bands['08']
             ch10 = new_bands['10']

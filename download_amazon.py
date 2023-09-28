@@ -24,7 +24,7 @@ gdal.PushErrorHandler('CPLQuietErrorHandler')   # Ignore GDAL warnings
 start = time.time()
 
 #Diretórios
-arq_log = f'{dir_log}Download_amazon.log'
+arq_log = f'{dir_log}'
 
 # Configurando log
 logging.basicConfig(filename=arq_log, level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%d/%m/%Y %H:%M:%S")
