@@ -121,7 +121,7 @@ def adicionando_descricao_imagem(description, institution, ax, fig, cruz=False):
     cax1.text(0, 0.13, description, color='white', size=10)  # Adicionando texto
     if cruz:
         cruzStr = '+'
-        cax1.text(0.190, 0.13, cruzStr, color='red', size=12)  # Adicionando símbolo "+"
+        cax1.text(0.192, 0.13, cruzStr, color='red', size=12)  # Adicionando símbolo "+"
     cax1.text(0.85, 0.13, institution, color='yellow', size=10)  # Adicionando texto
     cax1.xaxis.set_visible(False)  # Removendo rótulos do eixo X
     cax1.yaxis.set_visible(False)  # Removendo rótulos do eixo Y
@@ -521,9 +521,6 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     # Lê a imagem da banda 01
     file_ch01 = Dataset(ch01)
 
-    # Lê o identificador do satélite
-    satellite = getattr(file_ch01, 'platform_ID')
-
     # Lê a longitude central
     longitude = file_ch01.variables['goes_imager_projection'].longitude_of_projection_origin
 
@@ -581,7 +578,7 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     #------------------------------------------------------------------------------------------------------
 
     # Formatando a descricao a ser plotada na imagem
-    description = f' GOES-{satellite} Natural True Color {date_img}'
+    description = f' GOES-16 Natural True Color {date_img}'
     institution = "CEPAGRI - UNICAMP"
 
     d_p_i = 150
@@ -1111,13 +1108,9 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     # separando Latitudes e Longitudes dos pontos
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
-    brasil = (shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
-    brasil_geometries = list(sg.shape(geometry) for geometry in brasil)
-    
-    # Alteração Guilherme
+    brasil = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
     for i in range(len(p_lat)):
-        point = sg.Point(p_lon[i], p_lat[i])
-        if any(geo.contains(point) for geo in brasil_geometries):
+        if brasil[0].covers(Point(p_lon[i], p_lat[i])):
             p = (p_lat[i], p_lon[i])
             matriz_pixels_fogo.append(p)
 
@@ -1134,8 +1127,8 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
     # Verifica se as ocorrencias de pontos é maior que as anteriores, se sim, armazena a quantidade e as imagens para gerar fundo
     logging.info(f'Len matriz_pixels_fogo:{len(matriz_pixels_fogo)}  int control:  {int(control)}')
-    date_ini = datetime.datetime(date.year, date.month, date.day, int(12), int(00))
-    date_end = datetime.datetime(date.year, date.month, date.day, int(18), int(1))
+    date_ini = datetime.datetime(date.year, date.month, date.day, int(13), int(00))
+    date_end = datetime.datetime(date.year, date.month, date.day, int(18), int(00))
     
     # Pega a imagem com mais incidencia e salva
     if len(matriz_pixels_fogo) > int(control) and date_ini <= date <= date_end:
@@ -1151,9 +1144,12 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
             fo.write(str(0))
 
+        ch01 = f'{dir_in}fdcf/ch01.nc'
+        ch02 = f'{dir_in}fdcf/ch02.nc'
+        ch03 = f'{dir_in}fdcf/ch03.nc'
+        
         file_ch01 = Dataset(ch01)
-        # Lê o identificador do satélite
-        satellite = getattr(file_ch01, 'platform_ID')
+
         # Lê a longitude central
         longitude = file_ch01.variables['goes_imager_projection'].longitude_of_projection_origin
 
@@ -1729,7 +1725,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
+            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
             
             # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
             logging.info(f'date_file: {date_file}')
