@@ -1214,7 +1214,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         add_seconds = int(file_ch01.variables['time_bounds'][0])
         date = datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
         date_file = date.strftime('%Y%m%d_%H%M%S')
-        date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+        date_img = date.strftime('%d-%b-%Y UTC')
 
         # Area de interesse para recorte
         extent, resolution = area_para_recorte(v_extent)
