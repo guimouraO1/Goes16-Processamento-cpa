@@ -115,7 +115,7 @@ def checar_bandas(bands, dir_in):
 # Checa se há bandas 1, 2, 3 para true color
 def checar_truecolor(bands):
     # Checagem de novas imagens truecolor (Band 17) se todas as bands 1, 2, 3 forem True
-    if all(bands[str(x).zfill(2)] for x in range(1, 4)):
+    if all(bands[str(x).zfill(2)] for x in range(1, 4)) and bands['13'] == True:
         # Se Todas as três bandas são True
         bands['17'] = True
         logging.info(f'Novas imagens TRUECOLOR')

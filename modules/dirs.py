@@ -6,6 +6,7 @@ def get_dirs():
     dirs = {
         'dir_in': dir_main + 'goes/',
         'dir_main': dir_main,
+        'dir_maps': dir_main + 'maps/',
         'dir_out': dir_main + 'output/',
         'dir_shapefiles': dir_main + 'shapefiles/',
         'dir_colortables': dir_main + 'colortables/',

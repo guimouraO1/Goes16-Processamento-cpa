@@ -10,7 +10,6 @@ from osgeo import gdal  # Utilitario para a biblioteca GDAL
 from osgeo import osr  # Utilitario para a biblioteca GDAL
 from netCDF4 import Dataset  # Utilitario para a biblioteca NetCDF4
 import numpy as np  # Suporte para arrays e matrizes multidimensionais, com diversas funções matemáticas para trabalhar com estas estruturas
-import datetime  # Utilitario para datas e horas
 import time  # Utilitario para trabalhar com tempos
 import os  # Utilitario para trabalhar com chamadas de sistema
 import logging  # Utilitario para criar os logs
@@ -29,7 +28,7 @@ from pyorbital.astronomy import get_alt_az
 from pyorbital.orbital import get_observer_look
 from modules.remap import remap
 from matplotlib.colors import LinearSegmentedColormap, to_rgba
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 # Configurar o NumPy para ignorar os avisos
 np.seterr(invalid='ignore')
@@ -50,18 +49,19 @@ dir_colortables = dirs['dir_colortables']
 dir_logos = dirs['dir_logos']
 dir_temp = dirs['dir_temp']
 arq_log = dirs['arq_log']
+dir_maps = dirs['dir_maps']
 # ============================================# Diretórios ========================================= #
 
 
 def filtrar_imagens_por_intervalo(images, ch13):
     # Extrai a data e hora da string 'ch13' e define um intervalo de 9 minutos e 59 segundos a partir dela.
     glm_list = [] 
-    ch13_data = (datetime.datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
-    date_ini = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
-    date_end = datetime.datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + timedelta(minutes=9, seconds=59)
+    ch13_data = (datetime.strptime(ch13[ch13.find("M6C13_G16_s") + 11:ch13.find("_e") - 1], '%Y%j%H%M%S'))
+    date_ini = datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute)
+    date_end = datetime(ch13_data.year, ch13_data.month, ch13_data.day, ch13_data.hour, ch13_data.minute) + timedelta(minutes=9, seconds=59)
     # Percorre a lista de nomes de imagens e verifica se a data e hora de cada imagem estão dentro do intervalo.
     for x in images:
-        xtime = (datetime.datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
+        xtime = (datetime.strptime(x[x.find("GLM-L2-LCFA_G16_s") + 17:x.find("_e") - 1], '%Y%j%H%M%S'))
         if date_ini <= xtime <= date_end:
             glm_list.append(x)
         else:
@@ -143,7 +143,7 @@ def calculating_lons_lats(date, extent, data_ch01, data_ch02, data_ch03):
     lats = yy.reshape(data_ch01.shape[0], data_ch01.shape[1])
 
     # Obter o ano, mês, dia, hora e minuto para aplicar a correção zenital
-    utc_time = datetime.datetime(int(year), int(month), int(day), int(hour), int(minutes))
+    utc_time = datetime(int(year), int(month), int(day), int(hour), int(minutes))
     sun_zenith = np.zeros((data_ch01.shape[0], data_ch01.shape[1]))
     sun_zenith = astronomy.sun_zenith_angle(utc_time, lons, lats)
 
@@ -431,7 +431,7 @@ def process_band_cmi(file, ch, v_extent):
                    '[6.95 μm]', '[7.34 μm]', '[8.50 μm]', '[9.61 μm]', '[10.35 μm]', '[11.20 μm]', '[12.30 μm]', '[13.30 μm]']
 
     # Formatando data para plotar na imagem e salvar o arquivo
-    date = (datetime.datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    date = (datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
     date_file = date.strftime('%Y%m%d_%H%M%S')
 
@@ -513,50 +513,56 @@ def process_band_cmi(file, ch, v_extent):
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
-def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
-    global dir_out
-    # Calcula o tempo de processamento True Color
-    start = time.time() 
-    
+def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=None):
+    global dir_maps
+    start = time.time()  
+    #---------------------------------------------------------------------------------------------
+    #---------------------------------------------------------------------------------------------
+    # Area de interesse para recorte
+    extent, resolution = area_para_recorte(v_extent)
+    # Variable to remap
+    variable = "CMI"
+    #---------------------------------------------------------------------------------------------
+    #---------------------------------------------------------------------------------------------
+
     # Lê a imagem da banda 01
     file_ch01 = Dataset(ch01)
-
     # Lê a longitude central
     longitude = file_ch01.variables['goes_imager_projection'].longitude_of_projection_origin
-
     # Lê a data do arquivo
     add_seconds = int(file_ch01.variables['time_bounds'][0])
-    date = datetime.datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
+    date = datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
     date_file = date.strftime('%Y%m%d_%H%M%S')
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
-
-    extent, resolution = area_para_recorte(v_extent)
 
     #------------------------------------------------------------------------------------------------------#
     #-------------------------------------------Reprojetando----------------------------------------------#
     #------------------------------------------------------------------------------------------------------#
-    
-    # band01
-    variable = "CMI"
     # reprojetando band 01
     grid = remap(ch01, variable, extent, resolution)
     # Lê o retorno da função
     data_ch01 = grid.ReadAsArray()
-
+    #------------------------------------------------------------------------------------------------------
     #------------------------------------------------------------------------------------------------------
     # reprojetando band 02
     grid = remap(ch02, variable, extent, resolution)
     # Lê o retorno da função
     data_ch02 = grid.ReadAsArray()
-
+    #------------------------------------------------------------------------------------------------------
     #------------------------------------------------------------------------------------------------------
     # reprojetando band 03
     grid = remap(ch03, variable, extent, resolution)
     # Lê o retorno da função 
     data_ch03 = grid.ReadAsArray()
     #------------------------------------------------------------------------------------------------------
-
     #------------------------------------------------------------------------------------------------------
+     # reprojetando band 13
+    grid = remap(ch13, variable, extent, resolution)
+    # Lê o retorno da função
+    data_ch13 = grid.ReadAsArray()
+    #------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------------------
+    
     # Calculando correção zenith
     utc_time, lats, lons, sun_zenith, data_ch01, data_ch02, data_ch03 = calculating_lons_lats(date, extent, data_ch01, data_ch02, data_ch03)
 
@@ -567,7 +573,6 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     R = data_ch02
     G = (data_ch01 + data_ch02) / 2 * 0.93 + 0.07 * data_ch03 
     B = data_ch01
-
     # Aplicando o estiramento CIRA
     R = apply_cira_stretch(R)
     G = apply_cira_stretch(G)
@@ -575,17 +580,79 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
 
     # Create the RGB
     RGB = np.stack([R, G, B], axis=2)		
+    
     #------------------------------------------------------------------------------------------------------
-
+    #------------------------------------------------------------------------------------------------------
+    # If zenith angle is greater than 85°, the composite pixel is zero
+    RGB[sun_zenith > 85] = 0
+    # Create the mask for the regions with zero
+    mask = (RGB == [0.0,0.0,0.0]).all(axis=2)
+    # Apply the mask to overwrite the pixels
+    RGB[mask] = [0,0,0]
+    # Create the fading transparency between the regions with the sun zenith angle of 75° and 85°
+    alphas = sun_zenith / 100
+    min_sun_angle = 0.75
+    max_sun_angle = 0.85
+    # Normalize the transparency mask
+    alphas = ((alphas - max_sun_angle) / (min_sun_angle - max_sun_angle))
+    RGB = np.dstack((RGB, alphas))
+    
+    
+    raster = gdal.Open(f'{dir_maps}BlackMarble_2016_01deg_geo.tif')
+    ulx, xres, xskew, uly, yskew, yres = raster.GetGeoTransform()
+    lrx = ulx + (raster.RasterXSize * xres)
+    lry = uly + (raster.RasterYSize * yres)
+    corners = [ulx, lry, lrx, uly]
+    min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
+    raster = gdal.Translate('teste.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
+    
+    #lendo o RGB 
+    array = raster.ReadAsArray()
+    R_night = array[0,:,:].astype(float) / 255
+    G_night = array[1,:,:].astype(float) / 255
+    B_night = array[2,:,:].astype(float) / 255
+    
+    R_night[R_night==4] = 0
+    G_night[G_night==5] = 0
+    B_night[B_night==15] = 0
+    
+    #
+    rgb_night = np.stack([R_night,G_night,B_night], axis=2)
+    
+    # Area de recorte
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]  
+    
+    # Remove o arquivo.tif
+    os.remove('teste.tif')
+    
+    #------------------------------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------------------------------
+    
     # Formatando a descricao a ser plotada na imagem
-    description = f' GOES-16 Natural True Color {date_img}'
+    description = f' GOES-16 Natural True Color + Black Marble {date_img}'
     institution = "CEPAGRI - UNICAMP"
 
     d_p_i = 150
     fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
-
+    
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
+    
+    # Plotando a imagem night
+    ax.imshow(rgb_night, extent=img_extent)
+    
+    #band13
+    data1 = data_ch13
+    data1 = np.maximum(data1, 90)
+    data1 = np.minimum(data1, 313)
+    data1 = (data1-90)/(313-90)
+    data1 = 1 - data1
+
+    # Plotando 
+    ax.imshow(data1, cmap='gray', vmin=0.1, vmax=0.25, alpha = 0.3, origin='upper', extent=img_extent)
+
+    # Plotando a imagem  # TrueColor
+    ax.imshow(RGB, origin='upper', extent=img_extent)
 
     # Adicionando o shapefile dos estados brasileiros
     adicionando_shapefile(v_extent, ax)
@@ -593,27 +660,17 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None):
     # Adicionando  linhas dos litorais
     adicionando_linhas(ax)
 
-    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
-    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
-
-    # Plotando a imagem
-    ax.imshow(RGB, origin='upper', extent=img_extent)
-
     # Adicionando descricao da imagem
     adicionando_descricao_imagem(description, institution, ax, fig)
 
     # Adicionando os logos
     adicionando_logos(fig)
-    
+
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+
+    logging.info(f'Total processing time: {round((time.time() - start), 2)} seconds.')
     
-    # Fecha a janela para limpar a memoria
-    plt.close()
-
-    # Tempo de processamento True color
-    logging.info(f'Total processing time True Color:{round((time.time() - start),2)} seconds.') 
-
 
 def process_rrqpef(rrqpef, ch13, v_extent):
     
@@ -639,7 +696,7 @@ def process_rrqpef(rrqpef, ch13, v_extent):
     data_ch13 = reproject_ch13.variables['Band1'][:]
 
     # Formatando data para plotar na imagem e salvar o arquivo
-    date = (datetime.datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    date = (datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
     date_file = date.strftime('%Y%m%d_%H%M%S')
 
@@ -731,7 +788,7 @@ def process_glm(ch13, glm_list, v_extent):
     idx = counts.argsort()
 
     # Formatando data para plotar na imagem e salvar o arquivo
-    date = (datetime.datetime.strptime(dtime, '%Y%j%H%M%S'))
+    date = (datetime.strptime(dtime, '%Y%j%H%M%S'))
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
     date_file = date.strftime('%Y%m%d_%H%M%S')
 
@@ -807,11 +864,11 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     dtime_mask = ch02[ch02.find("M6C02_G16_s") + 11:ch02.find("_e") - 3]
 
     ## Transforma de data Juliana para data normal
-    year = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%Y')
-    day_of_year = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%d')
-    month = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%m')
-    hora = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%H')
-    min = datetime.datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%M')
+    year = datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%Y')
+    day_of_year = datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%d')
+    month = datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%m')
+    hora = datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%H')
+    min = datetime.strptime(dtime_mask, '%Y%j%H%M').strftime('%M')
     yyyymmddhhmn = year+month+day_of_year+hora+min
 
     # Download arquivo mascara de nuvens
@@ -855,7 +912,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     NDVI_fmax[NDVI_fmax == 1]= np.nan
 
     # Formatando data para plotar na imagem e salvar o arquivo
-    date = (datetime.datetime.strptime(dtime_ch02, '%Y%j%H%M%S'))
+    date = (datetime.strptime(dtime_ch02, '%Y%j%H%M%S'))
     date_file = date.strftime('%Y%m%d_%H%M%S')
 
     # Salvando array NDVI
@@ -868,12 +925,12 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     os.remove(f'{dir_in}clsm/{file_mask}.nc')
 
 
-    if ndvi_diario and datetime.datetime.now().isoweekday() == 6:
+    if ndvi_diario and datetime.now().isoweekday() == 6:
         
         # Captura a data atual e calculando data inicial e final
-        date_now = datetime.datetime.now()
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(12), int(00))
-        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+        date_now = datetime.now()
+        date_ini = datetime(date_now.year, date_now.month, date_now.day, int(12), int(00))
+        date_end = datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
         ndvi_list = [name for name in os.listdir(f'{dir_in}ndvi/') if os.path.isfile(os.path.join(f'{dir_in}ndvi/', name)) and re.match('^ndvi_.+_.+_br.npy$', name)]
@@ -893,7 +950,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             # Captura a hora do arquivo
             hour = f[f.find("ndvi_") + 14:f.find("ndvi_") + 20]
             # Monta a data/hora do arquivo
-            date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
+            date_file = (datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
             if date_ini <= date_file <= date_end + timedelta(minutes=1):
                 # logging.info(f, date_file)
@@ -910,8 +967,8 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
         NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br_fmax.npy')
         
         # Captura a data atual e calculando data inicial e final do acumulado da semana
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59)) - timedelta(days=6, hours=23, minutes=59)
-        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(59))
+        date_ini = datetime(date_now.year, date_now.month, date_now.day, int(23), int(59)) - timedelta(days=6, hours=23, minutes=59)
+        date_end = datetime(date_now.year, date_now.month, date_now.day, int(23), int(59))
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
         ndvi_list_fmax = [name for name in os.listdir(f'{dir_in}ndvi') if os.path.isfile(os.path.join(f'{dir_in}ndvi', name)) and re.match('^ndvi_.+_.+_br_fmax.npy$', name)]
@@ -929,8 +986,8 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             date_i = ndvi_list_fmax[f][ndvi_list_fmax[f].find("ndvi_") + 5:ndvi_list_fmax[f].find("ndvi_") + 13]
             date_e = ndvi_list_fmax[f][ndvi_list_fmax[f].find("ndvi_") + 14:ndvi_list_fmax[f].find("ndvi_") + 22]
             # Monta a data/hora do arquivo
-            date_file_i = (datetime.datetime.strptime(date_i, '%Y%m%d'))
-            date_file_e = (datetime.datetime.strptime(date_e, '%Y%m%d'))
+            date_file_i = (datetime.strptime(date_i, '%Y%m%d'))
+            date_file_e = (datetime.strptime(date_e, '%Y%m%d'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
             if date_file_i == date_file_e and date_ini <= date_file_i <= date_end:
                 # Le o arquivo NDVI
@@ -997,9 +1054,9 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     #   Cria o arquivo sem ser a imagem 
     elif ndvi_diario:
         # Captura a data atual e calculando data inicial e final
-        date_now = datetime.datetime.now()
-        date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(12), int(00))
-        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+        date_now = datetime.now()
+        date_ini = datetime(date_now.year, date_now.month, date_now.day, int(12), int(00))
+        date_end = datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
         ndvi_list = [name for name in os.listdir(f'{dir_in}ndvi') if os.path.isfile(os.path.join(f'{dir_in}ndvi', name)) and re.match('^ndvi_.+_.+_br.npy$', name)]
@@ -1019,7 +1076,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
             # Captura a hora do arquivo
             hour = f[f.find("ndvi_") + 14:f.find("ndvi_") + 20]
             # Monta a data/hora do arquivo
-            date_file = (datetime.datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
+            date_file = (datetime.strptime(date + hour, '%Y%m%d%H%M%S'))
             # Se a data/hora do arquivo estiver dentro do limite de datas
             if date_ini <= date_file <= date_end + timedelta(minutes=1):
                 # logging.info(f, date_file)
@@ -1094,7 +1151,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     dtime_fdcf = fdcf[fdcf.find("ABI-L2-FDCF-M6_G16_s") + 20:fdcf.find("_e") - 1]
     
     # Formatando data para plotar na imagem e salvar o arquivo
-    date = (datetime.datetime.strptime(dtime_fdcf, '%Y%j%H%M%S'))
+    date = (datetime.strptime(dtime_fdcf, '%Y%j%H%M%S'))
     date_img = date.strftime('%d-%b-%Y')
     date_file = date.strftime('%Y%m%d_%H%M%S')
 
@@ -1127,8 +1184,8 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
     # Verifica se as ocorrencias de pontos é maior que as anteriores, se sim, armazena a quantidade e as imagens para gerar fundo
     logging.info(f'Len matriz_pixels_fogo:{len(matriz_pixels_fogo)}  int control:  {int(control)}')
-    date_ini = datetime.datetime(date.year, date.month, date.day, int(13), int(00))
-    date_end = datetime.datetime(date.year, date.month, date.day, int(18), int(00))
+    date_ini = datetime(date.year, date.month, date.day, int(13), int(00))
+    date_end = datetime(date.year, date.month, date.day, int(18), int(00))
     
     # Pega a imagem com mais incidencia e salva
     if len(matriz_pixels_fogo) > int(control) and date_ini <= date <= date_end:
@@ -1155,7 +1212,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
         # Lê a data do arquivo
         add_seconds = int(file_ch01.variables['time_bounds'][0])
-        date = datetime.datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
+        date = datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
         date_file = date.strftime('%Y%m%d_%H%M%S')
         date_img = date.strftime('%d-%b-%Y %H:%M UTC')
 
@@ -1267,7 +1324,7 @@ def process_airmass(rgb_type, v_extent, path_ch08=None, path_ch10=None, path_ch1
 
     # Getting the file time and date
     add_seconds = int(file_ch08.variables['time_bounds'][0])
-    date = datetime.datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
+    date = datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
     date_file = date.strftime('%Y%m%d_%H%M%S')
     date_img = date.strftime('%d-%b-%Y %H:%M UTC')
 
@@ -1472,21 +1529,23 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
         process_sp.clear()
 
 
-def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands):
+def iniciar_processo_truecolor(p_br, p_sp, bands, process_br, process_sp, new_bands):
     # Checagem se e possivel gerar imagem TrueColor
     if bands['17']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             logging.info("")
-            logging.info('PROCESSANDO IMAGENS TRUECOLOR "BR"...')
-            # Pegando nome das bandas 01, 02, 03
+            logging.info('PROCESSANDO IMAGENS TRUECOLOR WITH NIGHT "BR"...')
+            # Pegando nome das bandas 01, 02, 03, 13
             ch01 = new_bands['01']
             ch02 = new_bands['02']
             ch03 = new_bands['03']
+            ch13 = new_bands['13']
             # Montando dicionario de argumentos
             kwargs = {'ch01': f'{dir_in}band01/{ch01}', 
                       'ch02': f'{dir_in}band02/{ch02}', 
-                      'ch03': f'{dir_in}band03/{ch03}'}
+                      'ch03': f'{dir_in}band03/{ch03}',
+                      'ch13': f'{dir_in}band13/{ch13}'}
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
@@ -1509,14 +1568,17 @@ def iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_ba
         # Se a variavel de controle de processamento sp for True, realiza o processamento
         if p_sp:
             logging.info("")
-            logging.info('PROCESSANDO IMAGENS TRUECOLOR "SP"...')
-            # Pegando nome das bandas 01, 02, 03
+            logging.info('PROCESSANDO IMAGENS TRUECOLOR WITH NIGHT "SP"...')
+            # Pegando nome das bandas 01, 02, 03,13
             ch01 = new_bands['01']
             ch02 = new_bands['02']
             ch03 = new_bands['03']
+            ch13 = new_bands['13']
             # Montando dicionario de argumentos
-            kwargs = {'ch01': f'{dir_in}band01/{ch01}', 'ch02': f'{dir_in}band02/{ch02}', 
-                      'ch03': f'{dir_in}band03/{ch03}'}
+            kwargs = {'ch01': f'{dir_in}band01/{ch01}', 
+                      'ch02': f'{dir_in}band02/{ch02}', 
+                      'ch03': f'{dir_in}band03/{ch03}',
+                      'ch13': f'{dir_in}band13/{ch13}'}
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
@@ -1659,11 +1721,11 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
             logging.info('PROCESSANDO IMAGENS NDVI...')
             
             # Captura a data do arquivo
-            date_file = (datetime.datetime.strptime(ch02[ch02.find("M6C02_G16_s") + 11:ch02.find("_e") - 1], '%Y%j%H%M%S'))
+            date_file = (datetime.strptime(ch02[ch02.find("M6C02_G16_s") + 11:ch02.find("_e") - 1], '%Y%j%H%M%S'))
             # Captura a data atual
-            date_now = datetime.datetime.now()
+            date_now = datetime.now()
             # Aponta o horario 18h para a data atual
-            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+            date = datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
             
             # Se a data do arquivo for maior ou igual as 18h da data atual e o dia da semana atual for sabado (6)
             if date_file >= date:
@@ -1721,11 +1783,11 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             logging.info('PROCESSANDO IMAGENS FDCF "BR"...')
             
             # Captura a data do arquivo
-            date_file = (datetime.datetime.strptime(fdcf[fdcf.find("ABI-L2-FDCF-M6_G16_s") + 20:fdcf.find("_e") - 1], '%Y%j%H%M%S'))
+            date_file = (datetime.strptime(fdcf[fdcf.find("ABI-L2-FDCF-M6_G16_s") + 20:fdcf.find("_e") - 1], '%Y%j%H%M%S'))
             # Captura a data atual
-            date_now = datetime.datetime.now()
+            date_now = datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime.datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
+            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
             
             # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
             logging.info(f'date_file: {date_file}')
@@ -1855,7 +1917,7 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
     try:
         iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands)
         
-        iniciar_processo_truelocor(p_br, p_sp, bands, process_br, process_sp, new_bands)
+        iniciar_processo_truecolor(p_br, p_sp, bands, process_br, process_sp, new_bands)
 
         iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands)
 
@@ -1868,7 +1930,7 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in):
         iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_bands)
         
     except Exception as e:
-        logging.info(f'Ocorrou um Erro {e} no Processamento')
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
     
     # Realiza log do encerramento do processamento
     logging.info("")
