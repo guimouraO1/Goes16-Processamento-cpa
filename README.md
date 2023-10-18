@@ -89,7 +89,7 @@ apt install ffmpeg
 You can create a Conda environment with required packages using the following command:
 
 ```bash
-conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp pyspectral
+conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp pyspectral pyorbital
 ```
 ---
 
