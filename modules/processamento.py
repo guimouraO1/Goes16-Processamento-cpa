@@ -598,7 +598,11 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=
     RGB = np.dstack((RGB, alphas))
     
     
-    raster = gdal.Open(f'{dir_maps}BlackMarble_2016_01deg_geo.tif')
+    if v_extent == 'sp':
+        raster = gdal.Open(f'{dir_maps}BlackMarble_2016_B2_geo.tif')
+    else:
+        raster = gdal.Open(f'{dir_maps}BlackMarble_2016_01deg_geo.tif')
+        
     ulx, xres, xskew, uly, yskew, yres = raster.GetGeoTransform()
     lrx = ulx + (raster.RasterXSize * xres)
     lry = uly + (raster.RasterYSize * yres)
@@ -1263,7 +1267,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         RGB = np.stack([R, G, B], axis=2)		
 
         # Adicionando descricao da imagem.
-        description = f"GOES-16 Natural True Color,     Fire Hot Spot em {date_img}"  # Esse espaço é necessário para adicionar o caractere na imagem
+        description = f"GOES-16 Natural True Color,    Fire Hot Spot em {date_img}"  # Esse espaço é necessário para adicionar o caractere na imagem
         institution = f'CEPAGRI - UNICAMP'
 
         # Definindo tamanho da imagem de saida.
