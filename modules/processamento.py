@@ -26,9 +26,9 @@ from pyorbital import astronomy
 from pyspectral.rayleigh import Rayleigh                     # Correção atmosférica no espectro visível 
 from pyorbital.astronomy import get_alt_az
 from pyorbital.orbital import get_observer_look
-from modules.remap import remap
 from matplotlib.colors import LinearSegmentedColormap, to_rgba
 from datetime import timedelta, datetime
+from modules.remap import remap
 
 # Configurar o NumPy para ignorar os avisos
 np.seterr(invalid='ignore')
@@ -42,7 +42,6 @@ dirs = get_dirs()
 
 # Acessando os diretórios usando as chaves do dicionário
 dir_in = dirs['dir_in']
-dir_main = dirs['dir_main']
 dir_out = dirs['dir_out']
 dir_shapefiles = dirs['dir_shapefiles']
 dir_colortables = dirs['dir_colortables']
@@ -71,7 +70,6 @@ def filtrar_imagens_por_intervalo(images, ch13):
 
 
 def area_para_recorte(v_extent):
-    
     # Area de interesse para recorte
     if v_extent == 'br':
         # Brasil
@@ -208,8 +206,7 @@ def adicionando_logos(fig):
     fig.figimage(logo_cepagri, 10, 80, zorder=3, alpha=0.8, origin='upper')  # Plotando logo
 
 
-def abrir_old_json():
-    global dir_main
+def abrir_old_json(dir_main):
     with open(f'{dir_main}old_bands.json', 'r') as jsonOld:
         oldImages = json.load(jsonOld)['oldImagesName']
         return oldImages
@@ -233,7 +230,7 @@ def save_log_erro(array_errors, nome_arquivo_txt):
     if len(array_errors) == 0:
         pass
     else:
-        # Criando nome do arquivo e diretório -- Mudar as barras para Linux
+        # Criando nome do arquivo e diretório 
         with open(f"{dir_out}fdcf/{nome_arquivo_txt}.txt", 'w') as file:
             for valor in array_errors:
                 erro = f"{valor}\n"
@@ -440,6 +437,7 @@ def process_band_cmi(file, ch, v_extent):
         unit = "Albedo (%)"
     else:
         unit = "Brightness Temperature [°C]"
+    
     # Formatando a descricao a ser plotada na imagem
     description = f" GOES-{satellite} ABI CMI Band {ch} {wavelenghts[int(ch)]} {unit} {date_img}"
     institution = "CEPAGRI - UNICAMP"
@@ -507,8 +505,10 @@ def process_band_cmi(file, ch, v_extent):
 
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}band{ch}/band{ch}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+    
     # Fecha a janela para limpar a memoria
     plt.close()
+    
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
@@ -580,9 +580,7 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=
 
     # Create the RGB
     RGB = np.stack([R, G, B], axis=2)		
-    
-    #------------------------------------------------------------------------------------------------------
-    #------------------------------------------------------------------------------------------------------
+
     # If zenith angle is greater than 85°, the composite pixel is zero
     RGB[sun_zenith > 85] = 0
     # Create the mask for the regions with zero
@@ -597,7 +595,6 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=
     alphas = ((alphas - max_sun_angle) / (min_sun_angle - max_sun_angle))
     RGB = np.dstack((RGB, alphas))
     
-    
     if v_extent == 'sp':
         raster = gdal.Open(f'{dir_maps}BlackMarble_2016_B2_geo.tif')
     else:
@@ -608,7 +605,7 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=
     lry = uly + (raster.RasterYSize * yres)
     corners = [ulx, lry, lrx, uly]
     min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
-    raster = gdal.Translate('teste.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
+    raster = gdal.Translate('raster.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
     
     #lendo o RGB 
     array = raster.ReadAsArray()
@@ -627,7 +624,7 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  
     
     # Remove o arquivo.tif
-    os.remove('teste.tif')
+    os.remove('raster.tif')
     
     #------------------------------------------------------------------------------------------------------
     #------------------------------------------------------------------------------------------------------
@@ -642,17 +639,17 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=
     # Utilizando projecao geoestacionaria no cartopy
     ax = plt.axes(projection=ccrs.PlateCarree())
     
-    # Plotando a imagem night
-    ax.imshow(rgb_night, extent=img_extent)
-    
     #band13
     data1 = data_ch13
     data1 = np.maximum(data1, 90)
     data1 = np.minimum(data1, 313)
     data1 = (data1-90)/(313-90)
     data1 = 1 - data1
+    
+    # Plotando a imagem night
+    ax.imshow(rgb_night, extent=img_extent)
 
-    # Plotando 
+    # Plotando band13
     ax.imshow(data1, cmap='gray', vmin=0.1, vmax=0.25, alpha = 0.3, origin='upper', extent=img_extent)
 
     # Plotando a imagem  # TrueColor
@@ -673,11 +670,13 @@ def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=
     # Salvando a imagem de saida
     plt.savefig(f'{dir_out}{rgb_type}/{rgb_type}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
 
-    logging.info(f'Total processing time: {round((time.time() - start), 2)} seconds.')
+    # Fecha a janela para limpar a memoria
+    plt.close()
+    
+    logging.info(f'True Color - Tempo de Processamento: {round((time.time() - start), 2)} segundos.')
     
 
 def process_rrqpef(rrqpef, ch13, v_extent):
-    
     global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
     file_var = 'RRQPE'
     # Captura a hora para contagem do tempo de processamento da imagem
@@ -688,6 +687,7 @@ def process_rrqpef(rrqpef, ch13, v_extent):
 
     # Reprojetando imagem CMI e recebendo data/hora da imagem, satelite e caminho absoluto do arquivo reprojetado
     dtime, satellite, reproject_rrqpef = reproject(rrqpef, file_var, v_extent, resolution, dir_in)
+    
     data = reproject_rrqpef.ReadAsArray()
     reproject_rrqpef = None
     del reproject_rrqpef
@@ -1477,12 +1477,12 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
         for x in range(1, 17):
             # Transforma o inteiro contador em string e com 2 digitos
             b = str(x).zfill(2)
-            # Se a banda tiver novas glm_list para o dia:
+            # Se a banda tiver TRUE processa
             if bands[b]:
                 # Tentando Processar
                 try:
                     # Cria o processo com a funcao de processamento
-                    process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{new_bands[b]}', b, "br"))
+                    process = Process(target=process_band_cmi, args=(f'{dir_in}band{b}/{new_bands[b]}', b, 'br'))
                     # Adiciona o processo na lista de controle do processamento paralelo
                     process_br.append(process)
                     # Inicia o processo
@@ -1606,6 +1606,7 @@ def iniciar_processo_truecolor(p_br, p_sp, bands, process_br, process_sp, new_ba
 def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands):
     # Checagem se e possivel gerar imagem RRQPEF   
     if bands['18']:
+        
         # Pega o nome netCDF da banda 13
         ch13 = new_bands['13']
         # Pega a lista de arquivos baixados rrqpef
@@ -1791,12 +1792,8 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
-            
-            # Se a data do arquivo for maior ou igual as 23h50 da do dia anterior
-            logging.info(f'date_file: {date_file}')
-            logging.info(f'date: {date}')
-            
+            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
+                        
             #Checagem para ver se é 23:50 para processamento do acumulado diário
             if date_file.year == date.year and date_file.month == date.month and date_file.day == date.day and date_file >= date:
                 # Adiciona true para a variavel de processamento semanal
@@ -1909,14 +1906,14 @@ def iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_band
 
 # ========================================#     Main     #========================================== #
 
-def processamento_das_imagens(bands, p_br, p_sp, dir_in): 
+def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main): 
    
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
     
-    new_bands = abrir_old_json()
+    new_bands = abrir_old_json(dir_main)
     
     try:
         iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands)

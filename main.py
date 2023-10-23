@@ -25,6 +25,7 @@ dirs = get_dirs()
 dir_in = dirs['dir_in']
 dir_out = dirs['dir_out']
 arq_log = dirs['arq_log']
+dir_main = dirs['dir_main']
 #==================================#           Dicionário        #==================================#
 
 
@@ -32,7 +33,7 @@ arq_log = dirs['arq_log']
 # Dicionarios das bandas key : value
 bands = {}
 # Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
-for num in range(1, 22):
+for num in range(1, 23):
     b = str(num).zfill(2)
     bands[f'{b}'] = False
 br = True
@@ -43,16 +44,17 @@ sp = True
 # ========================================#     Main     #========================================== #
 # configura o log
 conf_log(arq_log)
+
 # Log start time
 start = time.time()
 
 try:
     # Chama a função checarImagens para verificar a existência de novas imagens.
-    bands = checar_imagens(bands, dir_in)
+    bands = checar_imagens(bands, dir_in, dir_main)
     # Se tiver novas imagens para processamento:
     if any(bands[key] for key in bands):
         # Processa as imagens
-        processamento_das_imagens(bands, br, sp, dir_in)
+        processamento_das_imagens(bands, br, sp, dir_in, dir_main)
         # Remove os arquivos .nc que já foram processados
         remover_imagens(bands, dir_in)
         # A função é chamada para controlar a quantidade de produtos (imagens) a serem mantidos para a produção de um GIF animado.

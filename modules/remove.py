@@ -20,6 +20,7 @@ def abrir_old_json():
 
 # Remove os arquivos netCDF que foram processados
 def remover_imagens(bands, dir_in):
+    
     logging.info("")
     logging.info('REMOVENDO IMAGENS PROCESSADAS')
     oldBands = abrir_old_json()
@@ -40,16 +41,16 @@ def remover_imagens(bands, dir_in):
             except:
                 print(f'Sem imagens para remover {oldBands[b]}')
 
-
     # Controle de produtos de rrqpef
     if bands['18']:
-        logging.info('Removendo netCDF-rrqpef processadas')
+        ch18 = oldBands['18']
+        logging.info(f'Removendo imagens rrqpef')
         try:
-            shutil.rmtree(f'{dir_in}rrqpef/')
-            os.mkdir(f'{dir_in}rrqpef/')
-        except:
-            logging.info('Ocorreu um erro ao tentar apagar rrqpef')
-
+            os.remove(f'{dir_in}rrqpef/{ch18}')
+            os.remove(f'{dir_in}rrqpef/{ch18}'.replace(".nc", "_reproj_br.nc"))
+            os.remove(f'{dir_in}rrqpef/{ch18}'.replace(".nc", "_reproj_sp.nc"))
+        except FileNotFoundError as e:
+            logging.info(str(e))
 
     # Controle de produtos de glm
     if bands['19'] or bands['13']:
@@ -73,11 +74,11 @@ def remover_imagens(bands, dir_in):
                     # Remove arquivo em excesso
                     os.remove(f'{dir_in}glm/{prod_br[y]}')
             if aux:
-                logging.info("Produtos em excesso removidos com sucesso")
+                logging.info("Produtos glm em excesso removidos com sucesso")
             else:
-                logging.info("Quantidade de produtos dentro do limite")
+                logging.info("Quantidade de produtos glm dentro do limite")
         except:
-            logging.info('Ocorreu um erro ao tentar apagar glm')
+            logging.info('Ocorreu um erro ao tentar apagar produtos glm')
             
    
     if bands['21']:
@@ -87,8 +88,4 @@ def remover_imagens(bands, dir_in):
             os.remove(f'{dir_in}fdcf/{ch21}')
         except FileNotFoundError as e:
             logging.info(str(e))
-            dir_fdcf = os.listdir(f'{dir_in}fdcf/')
-            if len(dir_fdcf) > 15:
-                logging.info(f'{dir_fdcf} quatidade acima do normal, apagando produtos....')
-                shutil.rmtree(f'{dir_in}fdcf/')
-                os.mkdir(f'{dir_in}fdcf/')
+ 

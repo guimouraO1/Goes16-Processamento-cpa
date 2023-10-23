@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import logging
 import time
 
@@ -6,7 +6,7 @@ def conf_log(arq_log):
         # Configurando log
         logging.basicConfig(filename=arq_log, level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%d/%m/%Y %H:%M:%S")
         # Capturando data/hora inicio
-        inicio = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
+        inicio = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
         logging.info("")
         logging.info("")
         logging.info("=========================================================================================================")
@@ -16,7 +16,7 @@ def conf_log(arq_log):
 
 def finalize_log_time(s):
     # Capturando data/hora final
-    fim = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
+    fim = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
     # Realiza o log do calculo do tempo de execucao
     logging.info("")
     logging.info("Tempo gasto " + str(round(time.time() - s, 4)) + ' segundos')
