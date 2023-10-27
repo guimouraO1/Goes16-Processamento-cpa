@@ -1,8 +1,8 @@
 from datetime import date
 
 def get_dirs():
-    dir_main = '/home/guimoura/processamento/'
-    # dir_main = '/mnt/c/Users/Gui/OneDrive/Documentos/processamentopy/'
+    # dir_main = '/home/guimoura/processamento/'
+    dir_main = '/mnt/c/Users/Gui/OneDrive/Documentos/processamentopy/'
     dirs = {
         'dir_main': dir_main,
         'dir_in': f'{dir_main}goes/',

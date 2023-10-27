@@ -2025,7 +2025,7 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main):
     try:
         iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands)
         
-        iniciar_processo_truecolor(p_br, p_sp, bands, process_br, process_sp, new_bands)
+        iniciar_processo_truecolor(p_br, p_sp, bands, new_bands)
 
         iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands)
 

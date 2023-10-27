@@ -203,16 +203,17 @@ def checar_airmass(bands):
     # Checagem de novas imagens fdcf (Band 22)
     if bands['08'] and bands['10'] and bands['12'] and bands['13']:
         bands['22'] = True
-        logging.info(f'Novas imagens AirMass')
+        logging.info(f'Novas imagens AIRMASS')
     else:
         bands['22'] = False
-        logging.info(f'Sem novas imagens FDCF')
+        logging.info(f'Sem novas imagens AIRMASS')
         
         
+# Checa se há o Produto Land Sarface Temperature
 def checar_lst(bands, dir_in, old_bands):
 
     # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
-    imagens = [f for f in os.listdir(f'{dir_in}lst/') if os.path.isfile(os.path.join(f'{dir_in}lst/', f)) and re.match('^CG_ABI-L2-LST2KMF-M[0-9]_G16_s.+_e.+_c.+[0-9].nc$', f)]
+    imagens = [f for f in os.listdir(f'{dir_in}lst/') if os.path.isfile(os.path.join(f'{dir_in}lst/', f)) and re.match('^OR_ABI-L2-LST2KMF-M[0-9]_G16_s.+_e.+_c.+[0-9].nc$', f)]
     # Se houver imagens na pasta e a imagem mais recente for diferente da ultimo processamento                           
     if imagens and max(imagens) != old_bands['23']:
         logging.info(f'Novas imagens para Land Surface Temperature')

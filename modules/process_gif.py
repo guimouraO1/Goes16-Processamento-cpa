@@ -136,3 +136,18 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
                 create_gif("airmass", "sp")
         except:
             logging.info('Não existe imagens para process gif Airmass')
+            
+    if g_bands["23"]:
+        try:
+            if g_br:
+                logging.info('')
+                logging.info('CRIANDO GIF ANIMADO lst "BR"...')
+                # Cria o processo com a funcao gif
+                create_gif("lst", "br")
+            if g_sp:
+                logging.info('')
+                logging.info('CRIANDO GIF ANIMADO lst "BR"...')
+                # Cria o processo com a funcao gif
+                create_gif("lst", "sp")
+        except:
+            logging.info('Não existe imagens para process gif lst')
