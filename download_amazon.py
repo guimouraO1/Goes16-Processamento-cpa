@@ -4,11 +4,12 @@ from osgeo import gdal  # Utilitario para a biblioteca GDAL
 from modules.utilities import download_glm # Funcao para download dos produtos do goes disponiveis na amazon
 from modules.utilities import download_cmi_joao
 import datetime
-from datetime import timedelta
+from datetime import timedelta, datetime
 import logging
 import os
 import time
 from modules.dirs import get_dirs
+from modules.utilities import download_prod
 
 dirs = get_dirs()
 
@@ -28,7 +29,7 @@ arq_log = f'{dir_log}'
 # Configurando log
 logging.basicConfig(filename=arq_log, level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%d/%m/%Y %H:%M:%S")
 # Capturando data/hora inicio
-inicio = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
+inicio = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
 logging.info("")
 logging.info("")
 logging.info("==================================================================================================================")
@@ -38,10 +39,10 @@ logging.info("")
 
 
 #Captura hora atual em UTC para download no site da Amazon
-data_hora_atual = datetime.datetime.utcnow()
+data_hora_atual = datetime.utcnow()
 
 #Atrasa 10 min para entrar em conformidade com Amazon
-data_10_min = datetime.datetime.strftime(data_hora_atual-timedelta(minutes=10),'%Y%m%d%H%M')
+data_10_min = datetime.strftime(data_hora_atual-timedelta(minutes=10),'%Y%m%d%H%M')
 
 #Correção para poder fazer download em qualquer horário
 data_hora_download_file = data_10_min[0:11]+ '0'
@@ -61,4 +62,11 @@ for x in range(1, 17):
 
 
 download_glm(data_hora_download_file, dir_in + f'glm')
-                  
+
+#---------------------------
+#Atrasa 1h para entrar em conformidade com Amazon
+data_1h_lst = datetime.strftime(data_hora_atual-timedelta(hours=1),'%Y%m%d%H00')
+
+# Donwload do produto LST 2km Full disk
+download_prod(data_1h_lst,'ABI-L2-LST2KMF',f'{dir_in}lst/')
+#---------------------------
