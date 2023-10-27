@@ -513,7 +513,7 @@ def process_band_cmi(file, ch, v_extent):
     logging.info(f'{file} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
-def process_truecolor(rgb_type, v_extent, ch01=None, ch02=None, ch03=None, ch13=None):
+def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
     global dir_maps
     start = time.time()  
     #---------------------------------------------------------------------------------------------
@@ -1635,76 +1635,48 @@ def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
         process_sp.clear()
 
 
-def iniciar_processo_truecolor(p_br, p_sp, bands, process_br, process_sp, new_bands):
+def iniciar_processo_truecolor(p_br, p_sp, bands, new_bands):
     # Checagem se e possivel gerar imagem TrueColor
-    if bands['17']:
+    if bands['17']:        
+        # Pegando nome dos produtos 01, 02, 03, 13
+        ch01 = new_bands['01']
+        ch02 = new_bands['02']
+        ch03 = new_bands['03']
+        ch13 = new_bands['13']
+        
+        # Pegando nome e local e do produto
+        ch01 = f'{dir_in}band01/{ch01}'
+        ch02 = f'{dir_in}band02/{ch02}'
+        ch03 = f'{dir_in}band03/{ch03}'
+        ch13 = f'{dir_in}band13/{ch13}'
+        
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS TRUECOLOR WITH NIGHT "BR"...')
-            # Pegando nome das bandas 01, 02, 03, 13
-            ch01 = new_bands['01']
-            ch02 = new_bands['02']
-            ch03 = new_bands['03']
-            ch13 = new_bands['13']
-            # Montando dicionario de argumentos
-            kwargs = {'ch01': f'{dir_in}band01/{ch01}', 
-                      'ch02': f'{dir_in}band02/{ch02}', 
-                      'ch03': f'{dir_in}band03/{ch03}',
-                      'ch13': f'{dir_in}band13/{ch13}'}
             # Tenta realizar o processamento da imagem
             try:
-                # Cria o processo com a funcao de processamento
-                process = Process(target=process_truecolor, args=("truecolor", "br"), kwargs=kwargs)
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_br.append(process)
-                # Inicia o processo
-                process.start()
+                # Inicia a funcao de processamento
+                process_truecolor("truecolor", "br", ch01, ch02, ch03, ch13)
             # Caso seja retornado algum erro do processamento, realiza o log 
             except Exception as e:
                 # Registra detalhes da exceção, como mensagem e tipo
                 logging.error(f"Erro ao criar processo: {e}")
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in process_br:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-        # Limpa a lista de processos
-        process_br.clear()
-        
-        # Se a variavel de controle de processamento sp for True, realiza o processamento
+
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_sp:
             logging.info("")
-            logging.info('PROCESSANDO IMAGENS TRUECOLOR WITH NIGHT "SP"...')
-            # Pegando nome das bandas 01, 02, 03,13
-            ch01 = new_bands['01']
-            ch02 = new_bands['02']
-            ch03 = new_bands['03']
-            ch13 = new_bands['13']
-            # Montando dicionario de argumentos
-            kwargs = {'ch01': f'{dir_in}band01/{ch01}', 
-                      'ch02': f'{dir_in}band02/{ch02}', 
-                      'ch03': f'{dir_in}band03/{ch03}',
-                      'ch13': f'{dir_in}band13/{ch13}'}
+            logging.info('PROCESSANDO IMAGENS TRUECOLOR WITH NIGHT "BR"...')
             # Tenta realizar o processamento da imagem
             try:
-                # Cria o processo com a funcao de processamento
-                process = Process(target=process_truecolor, args=("truecolor", "sp"), kwargs=kwargs)
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_sp.append(process)
-                # Inicia o processo
-                process.start()
+                # Inicia a funcao de processamento
+                process_truecolor("truecolor", "sp", ch01, ch02, ch03, ch13)
             # Caso seja retornado algum erro do processamento, realiza o log 
             except Exception as e:
                 # Registra detalhes da exceção, como mensagem e tipo
                 logging.error(f"Erro ao criar processo: {e}")
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in process_sp:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-        # Limpa a lista de processos
-        process_sp.clear()
-
-
+                
+                
 def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands):
     # Checagem se e possivel gerar imagem RRQPEF   
     if bands['18']:
@@ -2010,14 +1982,16 @@ def iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_band
 def iniciar_processo_lst(p_br, p_sp, bands, new_bands):
     # Checagem se e possivel gerar imagem Land Surface Temperature
     if bands['23']:
+        
+        # Pega o nome do produto LST2KMF 
+        lst = new_bands['23']
+        # Pega o local do produto 
+        file = f'{dir_in}lst/{lst}'
+
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
             logging.info("")
             logging.info('PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "BR"...')
-            # Pega o nome do produto LST2KMF 
-            lst = new_bands['23']
-            # Pega o local do produto 
-            file = f'{dir_in}lst/{lst}'
             try:
                 # Inicia o Processamento
                 process_lst(file, 'br')
