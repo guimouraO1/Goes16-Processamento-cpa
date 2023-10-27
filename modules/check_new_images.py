@@ -208,6 +208,29 @@ def checar_airmass(bands):
         bands['22'] = False
         logging.info(f'Sem novas imagens FDCF')
         
+        
+def checar_lst(bands, dir_in, old_bands):
+
+    # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
+    imagens = [f for f in os.listdir(f'{dir_in}lst/') if os.path.isfile(os.path.join(f'{dir_in}lst/', f)) and re.match('^CG_ABI-L2-LST2KMF-M[0-9]_G16_s.+_e.+_c.+[0-9].nc$', f)]
+    # Se houver imagens na pasta e a imagem mais recente for diferente da ultimo processamento                           
+    if imagens and max(imagens) != old_bands['23']:
+        logging.info(f'Novas imagens para Land Surface Temperature')
+        # latestBand recebe a nova imagem
+        latestBand = max(imagens)
+        # Se houver mais de uma imagem na pasta:
+        if len(imagens) > 1:
+            # Remove os arquivos netCDF menos o mais atual
+            remover_todos_exceto(latestBand, f'{dir_in}lst/') 
+        # Modifica o arquivo JSON com a imagem mais recente.               
+        modificar_chave_old_bands('old_bands.json', '23', latestBand)  
+        # Atualiza o dicionário "bands" com true para novas imagens.
+        bands['23'] = True
+    else:
+        logging.info(f'Sem imagens para Land Surface Temperature') 
+        # Atualiza o dicionário "bands" com false sem novas imagens.
+        bands['23'] = False
+    
 
 # ========================================#     Main     #========================================== #
 
@@ -231,6 +254,8 @@ def checar_imagens(bands, dir_in, dir_main):
     checar_fdcf(bands, dir_in, new_bands)
     
     checar_airmass(bands)
+    
+    checar_lst(bands, dir_in, new_bands)
     
     print(bands)
 

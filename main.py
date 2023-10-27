@@ -33,7 +33,7 @@ dir_main = dirs['dir_main']
 # Dicionarios das bandas key : value
 bands = {}
 # Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
-for num in range(1, 23):
+for num in range(1, 24):
     b = str(num).zfill(2)
     bands[f'{b}'] = False
 br = True

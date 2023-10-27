@@ -1,8 +1,6 @@
 import logging
 import os
 import json
-import shutil
-import datetime
 import re
 from modules.dirs import get_dirs
 
@@ -11,6 +9,7 @@ dirs = get_dirs()
 
 # Acessando os diretórios usando as chaves do dicionário
 dir_main = dirs['dir_main']
+dir_in = dirs['dir_in']
 
 def abrir_old_json():
     global dir_main
@@ -86,6 +85,15 @@ def remover_imagens(bands, dir_in):
         logging.info(f'Removendo imagens FDCF')
         try:
             os.remove(f'{dir_in}fdcf/{ch21}')
+        except FileNotFoundError as e:
+            logging.info(str(e))
+    
+    
+    if bands['23']:    
+        ch23 = oldBands['23']
+        logging.info(f'Removendo imagens LST')
+        try:
+            os.remove(f'{dir_in}lst/{ch23}')
         except FileNotFoundError as e:
             logging.info(str(e))
  

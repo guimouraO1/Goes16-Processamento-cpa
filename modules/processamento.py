@@ -87,28 +87,28 @@ def area_para_recorte(v_extent):
     return extent, resolution
 
 
-def adicionando_shapefile(v_extent, ax):
+def adicionando_shapefile(v_extent, ax, colors='cyan'):
     if v_extent == 'br':
         # Adicionando o shapefile dos estados brasileiros
         # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020.shp').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor=colors, facecolor='none', linewidth=0.7, zorder=8)
     elif v_extent == 'sp':
         # Adicionando o shapefile dos estados brasileiros e cidade de campinas
         # https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2020/Brasil/BR/BR_UF_2020.zip
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='cyan', facecolor='none', linewidth=0.7)
-        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas').geometries())
-        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor='yellow', facecolor='none', linewidth=1)
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'brasil/BR_UF_2020.shp').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor=colors, facecolor='none', linewidth=0.7, zorder=8)
+        shapefile = list(shpreader.Reader(dir_shapefiles + 'campinas/campinas.shp').geometries())
+        ax.add_geometries(shapefile, ccrs.PlateCarree(), edgecolor=colors, facecolor='none', linewidth=1, zorder=8)
 
 
-def adicionando_linhas(ax):
+def adicionando_linhas(ax, colors='cyan'):
     # Adicionando  linhas dos litorais
-    ax.coastlines(resolution='10m', color='cyan', linewidth=0.5)
+    ax.coastlines(resolution='10m', color=colors, linewidth=0.5, zorder=8)
     # Adicionando  linhas das fronteiras
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='cyan', linewidth=0.5)
+    ax.add_feature(cartopy.feature.BORDERS, edgecolor=colors, linewidth=0.5, zorder=8)
     # Adicionando  paralelos e meridianos
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5))
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), color='white', alpha=0.7, linestyle='--', linewidth=0.2, xlocs=np.arange(-180, 180, 5), ylocs=np.arange(-90, 90, 5), zorder=8)
     gl.top_labels = False
     gl.right_labels = False
 
@@ -1017,10 +1017,10 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
         ax = plt.axes(projection=ccrs.PlateCarree())
 
         # Adicionando o shapefile dos estados brasileiros
-        adicionando_shapefile(v_extent, ax)
+        adicionando_shapefile(v_extent, ax, colors='dimgray')
 
         # Adicionando  linhas dos litorais
-        adicionando_linhas(ax)
+        adicionando_linhas(ax, colors='dimgray')
     
         # # Add an ocean mask
         ax.add_feature(cfeature.OCEAN, facecolor='cornflowerblue', zorder=3)
@@ -1467,6 +1467,108 @@ def process_airmass(rgb_type, v_extent, path_ch08=None, path_ch10=None, path_ch1
     logging.info(f'Total processing time Airmass: {round((time.time() - start),2)} seconds.') 
 
 
+def process_lst(file, v_extent):
+    global dir_maps, dir_in, dir_out
+    # Captura a hora para contagem do tempo de processamento da imagem
+    start = time.time()
+
+    # Area de interesse para recorte
+    extent, resolution = area_para_recorte(v_extent)
+    satellite = '16'
+    variable = 'LST'
+    
+    # Reprojetando
+    grid = remap(file, variable, extent, resolution)
+
+    # Lê o retorno da função
+    data_lst = grid.ReadAsArray()- 273.15
+
+    # Abrindo imagem com a biblioteca GDAL
+    raw = gdal.Open(f'NETCDF:{file}:' + 'LST', gdal.GA_ReadOnly)
+    metadata = raw.GetMetadata()
+    dtime = metadata.get('NC_GLOBAL#time_coverage_start')
+    date = (datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+
+    # Define a temperatura minima
+    min_temp = -26
+    
+    # Mask values less than -20 degrees
+    data_lst = np.ma.masked_where((data_lst < min_temp), data_lst)
+
+    # Formatando a descricao a ser plotada na imagem
+    description = f' GOES-{satellite} Land Surface Temperature (°C) {date_img}'
+    institution = "CEPAGRI - UNICAMP"
+
+    # Definindo tamanho da imagem de saida
+    d_p_i = 150
+    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+
+    # Utilizando projecao geoestacionaria no cartopy
+    ax = plt.axes(projection=ccrs.PlateCarree())
+
+    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
+    
+    # Criando imagem de fundo Natural Earth 1
+    raster = gdal.Open(f'{dir_maps}HYP_HR_SR_OB_DR.tif')
+    ulx, xres, xskew, uly, yskew, yres = raster.GetGeoTransform()
+    lrx = ulx + (raster.RasterXSize * xres)
+    lry = uly + (raster.RasterYSize * yres)
+    min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
+    raster = gdal.Translate('teste.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
+    # Lendo o RGB 
+    array = raster.ReadAsArray()
+    R = array[0,:,:].astype(float) / 255
+    G = array[1,:,:].astype(float) / 255
+    B = array[2,:,:].astype(float) / 255
+    R[R==4] = 0
+    G[G==5] = 0
+    B[B==15] = 0
+    rgb = np.stack([R, G, B], axis=2)
+    
+    # PLotando imagem de fundo
+    ax.imshow(rgb, extent=img_extent)
+    
+    # Remove imagem de fundo tif criada
+    os.remove('teste.tif')
+    
+    # Plotando a imagem Spectral_r
+    img = ax.imshow(data_lst, origin='upper',vmin=-25, vmax=60, extent=img_extent, zorder=2, cmap='jet')
+
+    # Adicionando barra da paleta de cores de acordo com o canal
+    cax0 = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.01325, ax.get_position().width, 0.0125])
+    cb = plt.colorbar(img, orientation="horizontal", cax=cax0, ticks=[-10, 10, 30, 50])
+    cb.ax.set_xticklabels(['-10', '10', '30','50'])
+    cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+    cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
+    cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
+    cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de coreses
+
+    # Adicionando o shapefile dos estados brasileiros
+    adicionando_shapefile(v_extent, ax, colors='dimgray')
+    
+    # Adicionando  linhas dos litorais
+    adicionando_linhas(ax, colors='dimgray')
+
+    # Adicionando descricao da imagem
+    adicionando_descricao_imagem(description, institution, ax, fig)
+
+    # Adicionando os logos
+    adicionando_logos(fig)
+
+    type_lst = 'lst'
+    
+    # Salvando a imagem de saida
+    plt.savefig(f'{dir_out}{type_lst}/{type_lst}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+
+    # Fecha a janela para limpar a memoria
+    plt.close()
+    
+    logging.info(f'Total processing time: {round((time.time() - start),2)} seconds.')
+
+
 def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
     global dir_out
     # Checagem se e possivel gerar imagem bandas 1-16
@@ -1904,6 +2006,37 @@ def iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_band
         # Limpa a lista de processos
         process_sp.clear()
 
+
+def iniciar_processo_lst(p_br, p_sp, bands, new_bands):
+    # Checagem se e possivel gerar imagem Land Surface Temperature
+    if bands['23']:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "BR"...')
+            # Pega o nome do produto LST2KMF 
+            lst = new_bands['23']
+            # Pega o local do produto 
+            file = f'{dir_in}lst/{lst}'
+            try:
+                # Inicia o Processamento
+                process_lst(file, 'br')
+            # Caso seja retornado algum erro do processamento, realiza o log 
+            except Exception as e:
+                # Registra detalhes da exceção, como mensagem e tipo
+                logging.error(f"Erro ao criar processo: {e}")
+                
+        if p_sp:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "SP"...')
+            try:
+                # Inicia o Processamento
+                process_lst(file, 'sp')
+            # Caso seja retornado algum erro do processamento, realiza o log 
+            except Exception as e:
+                # Registra detalhes da exceção, como mensagem e tipo
+                logging.error(f"Erro ao criar processo: {e}")
+
 # ========================================#     Main     #========================================== #
 
 def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main): 
@@ -1929,6 +2062,8 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main):
         iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands)
         
         iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_bands)
+        
+        iniciar_processo_lst(p_br, p_sp, bands, new_bands)
         
     except Exception as e:
         logging.info(f'Ocorreu um Erro {e} no Processamento')

@@ -1,0 +1,398 @@
+27/10/2023 12:22:23 INFO 
+27/10/2023 12:22:23 INFO 
+27/10/2023 12:22:23 INFO =========================================================================================================
+27/10/2023 12:22:23 INFO =                             PROCESSANDO IMAGENS GOES AS 27/10/2023-12:22:23                           =
+27/10/2023 12:22:23 INFO =========================================================================================================
+27/10/2023 12:22:23 INFO 
+27/10/2023 12:22:23 INFO VERIFICANDO NOVAS IMAGENS
+27/10/2023 12:22:23 INFO Sem imagens para o dia band01
+27/10/2023 12:22:23 INFO Sem imagens para o dia band02
+27/10/2023 12:22:23 INFO Sem imagens para o dia band03
+27/10/2023 12:22:23 INFO Sem imagens para o dia band04
+27/10/2023 12:22:23 INFO Sem imagens para o dia band05
+27/10/2023 12:22:23 INFO Sem imagens para o dia band06
+27/10/2023 12:22:23 INFO Sem imagens para o dia band07
+27/10/2023 12:22:23 INFO Sem imagens para o dia band08
+27/10/2023 12:22:23 INFO Sem imagens para o dia band09
+27/10/2023 12:22:23 INFO Sem imagens para o dia band10
+27/10/2023 12:22:23 INFO Sem imagens para o dia band11
+27/10/2023 12:22:23 INFO Sem imagens para o dia band12
+27/10/2023 12:22:23 INFO Sem imagens para o dia band13
+27/10/2023 12:22:23 INFO Sem imagens para o dia band14
+27/10/2023 12:22:23 INFO Sem imagens para o dia band15
+27/10/2023 12:22:23 INFO Sem imagens para o dia band16
+27/10/2023 12:22:23 INFO Sem novas imagens TRUECOLOR
+27/10/2023 12:22:23 INFO Sem novas imagens RRQPEF
+27/10/2023 12:22:23 INFO Sem novas imagens GLM
+27/10/2023 12:22:23 INFO Sem novas imagens FDCF
+27/10/2023 12:22:23 INFO Sem novas imagens FDCF
+27/10/2023 12:22:23 INFO Sem imagens para Land Surface Temperature
+27/10/2023 12:22:23 INFO Sem arquivos para processamento. 
+
+27/10/2023 12:22:23 INFO 
+27/10/2023 12:22:23 INFO Tempo gasto 0.0021 segundos
+27/10/2023 12:22:23 INFO 
+27/10/2023 12:22:23 INFO =========================================================================================================
+27/10/2023 12:22:23 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 27/10/2023-12:22:23                           =
+27/10/2023 12:22:23 INFO =========================================================================================================
+27/10/2023 12:22:23 INFO 
+27/10/2023 12:22:23 INFO 
+27/10/2023 12:22:35 INFO 
+27/10/2023 12:22:35 INFO 
+27/10/2023 12:22:35 INFO =========================================================================================================
+27/10/2023 12:22:35 INFO =                             PROCESSANDO IMAGENS GOES AS 27/10/2023-12:22:35                           =
+27/10/2023 12:22:35 INFO =========================================================================================================
+27/10/2023 12:22:35 INFO 
+27/10/2023 12:22:35 INFO VERIFICANDO NOVAS IMAGENS
+27/10/2023 12:22:35 INFO Sem imagens para o dia band01
+27/10/2023 12:22:35 INFO Sem imagens para o dia band02
+27/10/2023 12:22:35 INFO Sem imagens para o dia band03
+27/10/2023 12:22:35 INFO Sem imagens para o dia band04
+27/10/2023 12:22:35 INFO Sem imagens para o dia band05
+27/10/2023 12:22:35 INFO Sem imagens para o dia band06
+27/10/2023 12:22:35 INFO Sem imagens para o dia band07
+27/10/2023 12:22:35 INFO Sem imagens para o dia band08
+27/10/2023 12:22:35 INFO Sem imagens para o dia band09
+27/10/2023 12:22:35 INFO Sem imagens para o dia band10
+27/10/2023 12:22:35 INFO Sem imagens para o dia band11
+27/10/2023 12:22:35 INFO Sem imagens para o dia band12
+27/10/2023 12:22:35 INFO Sem imagens para o dia band13
+27/10/2023 12:22:35 INFO Sem imagens para o dia band14
+27/10/2023 12:22:35 INFO Sem imagens para o dia band15
+27/10/2023 12:22:35 INFO Sem imagens para o dia band16
+27/10/2023 12:22:35 INFO Sem novas imagens TRUECOLOR
+27/10/2023 12:22:35 INFO Sem novas imagens RRQPEF
+27/10/2023 12:22:35 INFO Sem novas imagens GLM
+27/10/2023 12:22:35 INFO Sem novas imagens FDCF
+27/10/2023 12:22:35 INFO Sem novas imagens FDCF
+27/10/2023 12:22:35 INFO Novas imagens para Land Surface Temperature
+27/10/2023 12:22:35 INFO 
+27/10/2023 12:22:35 INFO PROCESSANDO IMAGENS "BR"...
+27/10/2023 12:22:35 INFO 
+27/10/2023 12:22:35 INFO PROCESSANDO IMAGENS "SP"...
+27/10/2023 12:22:35 INFO 
+27/10/2023 12:22:35 INFO Sem imagens correspondentes a data para glm 
+27/10/2023 12:22:35 INFO 
+27/10/2023 12:22:35 INFO 
+27/10/2023 12:22:35 INFO PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "BR"...
+27/10/2023 12:22:37 ERROR /home/guimoura/processamento/shapefiles/brasil/BR_UF_2020: No such file or directory
+27/10/2023 12:22:37 ERROR Erro ao criar processo: /home/guimoura/processamento/shapefiles/brasil/BR_UF_2020: No such file or directory
+27/10/2023 12:22:37 INFO 
+27/10/2023 12:22:37 INFO PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "SP"...
+27/10/2023 12:22:37 ERROR /home/guimoura/processamento/shapefiles/brasil/BR_UF_2020: No such file or directory
+27/10/2023 12:22:37 ERROR Erro ao criar processo: /home/guimoura/processamento/shapefiles/brasil/BR_UF_2020: No such file or directory
+27/10/2023 12:22:37 INFO 
+27/10/2023 12:22:37 INFO PROCESSAMENTO ENCERRADO
+27/10/2023 12:22:37 INFO 
+27/10/2023 12:22:37 INFO REMOVENDO IMAGENS PROCESSADAS
+27/10/2023 12:22:37 INFO Removendo imagens LST
+27/10/2023 12:22:37 INFO 
+27/10/2023 12:22:37 INFO VERIFICANDO NUMERO DE PRODUTOS...
+27/10/2023 12:22:37 INFO Produtos em excesso removidos com sucesso
+27/10/2023 12:22:37 INFO 
+27/10/2023 12:22:37 INFO CRIANDO GIF ANIMADO "BR"...
+27/10/2023 12:22:37 INFO 
+27/10/2023 12:22:37 INFO CRIANDO GIF ANIMADO "SP"...
+27/10/2023 12:22:37 INFO 
+27/10/2023 12:22:37 INFO ENVIANDO PRODUTOS PARA O SITE
+27/10/2023 12:24:56 INFO 
+27/10/2023 12:24:56 INFO 
+27/10/2023 12:24:56 INFO =========================================================================================================
+27/10/2023 12:24:56 INFO =                             PROCESSANDO IMAGENS GOES AS 27/10/2023-12:24:56                           =
+27/10/2023 12:24:56 INFO =========================================================================================================
+27/10/2023 12:24:56 INFO 
+27/10/2023 12:24:56 INFO VERIFICANDO NOVAS IMAGENS
+27/10/2023 12:24:56 INFO Sem imagens para o dia band01
+27/10/2023 12:24:56 INFO Sem imagens para o dia band02
+27/10/2023 12:24:56 INFO Sem imagens para o dia band03
+27/10/2023 12:24:56 INFO Sem imagens para o dia band04
+27/10/2023 12:24:56 INFO Sem imagens para o dia band05
+27/10/2023 12:24:56 INFO Sem imagens para o dia band06
+27/10/2023 12:24:56 INFO Sem imagens para o dia band07
+27/10/2023 12:24:56 INFO Sem imagens para o dia band08
+27/10/2023 12:24:56 INFO Sem imagens para o dia band09
+27/10/2023 12:24:56 INFO Sem imagens para o dia band10
+27/10/2023 12:24:56 INFO Sem imagens para o dia band11
+27/10/2023 12:24:56 INFO Sem imagens para o dia band12
+27/10/2023 12:24:56 INFO Sem imagens para o dia band13
+27/10/2023 12:24:56 INFO Sem imagens para o dia band14
+27/10/2023 12:24:56 INFO Sem imagens para o dia band15
+27/10/2023 12:24:56 INFO Sem imagens para o dia band16
+27/10/2023 12:24:56 INFO Sem novas imagens TRUECOLOR
+27/10/2023 12:24:56 INFO Sem novas imagens RRQPEF
+27/10/2023 12:24:56 INFO Sem novas imagens GLM
+27/10/2023 12:24:56 INFO Sem novas imagens FDCF
+27/10/2023 12:24:56 INFO Sem novas imagens FDCF
+27/10/2023 12:24:56 INFO Sem imagens para Land Surface Temperature
+27/10/2023 12:24:56 INFO Sem arquivos para processamento. 
+
+27/10/2023 12:24:56 INFO 
+27/10/2023 12:24:56 INFO Tempo gasto 0.0023 segundos
+27/10/2023 12:24:56 INFO 
+27/10/2023 12:24:56 INFO =========================================================================================================
+27/10/2023 12:24:56 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 27/10/2023-12:24:56                           =
+27/10/2023 12:24:56 INFO =========================================================================================================
+27/10/2023 12:24:56 INFO 
+27/10/2023 12:24:56 INFO 
+27/10/2023 12:25:23 INFO 
+27/10/2023 12:25:23 INFO 
+27/10/2023 12:25:23 INFO =========================================================================================================
+27/10/2023 12:25:23 INFO =                             PROCESSANDO IMAGENS GOES AS 27/10/2023-12:25:23                           =
+27/10/2023 12:25:23 INFO =========================================================================================================
+27/10/2023 12:25:23 INFO 
+27/10/2023 12:25:23 INFO VERIFICANDO NOVAS IMAGENS
+27/10/2023 12:25:23 INFO Sem imagens para o dia band01
+27/10/2023 12:25:23 INFO Sem imagens para o dia band02
+27/10/2023 12:25:23 INFO Sem imagens para o dia band03
+27/10/2023 12:25:23 INFO Sem imagens para o dia band04
+27/10/2023 12:25:23 INFO Sem imagens para o dia band05
+27/10/2023 12:25:23 INFO Sem imagens para o dia band06
+27/10/2023 12:25:23 INFO Sem imagens para o dia band07
+27/10/2023 12:25:23 INFO Sem imagens para o dia band08
+27/10/2023 12:25:23 INFO Sem imagens para o dia band09
+27/10/2023 12:25:23 INFO Sem imagens para o dia band10
+27/10/2023 12:25:23 INFO Sem imagens para o dia band11
+27/10/2023 12:25:23 INFO Sem imagens para o dia band12
+27/10/2023 12:25:23 INFO Sem imagens para o dia band13
+27/10/2023 12:25:23 INFO Sem imagens para o dia band14
+27/10/2023 12:25:23 INFO Sem imagens para o dia band15
+27/10/2023 12:25:23 INFO Sem imagens para o dia band16
+27/10/2023 12:25:23 INFO Sem novas imagens TRUECOLOR
+27/10/2023 12:25:23 INFO Sem novas imagens RRQPEF
+27/10/2023 12:25:23 INFO Sem novas imagens GLM
+27/10/2023 12:25:23 INFO Sem novas imagens FDCF
+27/10/2023 12:25:23 INFO Sem novas imagens FDCF
+27/10/2023 12:25:23 INFO Novas imagens para Land Surface Temperature
+27/10/2023 12:25:23 INFO 
+27/10/2023 12:25:23 INFO PROCESSANDO IMAGENS "BR"...
+27/10/2023 12:25:23 INFO 
+27/10/2023 12:25:23 INFO PROCESSANDO IMAGENS "SP"...
+27/10/2023 12:25:23 INFO 
+27/10/2023 12:25:23 INFO Sem imagens correspondentes a data para glm 
+27/10/2023 12:25:23 INFO 
+27/10/2023 12:25:23 INFO 
+27/10/2023 12:25:23 INFO PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "BR"...
+27/10/2023 12:25:35 INFO 
+27/10/2023 12:25:35 INFO PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "SP"...
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:25:40 INFO PROCESSAMENTO ENCERRADO
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:25:40 INFO REMOVENDO IMAGENS PROCESSADAS
+27/10/2023 12:25:40 INFO Removendo imagens LST
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:25:40 INFO VERIFICANDO NUMERO DE PRODUTOS...
+27/10/2023 12:25:40 INFO Quantidade de produtos dentro do limite
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:25:40 INFO CRIANDO GIF ANIMADO "BR"...
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:25:40 INFO CRIANDO GIF ANIMADO "SP"...
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:25:40 INFO Tempo gasto 16.8972 segundos
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:25:40 INFO =========================================================================================================
+27/10/2023 12:25:40 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 27/10/2023-12:25:40                           =
+27/10/2023 12:25:40 INFO =========================================================================================================
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:25:40 INFO 
+27/10/2023 12:32:23 INFO 
+27/10/2023 12:32:23 INFO 
+27/10/2023 12:32:23 INFO =========================================================================================================
+27/10/2023 12:32:23 INFO =                             PROCESSANDO IMAGENS GOES AS 27/10/2023-12:32:23                           =
+27/10/2023 12:32:23 INFO =========================================================================================================
+27/10/2023 12:32:23 INFO 
+27/10/2023 12:32:23 INFO VERIFICANDO NOVAS IMAGENS
+27/10/2023 12:32:23 INFO Sem imagens para o dia band01
+27/10/2023 12:32:23 INFO Sem imagens para o dia band02
+27/10/2023 12:32:23 INFO Sem imagens para o dia band03
+27/10/2023 12:32:23 INFO Sem imagens para o dia band04
+27/10/2023 12:32:23 INFO Sem imagens para o dia band05
+27/10/2023 12:32:23 INFO Sem imagens para o dia band06
+27/10/2023 12:32:23 INFO Sem imagens para o dia band07
+27/10/2023 12:32:23 INFO Sem imagens para o dia band08
+27/10/2023 12:32:23 INFO Sem imagens para o dia band09
+27/10/2023 12:32:23 INFO Sem imagens para o dia band10
+27/10/2023 12:32:23 INFO Sem imagens para o dia band11
+27/10/2023 12:32:23 INFO Sem imagens para o dia band12
+27/10/2023 12:32:23 INFO Sem imagens para o dia band13
+27/10/2023 12:32:23 INFO Sem imagens para o dia band14
+27/10/2023 12:32:23 INFO Sem imagens para o dia band15
+27/10/2023 12:32:23 INFO Sem imagens para o dia band16
+27/10/2023 12:32:23 INFO Sem novas imagens TRUECOLOR
+27/10/2023 12:32:23 INFO Sem novas imagens RRQPEF
+27/10/2023 12:32:23 INFO Sem novas imagens GLM
+27/10/2023 12:32:23 INFO Sem novas imagens FDCF
+27/10/2023 12:32:23 INFO Sem novas imagens FDCF
+27/10/2023 12:32:23 INFO Sem imagens para Land Surface Temperature
+27/10/2023 12:32:23 INFO Sem arquivos para processamento. 
+
+27/10/2023 12:32:23 INFO 
+27/10/2023 12:32:23 INFO Tempo gasto 0.0022 segundos
+27/10/2023 12:32:23 INFO 
+27/10/2023 12:32:23 INFO =========================================================================================================
+27/10/2023 12:32:23 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 27/10/2023-12:32:23                           =
+27/10/2023 12:32:23 INFO =========================================================================================================
+27/10/2023 12:32:23 INFO 
+27/10/2023 12:32:23 INFO 
+27/10/2023 12:32:41 INFO 
+27/10/2023 12:32:41 INFO 
+27/10/2023 12:32:41 INFO =========================================================================================================
+27/10/2023 12:32:41 INFO =                             PROCESSANDO IMAGENS GOES AS 27/10/2023-12:32:41                           =
+27/10/2023 12:32:41 INFO =========================================================================================================
+27/10/2023 12:32:41 INFO 
+27/10/2023 12:32:41 INFO VERIFICANDO NOVAS IMAGENS
+27/10/2023 12:32:41 INFO Sem imagens para o dia band01
+27/10/2023 12:32:41 INFO Sem imagens para o dia band02
+27/10/2023 12:32:41 INFO Sem imagens para o dia band03
+27/10/2023 12:32:41 INFO Sem imagens para o dia band04
+27/10/2023 12:32:41 INFO Sem imagens para o dia band05
+27/10/2023 12:32:41 INFO Sem imagens para o dia band06
+27/10/2023 12:32:41 INFO Sem imagens para o dia band07
+27/10/2023 12:32:41 INFO Sem imagens para o dia band08
+27/10/2023 12:32:41 INFO Sem imagens para o dia band09
+27/10/2023 12:32:41 INFO Sem imagens para o dia band10
+27/10/2023 12:32:41 INFO Sem imagens para o dia band11
+27/10/2023 12:32:41 INFO Sem imagens para o dia band12
+27/10/2023 12:32:41 INFO Sem imagens para o dia band13
+27/10/2023 12:32:41 INFO Sem imagens para o dia band14
+27/10/2023 12:32:41 INFO Sem imagens para o dia band15
+27/10/2023 12:32:41 INFO Sem imagens para o dia band16
+27/10/2023 12:32:41 INFO Sem novas imagens TRUECOLOR
+27/10/2023 12:32:41 INFO Sem novas imagens RRQPEF
+27/10/2023 12:32:41 INFO Sem novas imagens GLM
+27/10/2023 12:32:41 INFO Sem novas imagens FDCF
+27/10/2023 12:32:41 INFO Sem novas imagens FDCF
+27/10/2023 12:32:41 INFO Novas imagens para Land Surface Temperature
+27/10/2023 12:32:41 INFO 
+27/10/2023 12:32:41 INFO PROCESSANDO IMAGENS "BR"...
+27/10/2023 12:32:41 INFO 
+27/10/2023 12:32:41 INFO PROCESSANDO IMAGENS "SP"...
+27/10/2023 12:32:41 INFO 
+27/10/2023 12:32:41 INFO Sem imagens correspondentes a data para glm 
+27/10/2023 12:32:41 INFO 
+27/10/2023 12:32:41 INFO 
+27/10/2023 12:32:41 INFO PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "BR"...
+27/10/2023 12:32:53 INFO Total processing time: 11.87 seconds.
+27/10/2023 12:32:53 INFO 
+27/10/2023 12:32:53 INFO PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "SP"...
+27/10/2023 12:32:58 INFO Total processing time: 4.54 seconds.
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:32:58 INFO PROCESSAMENTO ENCERRADO
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:32:58 INFO REMOVENDO IMAGENS PROCESSADAS
+27/10/2023 12:32:58 INFO Removendo imagens LST
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:32:58 INFO VERIFICANDO NUMERO DE PRODUTOS...
+27/10/2023 12:32:58 INFO Quantidade de produtos dentro do limite
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:32:58 INFO CRIANDO GIF ANIMADO "BR"...
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:32:58 INFO CRIANDO GIF ANIMADO "SP"...
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:32:58 INFO Tempo gasto 16.4394 segundos
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:32:58 INFO =========================================================================================================
+27/10/2023 12:32:58 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 27/10/2023-12:32:58                           =
+27/10/2023 12:32:58 INFO =========================================================================================================
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:32:58 INFO 
+27/10/2023 12:36:51 INFO 
+27/10/2023 12:36:51 INFO 
+27/10/2023 12:36:51 INFO =========================================================================================================
+27/10/2023 12:36:51 INFO =                             PROCESSANDO IMAGENS GOES AS 27/10/2023-12:36:51                           =
+27/10/2023 12:36:51 INFO =========================================================================================================
+27/10/2023 12:36:51 INFO 
+27/10/2023 12:36:51 INFO VERIFICANDO NOVAS IMAGENS
+27/10/2023 12:36:51 INFO Sem imagens para o dia band01
+27/10/2023 12:36:51 INFO Sem imagens para o dia band02
+27/10/2023 12:36:51 INFO Sem imagens para o dia band03
+27/10/2023 12:36:51 INFO Sem imagens para o dia band04
+27/10/2023 12:36:51 INFO Sem imagens para o dia band05
+27/10/2023 12:36:51 INFO Sem imagens para o dia band06
+27/10/2023 12:36:51 INFO Sem imagens para o dia band07
+27/10/2023 12:36:51 INFO Sem imagens para o dia band08
+27/10/2023 12:36:51 INFO Sem imagens para o dia band09
+27/10/2023 12:36:51 INFO Sem imagens para o dia band10
+27/10/2023 12:36:51 INFO Sem imagens para o dia band11
+27/10/2023 12:36:51 INFO Sem imagens para o dia band12
+27/10/2023 12:36:51 INFO Sem imagens para o dia band13
+27/10/2023 12:36:51 INFO Sem imagens para o dia band14
+27/10/2023 12:36:51 INFO Sem imagens para o dia band15
+27/10/2023 12:36:51 INFO Sem imagens para o dia band16
+27/10/2023 12:36:51 INFO Sem novas imagens TRUECOLOR
+27/10/2023 12:36:51 INFO Sem novas imagens RRQPEF
+27/10/2023 12:36:51 INFO Sem novas imagens GLM
+27/10/2023 12:36:51 INFO Sem novas imagens FDCF
+27/10/2023 12:36:51 INFO Sem novas imagens FDCF
+27/10/2023 12:36:51 INFO Sem imagens para Land Surface Temperature
+27/10/2023 12:36:51 INFO Sem arquivos para processamento. 
+
+27/10/2023 12:36:51 INFO 
+27/10/2023 12:36:51 INFO Tempo gasto 0.0019 segundos
+27/10/2023 12:36:51 INFO 
+27/10/2023 12:36:51 INFO =========================================================================================================
+27/10/2023 12:36:51 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 27/10/2023-12:36:51                           =
+27/10/2023 12:36:51 INFO =========================================================================================================
+27/10/2023 12:36:51 INFO 
+27/10/2023 12:36:51 INFO 
+27/10/2023 12:37:18 INFO 
+27/10/2023 12:37:18 INFO 
+27/10/2023 12:37:18 INFO =========================================================================================================
+27/10/2023 12:37:18 INFO =                             PROCESSANDO IMAGENS GOES AS 27/10/2023-12:37:18                           =
+27/10/2023 12:37:18 INFO =========================================================================================================
+27/10/2023 12:37:18 INFO 
+27/10/2023 12:37:18 INFO VERIFICANDO NOVAS IMAGENS
+27/10/2023 12:37:18 INFO Sem imagens para o dia band01
+27/10/2023 12:37:18 INFO Sem imagens para o dia band02
+27/10/2023 12:37:18 INFO Sem imagens para o dia band03
+27/10/2023 12:37:18 INFO Sem imagens para o dia band04
+27/10/2023 12:37:18 INFO Sem imagens para o dia band05
+27/10/2023 12:37:18 INFO Sem imagens para o dia band06
+27/10/2023 12:37:18 INFO Sem imagens para o dia band07
+27/10/2023 12:37:18 INFO Sem imagens para o dia band08
+27/10/2023 12:37:18 INFO Sem imagens para o dia band09
+27/10/2023 12:37:18 INFO Sem imagens para o dia band10
+27/10/2023 12:37:18 INFO Sem imagens para o dia band11
+27/10/2023 12:37:18 INFO Sem imagens para o dia band12
+27/10/2023 12:37:18 INFO Sem imagens para o dia band13
+27/10/2023 12:37:18 INFO Sem imagens para o dia band14
+27/10/2023 12:37:18 INFO Sem imagens para o dia band15
+27/10/2023 12:37:18 INFO Sem imagens para o dia band16
+27/10/2023 12:37:18 INFO Sem novas imagens TRUECOLOR
+27/10/2023 12:37:18 INFO Sem novas imagens RRQPEF
+27/10/2023 12:37:18 INFO Sem novas imagens GLM
+27/10/2023 12:37:18 INFO Sem novas imagens FDCF
+27/10/2023 12:37:18 INFO Sem novas imagens FDCF
+27/10/2023 12:37:18 INFO Novas imagens para Land Surface Temperature
+27/10/2023 12:37:18 INFO 
+27/10/2023 12:37:18 INFO PROCESSANDO IMAGENS "BR"...
+27/10/2023 12:37:18 INFO 
+27/10/2023 12:37:18 INFO PROCESSANDO IMAGENS "SP"...
+27/10/2023 12:37:18 INFO 
+27/10/2023 12:37:18 INFO Sem imagens correspondentes a data para glm 
+27/10/2023 12:37:18 INFO 
+27/10/2023 12:37:18 INFO 
+27/10/2023 12:37:18 INFO PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "BR"...
+27/10/2023 12:37:30 INFO Total processing time: 11.54 seconds.
+27/10/2023 12:37:30 INFO 
+27/10/2023 12:37:30 INFO PROCESSANDO IMAGENS LAND SURFACE TEMPERATURE "SP"...
+27/10/2023 12:37:34 INFO Total processing time: 4.44 seconds.
+27/10/2023 12:37:34 INFO 
+27/10/2023 12:37:34 INFO PROCESSAMENTO ENCERRADO
+27/10/2023 12:37:34 INFO 
+27/10/2023 12:37:34 INFO REMOVENDO IMAGENS PROCESSADAS
+27/10/2023 12:37:34 INFO Removendo imagens LST
+27/10/2023 12:37:34 INFO 
+27/10/2023 12:37:34 INFO VERIFICANDO NUMERO DE PRODUTOS...
+27/10/2023 12:37:34 INFO Quantidade de produtos dentro do limite
+27/10/2023 12:37:34 INFO 
+27/10/2023 12:37:34 INFO CRIANDO GIF ANIMADO "BR"...
+27/10/2023 12:37:34 INFO 
+27/10/2023 12:37:34 INFO CRIANDO GIF ANIMADO "SP"...
+27/10/2023 12:37:34 INFO 
+27/10/2023 12:37:34 INFO Tempo gasto 16.0076 segundos
+27/10/2023 12:37:34 INFO 
+27/10/2023 12:37:34 INFO =========================================================================================================
+27/10/2023 12:37:34 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 27/10/2023-12:37:34                           =
+27/10/2023 12:37:34 INFO =========================================================================================================
+27/10/2023 12:37:34 INFO 
+27/10/2023 12:37:34 INFO 
