@@ -1677,16 +1677,14 @@ def iniciar_processo_truecolor(p_br, p_sp, bands, new_bands):
                 logging.error(f"Erro ao criar processo: {e}")
                 
                 
-def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands):
+def iniciar_processo_rrqpef(p_br, p_sp, bands, new_bands):
     # Checagem se e possivel gerar imagem RRQPEF   
     if bands['18']:
         
         # Pega o nome netCDF da banda 13
         ch13 = new_bands['13']
-        # Pega a lista de arquivos baixados rrqpef
-        rrqpef_list = os.listdir(f'{dir_in}rrqpef/')
-        # Pega só o primeiro arquivo para enviar de argumento
-        rrqpef = f'{dir_in}rrqpef/{rrqpef_list[0]}'
+        rrqpef = new_bands['18']
+        rrqpef = f'{dir_in}rrqpef/{rrqpef}'
 
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_br:
@@ -1696,11 +1694,7 @@ def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_rrqpef, args=(f'{rrqpef}', f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', "br"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_br.append(process)
-                # Inicia o processo
-                process.start()
+                process_rrqpef(f'{rrqpef}', f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', "br")
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except Exception as e:
                 # Realiza o log do erro
@@ -1709,13 +1703,6 @@ def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands
                 os.remove(f'{rrqpef}')
                 os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
             
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in process_br:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-        # Limpa a lista de processos
-        process_br.clear()
-        
                 # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_sp:
             logging.info("")
@@ -1723,11 +1710,7 @@ def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_rrqpef, args=(f'{rrqpef}', f'{dir_in}band13/{ch13.replace(".nc", "_reproj_sp.nc")}', "sp"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_sp.append(process)
-                # Inicia o processo
-                process.start()
+                process_rrqpef(f'{rrqpef}', f'{dir_in}band13/{ch13.replace(".nc", "_reproj_sp.nc")}', "sp")
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except:
                 # Realiza o log do erro
@@ -1735,13 +1718,6 @@ def iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands
                 # Remove a imagem com erro de processamento
                 os.remove(f'{rrqpef}')
                 os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_sp.nc")}')
-            
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in process_sp:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-        # Limpa a lista de processos
-        process_sp.clear()
 
 
 def iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands):
@@ -1881,28 +1857,12 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_fdcf, args=(f'{dir_in}fdcf/{fdcf}', 
-                                                             f'{dir_in}band01/{ch01}', 
-                                                             f'{dir_in}band02/{ch02}', 
-                                                             f'{dir_in}band03/{ch03}', "br", fdcf_diario))
-                
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_br.append(process)
-                # Inicia o processo
-                process.start()
-                
+                process_fdcf(f'{dir_in}fdcf/{fdcf}', f'{dir_in}band01/{ch01}', f'{dir_in}band02/{ch02}', f'{dir_in}band03/{ch03}', "br", fdcf_diario)
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except Exception as e:
                 # Realiza o log do erro
                 logging.info("Erro Arquivo fdcf")
                 logging.info(str(e))
-
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in process_br:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-        # Limpa a lista de processos
-        process_br.clear()
 
 
 def iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_bands):
@@ -2026,8 +1986,8 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main):
         iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands)
         
         iniciar_processo_truecolor(p_br, p_sp, bands, new_bands)
-
-        iniciar_processo_rrqpef(p_br, p_sp, bands, process_br, process_sp, new_bands)
+        
+        iniciar_processo_rrqpef(p_br, p_sp, bands, new_bands)
 
         iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands)
         
