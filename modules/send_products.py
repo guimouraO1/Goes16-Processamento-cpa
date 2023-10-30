@@ -160,6 +160,8 @@ def send_products(s_br, s_sp, dir_out):
             # Envia o arquivo "gif" para o site
             scp_client.put(f'{dir_out}lst/lst_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/lst/lst_br.gif')
             
+            logging.info('Produtos BR enviados com sucesso! ')
+            
         # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
         if s_sp:
             logging.info('')
@@ -231,7 +233,9 @@ def send_products(s_br, s_sp, dir_out):
             # Envia o arquivo "gif" para o site
             scp_client.put(f'{dir_out}lst/lst_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/lst/lst_sp.gif')
 
-
+            logging.info('Produtos SP enviados com sucesso! ')
+            
+            
     except TimeoutError as e_timeout:
         logging.info('')
         logging.info(f'FALHA AO ENVIAR PRODUTOS PARA O SITE - {e_timeout}')
