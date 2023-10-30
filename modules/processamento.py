@@ -1842,7 +1842,7 @@ def iniciar_processo_fdcf(p_br, bands, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
+            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
                         
             #Checagem para ver se é 23:50 para processamento do acumulado diário
             if date_file.year == date.year and date_file.month == date.month and date_file.day == date.day and date_file >= date:
