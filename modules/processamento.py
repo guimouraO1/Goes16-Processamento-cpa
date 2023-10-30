@@ -1169,7 +1169,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     # separando Latitudes e Longitudes dos pontos
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
-    brasil = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0").geometries())
+    brasil = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0.shp").geometries())
     for i in range(len(p_lat)):
         if brasil[0].covers(Point(p_lon[i], p_lat[i])):
             p = (p_lat[i], p_lon[i])
@@ -1308,7 +1308,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     logging.info(f'{fdcf} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
 
-def process_airmass(rgb_type, v_extent, path_ch08=None, path_ch10=None, path_ch12=None, path_ch13=None):
+def process_airmass(rgb_type, v_extent, path_ch08, path_ch10, path_ch12, path_ch13):
     global dir_out
     start = time.time()  
 
@@ -1819,7 +1819,7 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
             process_br.clear()
 
 
-def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
+def iniciar_processo_fdcf(p_br, bands, dir_in, new_bands):
     
     if bands['21']:
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
@@ -1842,7 +1842,7 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
+            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
                         
             #Checagem para ver se é 23:50 para processamento do acumulado diário
             if date_file.year == date.year and date_file.month == date.month and date_file.day == date.day and date_file >= date:
@@ -1865,78 +1865,46 @@ def iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands):
                 logging.info(str(e))
 
 
-def iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_bands):
+def iniciar_processo_airmass(p_br, p_sp, bands, new_bands):
     # Checagem se e possivel gerar imagem Air Mass
     if bands['22']:
+        
+        logging.info("")
+        logging.info('PROCESSANDO IMAGENS AIR MASS "BR"...')
+        # Pegando nome das bandas 08, 10, 12, 13
+        ch08 = new_bands['08']
+        ch10 = new_bands['10']
+        ch12 = new_bands['12']
+        ch13 = new_bands['13']
+        
+        ch08 = f'{dir_in}band08/{ch08}'
+        ch10 = f'{dir_in}band10/{ch10}'
+        ch12 = f'{dir_in}band12/{ch12}'
+        ch13 = f'{dir_in}band13/{ch13}'
+        
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
-        if p_br:
-            logging.info("")
-            logging.info('PROCESSANDO IMAGENS AIR MASS "BR"...')
-            # Pegando nome das bandas 08, 10, 12, 13
-            ch08 = new_bands['08']
-            ch10 = new_bands['10']
-            ch12 = new_bands['12']
-            ch13 = new_bands['13']
-            
-            # Montando dicionario de argumentos
-            kwargs = {'path_ch08': f'{dir_in}band08/{ch08}', 
-                      'path_ch10': f'{dir_in}band10/{ch10}', 
-                      'path_ch12': f'{dir_in}band12/{ch12}',
-                      'path_ch13': f'{dir_in}band13/{ch13}'
-                      }
+        if p_br:            
             # Tenta realizar o processamento da imagem
             try:
-                # Cria o processo com a funcao de processamento
-                process = Process(target=process_airmass, args=("airmass", "br"), kwargs=kwargs)
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_br.append(process)
-                # Inicia o processo
-                process.start()
+                # Processando imagens 
+                process_airmass('airmass', 'br', ch08, ch10, ch12, ch13)
             # Caso seja retornado algum erro do processamento, realiza o log 
             except Exception as e:
                 # Registra detalhes da exceção, como mensagem e tipo
                 logging.error(f"Erro ao criar processo: {e}")
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in process_br:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-        # Limpa a lista de processos
-        process_br.clear()
-        
+
         # Se a variavel de controle de processamento sp for True, realiza o processamento
         if p_sp:
             logging.info("")
-            logging.info('PROCESSANDO IMAGENS AIRMASS "SP"...')
-                        # Pegando nome das bandas 08, 10, 12, 13
-            ch08 = new_bands['08']
-            ch10 = new_bands['10']
-            ch12 = new_bands['12']
-            ch13 = new_bands['13']
-            
-            # Montando dicionario de argumentos
-            kwargs = {'path_ch08': f'{dir_in}band08/{ch08}', 
-                      'path_ch10': f'{dir_in}band10/{ch10}', 
-                      'path_ch12': f'{dir_in}band12/{ch12}',
-                      'path_ch13': f'{dir_in}band13/{ch13}'
-                      }
+            logging.info('PROCESSANDO IMAGENS AIRMASS "SP"...')        
             # Tenta realizar o processamento da imagem
             try:
-                # Cria o processo com a funcao de processamento
-                process = Process(target=process_airmass, args=("airmass", "sp"), kwargs=kwargs)
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_sp.append(process)
-                # Inicia o processo
-                process.start()
+                # Processando imagens 
+                process_airmass('airmass', 'sp', ch08, ch10, ch12, ch13)
             # Caso seja retornado algum erro do processamento, realiza o log 
             except Exception as e:
                 # Registra detalhes da exceção, como mensagem e tipo
                 logging.error(f"Erro ao criar processo: {e}")
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-        for process in process_sp:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-            process.join()
-        # Limpa a lista de processos
-        process_sp.clear()
 
 
 def iniciar_processo_lst(p_br, p_sp, bands, new_bands):
@@ -1993,9 +1961,9 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main):
         
         iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands)
         
-        iniciar_processo_fdcf(p_br, bands, process_br, dir_in, new_bands)
+        iniciar_processo_fdcf(p_br, bands, dir_in, new_bands)
         
-        iniciar_processo_airmass(p_br, p_sp, bands, process_br, process_sp, new_bands)
+        iniciar_processo_airmass(p_br, p_sp, bands, new_bands)
         
         iniciar_processo_lst(p_br, p_sp, bands, new_bands)
         
