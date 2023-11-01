@@ -595,18 +595,19 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
     alphas = ((alphas - max_sun_angle) / (min_sun_angle - max_sun_angle))
     RGB = np.dstack((RGB, alphas))
     
+    # if v_extent == 'sp':   #Usar este caso precise mudar a área
+    #     raster = gdal.Open(f'{dir_maps}BlackMarble_2016_B2_geo.tif')
+    # else:
+    #     raster = gdal.Open(f'{dir_maps}BlackMarble_2016_3km_geo.tif')
+    # min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
+    # raster = gdal.Translate(f'{dir_maps}brasil.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
+
+    # Uso especifico de áreas já recortadas da black marble
     if v_extent == 'sp':
-        raster = gdal.Open(f'{dir_maps}BlackMarble_2016_B2_geo.tif')
+        raster = gdal.Open(f'{dir_maps}sp.tif')
     else:
-        raster = gdal.Open(f'{dir_maps}BlackMarble_2016_01deg_geo.tif')
-        
-    ulx, xres, xskew, uly, yskew, yres = raster.GetGeoTransform()
-    lrx = ulx + (raster.RasterXSize * xres)
-    lry = uly + (raster.RasterYSize * yres)
-    corners = [ulx, lry, lrx, uly]
-    min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
-    raster = gdal.Translate('raster.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
-    
+        raster = gdal.Open(f'{dir_maps}brasil.tif')
+   
     #lendo o RGB 
     array = raster.ReadAsArray()
     R_night = array[0,:,:].astype(float) / 255
@@ -617,14 +618,11 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
     G_night[G_night==5] = 0
     B_night[B_night==15] = 0
     
-    #
+    # Cores da noite
     rgb_night = np.stack([R_night,G_night,B_night], axis=2)
     
     # Area de recorte
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  
-    
-    # Remove o arquivo.tif
-    os.remove('raster.tif')
     
     #------------------------------------------------------------------------------------------------------
     #------------------------------------------------------------------------------------------------------
@@ -649,7 +647,7 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
     # Plotando a imagem night
     ax.imshow(rgb_night, extent=img_extent)
 
-    # Plotando band13
+    # Plotando band13 nuvens
     ax.imshow(data1, cmap='gray', vmin=0.1, vmax=0.25, alpha = 0.3, origin='upper', extent=img_extent)
 
     # Plotando a imagem  # TrueColor
