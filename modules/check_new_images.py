@@ -153,7 +153,7 @@ def checar_ndvi(bands, dir_in, old_bands):
         # Verifica date now, nosso dia colocando horario 13h utc, e end 18h utc
         date_now = datetime.datetime.now()
         date_ini = datetime.datetime(date_now.year, date_now.month, date_now.day, int(13), int(00))
-        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+        date_end = datetime.datetime(date_now.year, date_now.month, date_now.day, int(18), int(1))
         
         # Data do file band02 para fazer a verificação da hora
         date_file = datetime.datetime.strptime(file_ch02[file_ch02.find("M6C02_G16_s") + 11:file_ch02.find("_e") - 1], '%Y%j%H%M%S')

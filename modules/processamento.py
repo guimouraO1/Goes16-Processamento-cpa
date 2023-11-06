@@ -72,7 +72,7 @@ def filtrar_imagens_por_intervalo(images, ch13):
 def area_para_recorte(v_extent):
     # Area de interesse para recorte
     if v_extent == 'br':
-        # Brasil
+        # Brasil # Esquerda , baixo,  direita, cima
         extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
     # Choose the image resolution (the higher the number the faster the processing is)
         resolution = 4.0
@@ -604,9 +604,9 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
 
     # Uso especifico de áreas já recortadas da black marble
     if v_extent == 'sp':
-        raster = gdal.Open(f'{dir_maps}sp.tif')
+        raster = gdal.Open(f'{dir_maps}sp_night.tif')
     else:
-        raster = gdal.Open(f'{dir_maps}brasil.tif')
+        raster = gdal.Open(f'{dir_maps}brasil_night.tif')
    
     #lendo o RGB 
     array = raster.ReadAsArray()
@@ -886,7 +886,6 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     #  Abrindo o Dataset do arquivo da mascara
     reproject_mask = Dataset(f'{dir_in}clsm/{r_file}')
 
-
     data_ch02 = reproject_ch02.variables['Band1'][:]
     data_ch03 = reproject_ch03.variables['Band1'][:]
     data_mask = reproject_mask.variables['Band1'][:]
@@ -1062,6 +1061,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
         ndvi_list = [name for name in os.listdir(f'{dir_in}ndvi') if os.path.isfile(os.path.join(f'{dir_in}ndvi', name)) and re.match('^ndvi_.+_.+_br.npy$', name)]
+        
         # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
         ndvi_list.sort()
         teste = np.load(f'{dir_in}ndvi/{ndvi_list[0]}', allow_pickle=True)
@@ -1510,17 +1510,21 @@ def process_lst(file, v_extent):
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
     
     # Criando imagem de fundo Natural Earth 1
-    raster = gdal.Open(f'{dir_maps}HYP_HR_SR_OB_DR.tif')
-    ulx, xres, xskew, uly, yskew, yres = raster.GetGeoTransform()
-    lrx = ulx + (raster.RasterXSize * xres)
-    lry = uly + (raster.RasterYSize * yres)
-    min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
-    raster = gdal.Translate('teste.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
+    # raster = gdal.Open(f'{dir_maps}HYP_HR_SR_OB_DR.tif')
+    # min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
+    # raster = gdal.Translate(f'{dir_maps}naturalEarth_sp.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
+    
+    if v_extent == 'sp':
+        raster = gdal.Open(f'{dir_maps}naturalEarth_sp.tif')
+    else:
+        raster = gdal.Open(f'{dir_maps}naturalEarth_br.tif')
+    
     # Lendo o RGB 
     array = raster.ReadAsArray()
     R = array[0,:,:].astype(float) / 255
     G = array[1,:,:].astype(float) / 255
     B = array[2,:,:].astype(float) / 255
+    
     R[R==4] = 0
     G[G==5] = 0
     B[B==15] = 0
@@ -1528,9 +1532,6 @@ def process_lst(file, v_extent):
     
     # PLotando imagem de fundo
     ax.imshow(rgb, extent=img_extent)
-    
-    # Remove imagem de fundo tif criada
-    os.remove('teste.tif')
     
     # Plotando a imagem Spectral_r
     img = ax.imshow(data_lst, origin='upper',vmin=-25, vmax=60, extent=img_extent, zorder=2, cmap='jet')
@@ -1778,7 +1779,7 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.now()
             # Aponta o horario 18h para a data atual
-            date = datetime(date_now.year, date_now.month, date_now.day, int(18), int(00))
+            date = datetime(date_now.year, date_now.month, date_now.day, int(17), int(59))
             
             # Se a data do arquivo for maior ou igual as 18h da data atual e o dia da semana atual for sabado (6)
             if date_file >= date:
@@ -1936,6 +1937,7 @@ def iniciar_processo_lst(p_br, p_sp, bands, new_bands):
             except Exception as e:
                 # Registra detalhes da exceção, como mensagem e tipo
                 logging.error(f"Erro ao criar processo: {e}")
+
 
 # ========================================#     Main     #========================================== #
 
