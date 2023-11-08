@@ -81,7 +81,6 @@ The script processes these NetCDF to generate images, GIFs and other products.
 Before using the script, make sure you have the following packages and tools installed:
 
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
-- [FFmpeg](https://ffmpeg.org/)
 In linux
 ```bash
 apt install ffmpeg
@@ -89,7 +88,7 @@ apt install ffmpeg
 You can create a Conda environment with required packages using the following command:
 
 ```bash
-conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp pyspectral pyorbital
+conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp pyspectral pyorbital pillow
 ```
 ---
 

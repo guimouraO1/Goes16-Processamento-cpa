@@ -62,7 +62,7 @@ try:
         # Processa o gif
         process_gif(bands, br, sp, dir_out)
         # Envia produtos para o site
-        send_products(br, sp, dir_out)
+        # send_products(br, sp, dir_out)
     else:
         logging.info('Sem arquivos para processamento. \n')
 except Exception as error:

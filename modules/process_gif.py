@@ -1,153 +1,130 @@
 import logging
 import os
-from multiprocessing import Process  # Utilitario para multiprocessamento
+from multiprocessing import Process
+from PIL import Image
+import glob
+from modules.dirs import get_dirs
+import time
 
+dirs = get_dirs()
+
+# Acessando os diretórios usando as chaves do dicionário
+dir_out = dirs['dir_out']
+
+def create_gif(band, roi, dir_out):
+    try:
+        images = []
+        for filename in sorted(glob.glob(f"{dir_out}{band}/{band}_*_*_{roi}.png")):
+            img = Image.open(filename)
+            images.append(img)
+        # Salvar como um GIF
+        images[0].save(f"{dir_out}{band}/{band}_{roi}.gif", save_all=True, append_images=images[1:], duration=500, loop=0)
+    except Exception as e:
+        logging.error(f'Erro ao criar GIF: {str(e)}')
 
 def process_gif(g_bands, g_br, g_sp, dir_out):
-
-    # Cria lista vazia para controle do processamento paralelo
+        
+    start = time.time()  
+    
     gif_br = []
-    # Cria lista vazia para controle do processamento paralelo
     gif_sp = []
 
-    # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
-    def create_gif_cmi(banda, roi):
-        try:
-            os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}band{banda}/band{banda}_*_*_{roi}.png" "{dir_out}band{banda}/band{banda}_{roi}.gif"')
-        except Exception as e:
-            logging.error(f'Erro ao criar GIF: {str(e)}')
-
-    # Chamada de sistema para o software ffmpeg realizar a criacao do gif animado
-    def create_gif(file_type, roi):
-        try:
-            os.system(f'/usr/bin/ffmpeg -y -v warning -framerate 4 -pattern_type glob -i "{dir_out}{file_type}/{file_type}_*_*_{roi}.png" "{dir_out}{file_type}/{file_type}_{roi}.gif"')
-        except Exception as e:
-            logging.error(f'Erro ao criar GIF: {str(e)}')
-            
-    # Se a variavel de controle de processamento do brasil for True, cria o gif
     if g_br:
         logging.info('')
         logging.info('CRIANDO GIF ANIMADO "BR"...')
-        # Contador para gif nas 16 bandas
         for x in range(1, 17):
-            # Transforma o inteiro contador em string e com 2 digitos
             b = str(x).zfill(2)
-            # Se o dicionario de controle das bandas apontar True para essa banda, cria o gif
             if g_bands[b]:
                 logging.info('Gif BR banda ' + b)
-                # Cria o processo com a funcao gif
-                process = Process(target=create_gif_cmi, args=(b, "br"))
-                # Adiciona o processo na lista de controle do processamento paralelo
+                process = Process(target=create_gif, args=(f'band{b}', "br", dir_out))
                 gif_br.append(process)
-                # Inicia o processo
                 process.start()
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in gif_br:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
 
-    # Se a variavel de controle de processamento do estado de sao paulo for True, cria o gif
     if g_sp:
         logging.info('')
         logging.info('CRIANDO GIF ANIMADO "SP"...')
-        # Contador para gif nas 16 bandas
         for x in range(1, 17):
-            # Transforma o inteiro contador em string e com 2 digitos
             b = str(x).zfill(2)
-            # Se o dicionario de controle das bandas apontar True para essa banda, cria o gif
             if g_bands[b]:
                 logging.info('Gif SP banda ' + b)
-                # Cria o processo com a funcao gif
-                process = Process(target=create_gif_cmi, args=(b, "sp"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                gif_br.append(process)
-                # Inicia o processo
+                process = Process(target=create_gif, args=(f'band{b}', "sp", dir_out))
+                gif_sp.append(process)
                 process.start()
-        # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
         for process in gif_sp:
-            # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
             process.join()
 
-
-    # Se bands 17 for true processa True color gif br e sp
     if g_bands['17']:
         if g_br:
             logging.info('')
             logging.info('CRIANDO GIF ANIMADO TRUECOLOR "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("truecolor", "br")
+            create_gif("truecolor", "br", dir_out)
         if g_sp:
             logging.info('')
             logging.info('CRIANDO GIF ANIMADO TRUECOLOR "SP"...')
-            # Cria o processo com a funcao gif
-            create_gif("truecolor", "sp")
-    
+            create_gif("truecolor", "sp", dir_out)
+
     if g_bands['18']:
         if g_br:
             logging.info('')
             logging.info('CRIANDO GIF ANIMADO RRQPEF "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("rrqpef", "br")
+            create_gif("rrqpef", "br", dir_out)
         if g_sp:
             logging.info('')
             logging.info('CRIANDO GIF ANIMADO RRQPEF "SP"...')
-            # Cria o processo com a funcao gif
-            create_gif("rrqpef", "sp")
+            create_gif("rrqpef", "sp", dir_out)
 
     if g_bands["19"]:
         if g_br:
             logging.info('')
             logging.info('CRIANDO GIF ANIMADO GLM "BR"...')
-            # Cria o processo com a funcao gif
-            create_gif("glm", "br")
+            create_gif("glm", "br", dir_out)
 
     if g_bands["20"]:
         try:
             if g_br:
                 logging.info('')
                 logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
-                # Cria o processo com a funcao gif
-                create_gif("ndvi", "br")
+                create_gif("ndvi", "br", dir_out)
         except:
-            logging.info('Não existe imagens para process gif NDVI')
-
+            logging.info('Não existe imagens para processar GIF NDVI')
 
     if g_bands["21"]:
         try:
             if g_br:
                 logging.info('')
                 logging.info('CRIANDO GIF ANIMADO FDCF "BR"...')
-                # Cria o processo com a funcao gif
-                create_gif("fdcf", "br")
+                create_gif("fdcf", "br", dir_out)
         except:
-            logging.info('Não existe imagens para process gif FDCF')
-            
+            logging.info('Não existe imagens para processar GIF FDCF')
+
     if g_bands["22"]:
         try:
             if g_br:
                 logging.info('')
                 logging.info('CRIANDO GIF ANIMADO Airmass "BR"...')
-                # Cria o processo com a funcao gif
-                create_gif("airmass", "br")
+                create_gif("airmass", "br", dir_out)
             if g_sp:
                 logging.info('')
-                logging.info('CRIANDO GIF ANIMADO Airmass "BR"...')
-                # Cria o processo com a funcao gif
-                create_gif("airmass", "sp")
+                logging.info('CRIANDO GIF ANIMADO Airmass "SP"...')
+                create_gif("airmass", "sp", dir_out)
         except:
-            logging.info('Não existe imagens para process gif Airmass')
-            
+            logging.info('Não existe imagens para processar GIF Airmass')
+
     if g_bands["23"]:
         try:
             if g_br:
                 logging.info('')
                 logging.info('CRIANDO GIF ANIMADO lst "BR"...')
-                # Cria o processo com a funcao gif
-                create_gif("lst", "br")
+                create_gif("lst", "br", dir_out)
             if g_sp:
                 logging.info('')
-                logging.info('CRIANDO GIF ANIMADO lst "BR"...')
-                # Cria o processo com a funcao gif
-                create_gif("lst", "sp")
+                logging.info('CRIANDO GIF ANIMADO lst "SP"...')
+                create_gif("lst", "sp", dir_out)
         except:
-            logging.info('Não existe imagens para process gif lst')
+            logging.info('Não existe imagens para processar GIF lst')
+            
+    
+    logging.info(f'Tempo de Processamento Gifs: {round((time.time() - start), 2)} segundos.')
+
