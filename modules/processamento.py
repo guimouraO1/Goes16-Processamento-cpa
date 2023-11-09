@@ -1122,8 +1122,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         # lat/lon calculus routine from satellite radian angle vectors
         lambda_0 = (lon_origin * np.pi) / 180.0
 
-        a_var = np.power(np.sin(lat_rad), 2.0) + (np.power(np.cos(lat_rad), 2.0) * (
-                np.power(np.cos(lon_rad), 2.0) + (((r_eq * r_eq) / (r_pol * r_pol)) * np.power(np.sin(lon_rad), 2.0))))
+        a_var = np.power(np.sin(lat_rad), 2.0) + (np.power(np.cos(lat_rad), 2.0) * (np.power(np.cos(lon_rad), 2.0) + (((r_eq * r_eq) / (r_pol * r_pol)) * np.power(np.sin(lon_rad), 2.0))))
         b_var = -2.0 * H * np.cos(lat_rad) * np.cos(lon_rad)
         c_var = (H ** 2.0) - (r_eq ** 2.0)
 
@@ -1158,15 +1157,16 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     date_file = date.strftime('%Y%m%d_%H%M%S')
 
     matriz_pixels_fogo = []
+    
     fire_mask_values = fire_mask.variables['Mask'][:, :]
-    selected_fires = (fire_mask_values == 10) | (fire_mask_values == 11) | (fire_mask_values == 13) | (
-            fire_mask_values == 30) | (fire_mask_values == 33)
+    selected_fires = (fire_mask_values == 10) | (fire_mask_values == 11) | (fire_mask_values == 13) | (fire_mask_values == 30) | (fire_mask_values == 33)
 
     lat, lon = degrees(fire_mask)
     
     # separando Latitudes e Longitudes dos pontos
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
+    
     brasil = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0.shp").geometries())
     for i in range(len(p_lat)):
         if brasil[0].covers(Point(p_lon[i], p_lat[i])):
@@ -1187,7 +1187,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     # Verifica se as ocorrencias de pontos é maior que as anteriores, se sim, armazena a quantidade e as imagens para gerar fundo
     logging.info(f'Len matriz_pixels_fogo:{len(matriz_pixels_fogo)}  int control:  {int(control)}')
     date_ini = datetime(date.year, date.month, date.day, int(13), int(00))
-    date_end = datetime(date.year, date.month, date.day, int(18), int(00))
+    date_end = datetime(date.year, date.month, date.day, int(18), int(1))
     
     # Pega a imagem com mais incidencia e salva
     if len(matriz_pixels_fogo) > int(control) and date_ini <= date <= date_end:
@@ -1568,8 +1568,14 @@ def process_lst(file, v_extent):
     logging.info(f'Total processing time: {round((time.time() - start),2)} seconds.')
 
 
-def iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands):
+def iniciar_processo_cmi(p_br, p_sp, bands, new_bands):
     global dir_out
+    
+    # Cria lista vazia para controle do processamento paralelo
+    process_br = []
+    # Cria lista vazia para controle processamento paralelo
+    process_sp = []
+
     # Checagem se e possivel gerar imagem bandas 1-16
     if p_br:
         logging.info('')
@@ -1945,28 +1951,46 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main):
    
     # Cria lista vazia para controle do processamento paralelo
     process_br = []
-    # Cria lista vazia para controle processamento paralelo
-    process_sp = []
     
     new_bands = abrir_old_json(dir_main)
     
     try:
-        iniciar_processo_cmi(p_br, p_sp, bands, process_br, process_sp, new_bands)
-        
+        iniciar_processo_cmi(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
+    
+    try:    
         iniciar_processo_truecolor(p_br, p_sp, bands, new_bands)
-        
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')   
+       
+    try:
         iniciar_processo_rrqpef(p_br, p_sp, bands, new_bands)
-
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
+        
+    try:
         iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
         
+    try:    
         iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
         
+    try:    
         iniciar_processo_fdcf(p_br, bands, dir_in, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
         
+    try:    
         iniciar_processo_airmass(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
         
+    try:    
         iniciar_processo_lst(p_br, p_sp, bands, new_bands)
-        
     except Exception as e:
         logging.info(f'Ocorreu um Erro {e} no Processamento')
     

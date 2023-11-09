@@ -178,6 +178,7 @@ def checar_ndvi(bands, dir_in, old_bands):
 
 # Checa se há bandas 1, 2, 3 (truecolor) para fdcf band 21
 def checar_fdcf(bands, dir_in, old_bands):  
+    
     # Checagem de novas imagens fdcf (Band 21)
     if bands['17']:
         # Extrai a data/hora do arquivo para download do arquivo FDCF

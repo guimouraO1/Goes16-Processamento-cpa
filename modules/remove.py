@@ -49,6 +49,9 @@ def remover_imagens(bands, dir_in):
             os.remove(f'{dir_in}rrqpef/{ch18}'.replace(".nc", "_reproj_br.nc"))
             os.remove(f'{dir_in}rrqpef/{ch18}'.replace(".nc", "_reproj_sp.nc"))
         except FileNotFoundError as e:
+            pasta = os.listdir(f'{dir_in}rrqpef/')
+            for item in pasta:
+                os.remove(os.path.join(f'{dir_in}rrqpef/', item))
             logging.info(str(e))
 
     # Controle de produtos de glm

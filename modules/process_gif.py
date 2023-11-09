@@ -11,6 +11,7 @@ dirs = get_dirs()
 # Acessando os diretórios usando as chaves do dicionário
 dir_out = dirs['dir_out']
 
+
 def create_gif(band, roi, dir_out):
     try:
         images = []
@@ -18,7 +19,7 @@ def create_gif(band, roi, dir_out):
             img = Image.open(filename)
             images.append(img)
         # Salvar como um GIF
-        images[0].save(f"{dir_out}{band}/{band}_{roi}.gif", save_all=True, append_images=images[1:], duration=500, loop=0)
+        images[0].save(f"{dir_out}{band}/{band}_{roi}.gif", save_all=True, append_images=images[1:], duration=400, loop=0)
     except Exception as e:
         logging.error(f'Erro ao criar GIF: {str(e)}')
 
@@ -128,3 +129,14 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
     
     logging.info(f'Tempo de Processamento Gifs: {round((time.time() - start), 2)} segundos.')
 
+
+
+# bands = {}
+# # Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
+# for num in range(1, 24):
+#     b = str(num).zfill(2)
+#     bands[f'{b}'] = True
+# br = True
+# sp = True
+
+# process_gif(bands, br, sp, dir_out)
