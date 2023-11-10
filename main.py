@@ -56,11 +56,11 @@ try:
         # Processa as imagens
         processamento_das_imagens(bands, br, sp, dir_in, dir_main)
         # Remove os arquivos .nc que já foram processados
-        remover_imagens(bands, dir_in)
+        #remover_imagens(bands, dir_in)
         # A função é chamada para controlar a quantidade de produtos (imagens) a serem mantidos para a produção de um GIF animado.
-        quantity_products(dir_out)
+        #quantity_products(dir_out)
         # Processa o gif
-        process_gif(bands, br, sp, dir_out)
+        #process_gif(bands, br, sp, dir_out)
         # Envia produtos para o site
         #send_products(br, sp, dir_out)
     else:

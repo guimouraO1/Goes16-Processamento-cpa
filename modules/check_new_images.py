@@ -212,7 +212,6 @@ def checar_airmass(bands):
         
 # Checa se há o Produto Land Sarface Temperature
 def checar_lst(bands, dir_in, old_bands):
-
     # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
     imagens = [f for f in os.listdir(f'{dir_in}lst/') if os.path.isfile(os.path.join(f'{dir_in}lst/', f)) and re.match('^OR_ABI-L2-LST2KMF-M[0-9]_G16_s.+_e.+_c.+[0-9].nc$', f)]
     # Se houver imagens na pasta e a imagem mais recente for diferente da ultimo processamento                           

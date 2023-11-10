@@ -1137,7 +1137,7 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
 
         return lat, lon
 
-    file_var = 'FDCF'
+    file_var = 'Mask'
     
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
@@ -1155,19 +1155,19 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     date = (datetime.strptime(dtime_fdcf, '%Y%j%H%M%S'))
     date_img = date.strftime('%d-%b-%Y')
     date_file = date.strftime('%Y%m%d_%H%M%S')
-
-    matriz_pixels_fogo = []
     
+    matriz_pixels_fogo = []
+     
     fire_mask_values = fire_mask.variables['Mask'][:, :]
     selected_fires = (fire_mask_values == 10) | (fire_mask_values == 11) | (fire_mask_values == 13) | (fire_mask_values == 30) | (fire_mask_values == 33)
-
     lat, lon = degrees(fire_mask)
-    
+
     # separando Latitudes e Longitudes dos pontos
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
     
     brasil = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0.shp").geometries())
+    
     for i in range(len(p_lat)):
         if brasil[0].covers(Point(p_lon[i], p_lat[i])):
             p = (p_lat[i], p_lon[i])
@@ -1847,7 +1847,7 @@ def iniciar_processo_fdcf(p_br, bands, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(50))
+            date = datetime(date_now.year, date_now.month, date_now.day, int(8), int(50))
                         
             #Checagem para ver se é 23:50 para processamento do acumulado diário
             if date_file.year == date.year and date_file.month == date.month and date_file.day == date.day and date_file >= date:
@@ -1954,45 +1954,45 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main):
     
     new_bands = abrir_old_json(dir_main)
     
-    try:
-        iniciar_processo_cmi(p_br, p_sp, bands, new_bands)
-    except Exception as e:
-        logging.info(f'Ocorreu um Erro {e} no Processamento')
+    # try:
+    #     iniciar_processo_cmi(p_br, p_sp, bands, new_bands)
+    # except Exception as e:
+    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
     
-    try:    
-        iniciar_processo_truecolor(p_br, p_sp, bands, new_bands)
-    except Exception as e:
-        logging.info(f'Ocorreu um Erro {e} no Processamento')   
+    # try:    
+    #     iniciar_processo_truecolor(p_br, p_sp, bands, new_bands)
+    # except Exception as e:
+    #     logging.info(f'Ocorreu um Erro {e} no Processamento')   
        
-    try:
-        iniciar_processo_rrqpef(p_br, p_sp, bands, new_bands)
-    except Exception as e:
-        logging.info(f'Ocorreu um Erro {e} no Processamento')
+    # try:
+    #     iniciar_processo_rrqpef(p_br, p_sp, bands, new_bands)
+    # except Exception as e:
+    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
         
-    try:
-        iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands)
-    except Exception as e:
-        logging.info(f'Ocorreu um Erro {e} no Processamento')
+    # try:
+    #     iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands)
+    # except Exception as e:
+    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
         
-    try:    
-        iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands)
-    except Exception as e:
-        logging.info(f'Ocorreu um Erro {e} no Processamento')
+    # try:    
+    #     iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands)
+    # except Exception as e:
+    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
         
     try:    
         iniciar_processo_fdcf(p_br, bands, dir_in, new_bands)
     except Exception as e:
         logging.info(f'Ocorreu um Erro {e} no Processamento')
         
-    try:    
-        iniciar_processo_airmass(p_br, p_sp, bands, new_bands)
-    except Exception as e:
-        logging.info(f'Ocorreu um Erro {e} no Processamento')
+    # try:    
+    #     iniciar_processo_airmass(p_br, p_sp, bands, new_bands)
+    # except Exception as e:
+    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
         
-    try:    
-        iniciar_processo_lst(p_br, p_sp, bands, new_bands)
-    except Exception as e:
-        logging.info(f'Ocorreu um Erro {e} no Processamento')
+    # try:    
+    #     iniciar_processo_lst(p_br, p_sp, bands, new_bands)
+    # except Exception as e:
+    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
     
     # Realiza log do encerramento do processamento
     logging.info("")

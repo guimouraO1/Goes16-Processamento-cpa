@@ -55,14 +55,17 @@ where:
 - `c20231671156144`: is netCDF4 file creation time
 - `.nc` is netCDF file extension
 
----
+<br>
+<br>
 
 # GOES-16 NetCDF Image Manipulation
 
 This repository contains a Python script for manipulating images from the GOES-16 satellite in NetCDF format. 
 The script processes these NetCDF to generate images, GIFs and other products.
 
----
+<br>
+<br>
+
 
 ## Table of Contents
 
@@ -74,23 +77,22 @@ The script processes these NetCDF to generate images, GIFs and other products.
 - [Processamento.py](#processamento.py)
 - [License](#license)
 
----
+<br>
+<br>
 
 ## Prerequisites
 
 Before using the script, make sure you have the following packages and tools installed:
 
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+
 In linux
-```bash
-apt install ffmpeg
-```
 You can create a Conda environment with required packages using the following command:
 
 ```bash
 conda create --name goes -c conda-forge matplotlib netcdf4 cartopy boto3 gdal scipy pandas scp pyspectral pyorbital pillow
 ```
----
+
 
 To activate this environment, use
 ```bash
@@ -100,6 +102,9 @@ To deactivate an active environment, use
 ```bash
 conda deactivate
 ```
+<br>
+<br>
+
 
 ## Installation
 
@@ -114,7 +119,10 @@ https://github.com/guimouraO1/processamentopy.git
 ```bash
 cd your-repo
 ```
----
+
+
+<br>
+<br>
 
 ## Configuration
 
@@ -125,7 +133,7 @@ dirs.py
 ```
 
 ```python
-dir_main = '/home/myDirs/'
+dir_main = '/your-repo/your-repo/'
 dirs = {
     'dir_in': dir_main + 'goes/',
     'dir_main': dir_main,
@@ -134,6 +142,7 @@ dirs = {
     'dir_shapefiles': dir_main + 'shapefiles/',
     'dir_colortables': dir_main + 'colortables/',
     'dir_logos': dir_main + 'logos/',
+    'dir_maps': dir_main + 'maps/',
     'dir_temp': dir_main + 'temp/',
     'arq_log': dir_main + 'logs/Processamento-GOES_' + str(datetime.date.today()) + '.log'
 }
@@ -141,7 +150,8 @@ dirs = {
 
 Make sure to update the paths in the `dirs` dictionary to match your file system structure and requirements.
 
----
+<br>
+<br>
 
 ## Usage
 
@@ -150,12 +160,11 @@ The directory structure of this repository is as follows:
 ```
 .
 
-├── shapefiles
-├── output
 ├── colortables
 ├── goes
 ├── logos
 ├── logs
+├── maps
 ├── modules/
 │   ├── check_new_images.py
 │   ├── dirs.py
@@ -167,6 +176,9 @@ The directory structure of this repository is as follows:
 │   ├── remove.py
 │   ├── send_products.py
 │   ├── utilities.py
+├── output
+├── shapefiles
+├── temp
 ├── oldBands.json             
 ├── download_amazon.py        
 ├── main.py                   
@@ -181,78 +193,66 @@ To use the script, follow these steps:
 2. Run the script:
 
 ```bash
-/opt/miniconda3/envs/goes/bin/python3 processamento.py
+/opt/miniconda3/envs/goes/bin/python3 main.py
 ```
 3. The script will process the images, generate GIFs, and perform other operations based on the configuration.
 
----
 
-## Processamento.py
-
-### Code Structure
-
-- The code is highly modularized for ease of maintenance and extensibility. Below, we detail the key functionalities of the code:
----
-### Directory Configuration
-
-- The `dirs.py` file defines input, output, and temporary directories where images will be read, processed, and stored.
----
-### Band Processing Control
-
-- A dictionary called `bands` is created to represent the processing status of each image band. Initially, all bands are marked as unprocessed (False).
----
-### Log Configuration and Time Tracking
-
-- The `conf_log` function is called to configure log generation. Next, the `start` variable is initialized to record the script's start time.
----
-### Checking for New Images
-
-- The `checar_imagens` function is called to check if there are new images to be processed. The `bands` dictionary is updated to reflect this information.
----
-### Image Processing
-
-- If there is at least one new image to process (any band with a True value in the dictionary), the `processamento_das_imagens` function is called to perform image processing.
----
-### Storage of Processed Images
-
-- Processed images are stored in the output directory (`dir_out`).
----
-### Removal of Processed Images
-
-- After processing, the `remover_imagens` function is called to remove the `.nc` files that have already been processed from the input directory (`dir_in`).
----
-### Product Quantity Control
-
-- The `quantity_products` function is called to control the quantity of products (images) to be retained for producing an animated GIF.
----
-### Creation of Animated GIF
-
-- Next, the `process_gif` function is called to create an animated GIF from the processed images.
----
-### Sending Processed Products
-
-- The `send_products` function sends the processed images to a specific site (cpa.unicamp.br).
+<br>
+<br>
 
 
----
+## About code
+
+The code processes the images:
+
+- **Bands 1-16**: This product is produced every 10 minutes and shows all 16 bands of Goes16.
+
+- **Natural True Color**: This product is produced every 10 minutes and shows a true-color image of the Earth's surface as it would appear to the human eye.
+
+- **AIRMASS**: This product is produced every 10 minutes and shows the distribution of atmospheric moisture and dust in the Earth's atmosphere.
+
+- **Land Surface Temperature**: This product is produced once per hour and shows the temperature of the Earth's surface.
+
+- **Fire Hot Spot**: This product is produced once per day and shows the location of active fires on the Earth's surface.
+
+- **Geostationary Lightning Mapper**: This product is produced every 10 minutes and shows the total lightning activity of the western hemisphere.
+
+- **Normalized Difference Vegetation Index**: This product is produced once per week and shows the health and density of vegetation on the Earth's surface.
+
+- **Rainfall Rate (Quantitative Precipitation Estimate)**: This product is produced every 10 minutes and shows the rate of rainfall on the Earth's surface.
+
+<br>
+
+ ### Features include:
+  - `dirs.py`: Defines input, output, and temporary directories.
+  - `bands` dictionary: Represents the processing status of each image band.
+  - `conf_log` function: Configures log generation.
+  - `checar_imagens` function: Checks for new images to process.
+  - `processamento_das_imagens` function: Performs image processing.
+  - `remover_imagens` function: Removes processed image files from the input directory.
+  - `quantity_products` function: Controls the quantity of products to retain for producing an animated GIF.
+  - `process_gif` function: Creates an animated GIF from the processed images.
+  - `send_products` function: Sends processed images to a specific site (cpa.unicamp.br).
+
+
+
 
 ## Example: NOAA GOES-16 truecolor Processing on CEPAGRI
 
+---
 ![GOES-16 Satellite](shapefiles/truecolor.png)
 
 ---
+
+## License
+This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgments
 
 This script is developed as part of an image processing project for the GOES-16 satellite data. It builds upon various open-source libraries and tools.
 
----
-
-## License
-
-This project is licensed under the []().
-
----
-**Readme.md Author:** [Guilherme de Moura Oliveira]
+## Author
+**Author:** [Guilherme de Moura Oliveira]
 **Contact:** [guimoura@unicamp.br]
-**Last Updated:** [16/08/2023]
+**Last Updated:** [09/11/2023]

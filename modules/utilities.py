@@ -306,3 +306,118 @@ def download_cmi_joao(yyyymmddhhmn, band, path_dest, logging):
 
     return f'{file_name}'
 # -----------------------------------------------------------------------------------------------------------
+
+
+def reprojectBruno(reproj_file, reproj_var, reproj_extent, reproj_resolution, path_dest):
+
+    # test_file = reproj_file.split('\\')
+    # test_file.reverse()
+    # rtest_file = test_file[0].replace('.nc', f'_reproj_.nc')
+
+    # if os.path.exists(f"{path_dest}{rtest_file}"):
+    #     print('Arquivo já Reprojetado')
+    #     caminho = f"{path_dest}{rtest_file}"
+    #     print(caminho)
+    #     return caminho
+    
+    
+    def get_geot(ex, nlines, ncols):
+        # Compute resolution based on data dimension
+        resx = (ex[2] - ex[0]) / ncols
+        resy = (ex[3] - ex[1]) / nlines
+        return [ex[0], resx, 0, ex[3], 0, -resy]
+
+    # GOES-16 Spatial Reference System
+    source_prj = osr.SpatialReference()
+    source_prj.ImportFromProj4('+proj=geos +h=35786023.0 +a=6378137.0 +b=6356752.31414 +f=0.00335281068119356027 '
+                               '+lat_0=0.0 +lon_0=-75 +sweep=x +no_defs')
+    # Lat/lon WSG84 Spatial Reference System
+    target_prj = osr.SpatialReference()
+    target_prj.ImportFromProj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+
+    # Abrindo imagem com a biblioteca GDAL
+    raw = gdal.Open(f'NETCDF:{reproj_file}:' + reproj_var, gdal.GA_ReadOnly)
+    # ds_dqf = gdal.Open(f'NETCDF:{reproj_file}:' + 'DQF', gdal.GA_ReadOnly)
+
+    # Lendo os metadados do cabecalho
+    if reproj_var == 'BCM' or 'Mask':  ### O arquivo Clear Sky não possui sacale e offset é um arquivo binário
+        metadata = raw.GetMetadata()
+        scale = 1
+        offset = 0
+        undef = float(metadata.get(reproj_var + '#_FillValue'))
+        file_dtime = metadata.get('NC_GLOBAL#time_coverage_start')
+        file_satellite = metadata.get('NC_GLOBAL#platform_ID')[1:3]
+
+    else:  # Alteração João 26/08/2022
+        metadata = raw.GetMetadata()
+        scale = float(metadata.get(reproj_var + '#scale_factor'))
+        offset = float(metadata.get(reproj_var + '#add_offset'))
+        undef = float(metadata.get(reproj_var + '#_FillValue'))
+        file_dtime = metadata.get('NC_GLOBAL#time_coverage_start')
+        file_satellite = metadata.get('NC_GLOBAL#platform_ID')[1:3]
+
+    # Setup projection and geo-transformation
+    raw.SetProjection(source_prj.ExportToWkt())
+    # raw.SetGeoTransform(raw.GetGeoTransform())
+    GOES16_EXTENT = [-5434894.885056, -5434894.885056, 5434894.885056, 5434894.885056]
+    raw.SetGeoTransform(get_geot(GOES16_EXTENT, raw.RasterYSize, raw.RasterXSize))
+
+    # Compute grid dimension
+    KM_PER_DEGREE = 111.32
+    sizex = int(((reproj_extent[2] - reproj_extent[0]) * KM_PER_DEGREE) / reproj_resolution)
+    sizey = int(((reproj_extent[3] - reproj_extent[1]) * KM_PER_DEGREE) / reproj_resolution)
+
+    # Get memory driver
+    driver = gdal.GetDriverByName('MEM')
+
+    # Create grid
+    grid = driver.Create('grid', sizex, sizey, 1, gdal.GDT_Float32)
+    # dqf = driver.Create('dqf', sizex, sizey, 1, gdal.GDT_Float32)
+
+    # Setup projection and geo-transformation
+    grid.SetProjection(target_prj.ExportToWkt())
+    grid.SetGeoTransform(get_geot(reproj_extent, grid.RasterYSize, grid.RasterXSize))
+
+
+    # Perform the projection/resampling
+    gdal.ReprojectImage(raw, grid, source_prj.ExportToWkt(), target_prj.ExportToWkt(), gdal.GRA_NearestNeighbour,
+                        options=['NUM_THREADS=ALL_CPUS'])
+    
+    
+    # Close files
+    raw = None
+    del raw
+
+    # Read grid data
+    array = grid.ReadAsArray()
+
+    # Mask fill values (i.e. invalid values)
+    np.ma.masked_where(array, array == -1, False)
+
+    # Aplicando scale, offset
+    array = array * scale + offset
+
+
+    grid.GetRasterBand(1).SetNoDataValue(-1)
+    grid.GetRasterBand(1).WriteArray(array)
+
+    # Define the parameters of the output file
+    kwargs = {'format': 'netCDF',
+              'dstSRS': target_prj,
+              'outputBounds': (reproj_extent[0], reproj_extent[3], reproj_extent[2], reproj_extent[1]),
+              'outputBoundsSRS': target_prj,
+              'outputType': gdal.GDT_Float32,
+              'srcNodata': undef,
+              'dstNodata': 'nan',
+              'resampleAlg': gdal.GRA_NearestNeighbour}
+
+    reproj_file = reproj_file.split('\\')
+    reproj_file.reverse()
+    r_file = reproj_file[0].replace('.nc', f'_reproj_.nc')
+    gdal.Warp(f'{path_dest}/{r_file}', grid, **kwargs)
+
+    # os.remove(f'{input}{reproj_file[0]}')
+    # return file_dtime, file_satellite, grid
+    caminho = F'{path_dest}{r_file}'
+    
+    return caminho
