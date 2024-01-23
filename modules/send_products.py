@@ -160,7 +160,26 @@ def send_products(s_br, s_sp, dir_out):
             # Envia o arquivo "gif" para o site
             scp_client.put(f'{dir_out}lst/lst_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/lst/lst_br.gif')
             
-            logging.info('Produtos BR enviados com sucesso! ')
+            # Envio Derived Motion Winds
+            # Cria uma lista com os itens no diretorio dos produtos lst que sao arquivos e se encaixa na expressao regular "^lst_.+_.+_br.png$"
+            ultima_br = [name for name in os.listdir(f'{dir_out}dmw') if os.path.isfile(os.path.join(f'{dir_out}dmw', name)) and re.match('^dmw_.+_.+_br.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_br.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_br.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}dmw/{ultima_br[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/dmw/dmw_br.png')
+            # Cria um arquivo menor do arquivo "png" mais recente
+            os.system(f'/usr/bin/ffmpeg -y -v warning -i {dir_out}dmw/{ultima_br[0]} -vf scale=448:321 {dir_out}dmw/dmw.png')
+            # Envia o arquivo menor do "png" mais recente para o site
+            scp_client.put(f'{dir_out}dmw/dmw.png', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/dmw/dmw.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}dmw/dmw_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/dmw/dmw_br.gif')
+            
+            # Envia os arquivos "gifs" low quality para o site
+            scp_client.put(f'{dir_out}index_gifs/truecolor_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/index_gifs/truecolor_br.gif')
+            scp_client.put(f'{dir_out}index_gifs/airmass_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/index_gifs/airmass_br.gif')
+            scp_client.put(f'{dir_out}index_gifs/lst_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/index_gifs/lst_br.gif')
             
         # Se a variavel de controle de processamento do estado de sao paulo for True, realiza o processamento
         if s_sp:
@@ -233,9 +252,7 @@ def send_products(s_br, s_sp, dir_out):
             # Envia o arquivo "gif" para o site
             scp_client.put(f'{dir_out}lst/lst_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/lst/lst_sp.gif')
 
-            logging.info('Produtos SP enviados com sucesso! ')
-            
-            
+
     except TimeoutError as e_timeout:
         logging.info('')
         logging.info(f'FALHA AO ENVIAR PRODUTOS PARA O SITE - {e_timeout}')

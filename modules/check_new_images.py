@@ -208,8 +208,8 @@ def checar_airmass(bands):
     else:
         bands['22'] = False
         logging.info(f'Sem novas imagens AIRMASS')
-        
-        
+
+
 # Checa se há o Produto Land Sarface Temperature
 def checar_lst(bands, dir_in, old_bands):
     # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
@@ -218,21 +218,40 @@ def checar_lst(bands, dir_in, old_bands):
     if imagens and max(imagens) != old_bands['23']:
         logging.info(f'Novas imagens para Land Surface Temperature')
         # latestBand recebe a nova imagem
-        latestBand = max(imagens)
+        latestLst = max(imagens)
         # Se houver mais de uma imagem na pasta:
         if len(imagens) > 1:
             # Remove os arquivos netCDF menos o mais atual
-            remover_todos_exceto(latestBand, f'{dir_in}lst/') 
+            remover_todos_exceto(latestLst, f'{dir_in}lst/')
         # Modifica o arquivo JSON com a imagem mais recente.               
-        modificar_chave_old_bands('old_bands.json', '23', latestBand)  
+        modificar_chave_old_bands('old_bands.json', '23', latestLst)
         # Atualiza o dicionário "bands" com true para novas imagens.
         bands['23'] = True
     else:
         logging.info(f'Sem imagens para Land Surface Temperature') 
         # Atualiza o dicionário "bands" com false sem novas imagens.
         bands['23'] = False
-    
 
+
+# Checa se há imagem truecolor para fazer DMW 
+def checar_dmw(bands, dir_in, new_bands):
+    # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
+    imagens = [f for f in os.listdir(f'{dir_in}dmw/') if os.path.isfile(os.path.join(f'{dir_in}dmw/', f)) and re.match('^OR_ABI-L2-DMWF-M[0-9]C[0-9][0-9]_G16_s.+_e.+_c.+[0-9].nc$', f)]
+    # Se houver imagens na pasta e a imagem mais recente for diferente da ultimo processamento                           
+    if imagens and max(imagens) != new_bands['24']:
+        # 
+        latestDmw = max(imagens)
+        # Se houver mais de uma imagem na pasta:
+        if len(imagens) > 1:
+            # Remove os arquivos netCDF menos o mais atual
+            remover_todos_exceto(latestDmw, f'{dir_in}dmw/')
+        modificar_chave_old_bands(f'old_bands.json', '24', latestDmw)
+        bands['24'] = True
+        logging.info(f'Novas imagens DMW')
+    else:
+        bands['24'] = False
+        logging.info(f'Sem novas imagens DMW')
+        
 # ========================================#     Main     #========================================== #
 
 # Função para verificar a existência de novas imagens
@@ -240,23 +259,25 @@ def checar_imagens(bands, dir_in, dir_main):
     
     logging.info("VERIFICANDO NOVAS IMAGENS")
 
-    checar_bandas(bands, dir_in, dir_main)
+    # checar_bandas(bands, dir_in, dir_main)
 
-    new_bands = abrir_old_json(dir_main)    
+    new_bands = abrir_old_json(dir_main)
     
-    checar_truecolor(bands)
+    # checar_truecolor(bands)
     
-    checar_rrqpef(bands, dir_in, new_bands)
+    # checar_rrqpef(bands, dir_in, new_bands)
     
-    checar_glm(bands, dir_in, new_bands)   
+    # checar_glm(bands, dir_in, new_bands)   
     
-    checar_ndvi(bands, dir_in, new_bands)
+    # checar_ndvi(bands, dir_in, new_bands)
 
-    checar_fdcf(bands, dir_in, new_bands)
+    # checar_fdcf(bands, dir_in, new_bands)
     
-    checar_airmass(bands)
+    # checar_airmass(bands)
     
-    checar_lst(bands, dir_in, new_bands)
+    # checar_lst(bands, dir_in, new_bands)
+    
+    checar_dmw(bands, dir_in, new_bands)
     
     print(bands)
 

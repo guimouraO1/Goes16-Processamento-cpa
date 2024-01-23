@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use('Agg')# Force matplotlib to not use any Xwindows backend.
 import matplotlib.pyplot as plt  # Plotagem de resultados, textos, logos, etc.
 from matplotlib import cm  # Utilitario para paletas de cores
+from matplotlib.image import imread  
 import cartopy  # Inserir mapas, shapefiles, paralelos, meridianos, latitudes, longitudes, etc.
 import cartopy.crs as ccrs  # Utilitario para sistemas de referência e coordenadas
 import cartopy.io.shapereader as shpreader  # Utilitario para leitura de shapefiles
@@ -13,7 +14,7 @@ import numpy as np  # Suporte para arrays e matrizes multidimensionais, com dive
 import time  # Utilitario para trabalhar com tempos
 import os  # Utilitario para trabalhar com chamadas de sistema
 import logging  # Utilitario para criar os logs
-from multiprocessing import Process  # Utilitario para multiprocessamento
+from multiprocessing import Process, Manager  # Utilitario para multiprocessamento
 import re # Utilitario para trabalhar com expressoes regulares
 import json
 from modules.dirs import get_dirs
@@ -29,6 +30,9 @@ from pyorbital.orbital import get_observer_look
 from matplotlib.colors import LinearSegmentedColormap, to_rgba
 from datetime import timedelta, datetime
 from modules.remap import remap
+from shapely.geometry import Point
+import shapely.speedups
+shapely.speedups.enable()
 
 # Configurar o NumPy para ignorar os avisos
 np.seterr(invalid='ignore')
@@ -72,7 +76,7 @@ def filtrar_imagens_por_intervalo(images, ch13):
 def area_para_recorte(v_extent):
     # Area de interesse para recorte
     if v_extent == 'br':
-        # Brasil # Esquerda , baixo,  direita, cima
+        # Brasil
         extent = [-90.0, -40.0, -20.0, 10.0]  # Min lon, Min lat, Max lon, Max lat
     # Choose the image resolution (the higher the number the faster the processing is)
         resolution = 4.0
@@ -235,6 +239,49 @@ def save_log_erro(array_errors, nome_arquivo_txt):
             for valor in array_errors:
                 erro = f"{valor}\n"
                 file.write(erro)
+
+
+def degrees(file_id):
+        
+        proj_info = file_id.variables['goes_imager_projection']
+        lon_origin = proj_info.longitude_of_projection_origin
+        H = proj_info.perspective_point_height + proj_info.semi_major_axis
+        r_eq = proj_info.semi_major_axis
+        r_pol = proj_info.semi_minor_axis
+
+        # Data info
+        lat_rad_1d = file_id.variables['x'][:]
+        lon_rad_1d = file_id.variables['y'][:]
+
+        # Create meshgrid filled with radian angles
+        lat_rad, lon_rad = np.meshgrid(lat_rad_1d, lon_rad_1d)
+
+        # lat/lon calculus routine from satellite radian angle vectors
+        lambda_0 = (lon_origin * np.pi) / 180.0
+
+        a_var = np.power(np.sin(lat_rad), 2.0) + (np.power(np.cos(lat_rad), 2.0) * (
+                np.power(np.cos(lon_rad), 2.0) + (((r_eq * r_eq) / (r_pol * r_pol)) * np.power(np.sin(lon_rad), 2.0))))
+        b_var = -2.0 * H * np.cos(lat_rad) * np.cos(lon_rad)
+        c_var = (H ** 2.0) - (r_eq ** 2.0)
+
+        r_s = (-1.0 * b_var - np.sqrt((b_var ** 2) - (4.0 * a_var * c_var))) / (2.0 * a_var)
+
+        s_x = r_s * np.cos(lat_rad) * np.cos(lon_rad)
+        s_y = - r_s * np.sin(lat_rad)
+        s_z = r_s * np.cos(lat_rad) * np.sin(lon_rad)
+
+        lat = (180.0 / np.pi) * (np.arctan(((r_eq * r_eq) / (r_pol * r_pol)) * (s_z / np.sqrt(((H - s_x) * (H - s_x)) + (s_y * s_y)))))
+        lon = (lambda_0 - np.arctan(s_y / (H - s_x))) * (180.0 / np.pi)
+
+        return lat, lon
+
+
+def processar_parte(indice_inicio, indice_fim, p_lat_lista, p_lon, brasil, matriz_pixels_fogo):
+    for i in range(indice_inicio, indice_fim):
+        if i < len(p_lat_lista):
+            if brasil[0].covers(Point(p_lon[i], p_lat_lista[i])):
+                p = (p_lat_lista[i], p_lon[i])
+                matriz_pixels_fogo.append(p)
 
 
 def fdcf_tabela_hot_spots(date, ax):    
@@ -595,13 +642,15 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
     alphas = ((alphas - max_sun_angle) / (min_sun_angle - max_sun_angle))
     RGB = np.dstack((RGB, alphas))
     
-    # if v_extent == 'sp':   #Usar este caso precise mudar a área
+       
+        # if v_extent == 'sp':   #Usar este caso precise mudar a área
     #     raster = gdal.Open(f'{dir_maps}BlackMarble_2016_B2_geo.tif')
     # else:
     #     raster = gdal.Open(f'{dir_maps}BlackMarble_2016_3km_geo.tif')
     # min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
     # raster = gdal.Translate(f'{dir_maps}brasil.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
 
+    # https://www.visibleearth.nasa.gov/images/144898/earth-at-night-black-marble-2016-color-maps
     # Uso especifico de áreas já recortadas da black marble
     if v_extent == 'sp':
         raster = gdal.Open(f'{dir_maps}sp_night.tif')
@@ -613,17 +662,15 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
     R_night = array[0,:,:].astype(float) / 255
     G_night = array[1,:,:].astype(float) / 255
     B_night = array[2,:,:].astype(float) / 255
-    
     R_night[R_night==4] = 0
     G_night[G_night==5] = 0
     B_night[B_night==15] = 0
     
-    # Cores da noite
+    #
     rgb_night = np.stack([R_night,G_night,B_night], axis=2)
     
     # Area de recorte
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  
-    
     #------------------------------------------------------------------------------------------------------
     #------------------------------------------------------------------------------------------------------
     
@@ -647,8 +694,8 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
     # Plotando a imagem night
     ax.imshow(rgb_night, extent=img_extent)
 
-    # Plotando band13 nuvens
-    ax.imshow(data1, cmap='gray', vmin=0.1, vmax=0.25, alpha = 0.3, origin='upper', extent=img_extent)
+    # Plotando band13
+    ax.imshow(data1, cmap='gray', vmin=0.1, vmax=0.25, alpha = 0.1, origin='upper', extent=img_extent)
 
     # Plotando a imagem  # TrueColor
     ax.imshow(RGB, origin='upper', extent=img_extent)
@@ -886,6 +933,7 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     #  Abrindo o Dataset do arquivo da mascara
     reproject_mask = Dataset(f'{dir_in}clsm/{r_file}')
 
+
     data_ch02 = reproject_ch02.variables['Band1'][:]
     data_ch03 = reproject_ch03.variables['Band1'][:]
     data_mask = reproject_mask.variables['Band1'][:]
@@ -1061,7 +1109,6 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
 
         # Cria uma lista com os itens no diretorio temp que sao arquivos e se encaixa na expressao regular "^ndvi_.+_.+_br.npy$"
         ndvi_list = [name for name in os.listdir(f'{dir_in}ndvi') if os.path.isfile(os.path.join(f'{dir_in}ndvi', name)) and re.match('^ndvi_.+_.+_br.npy$', name)]
-        
         # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
         ndvi_list.sort()
         teste = np.load(f'{dir_in}ndvi/{ndvi_list[0]}', allow_pickle=True)
@@ -1099,105 +1146,87 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{ch02[0:59].replace("M6C02", "M6C0*")} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
 
-
+           
 def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
     
-    global dir_shapefiles, dir_colortables, dir_logos, dir_in, dir_out
+    global dir_colortables, dir_in, dir_out
 
-    def degrees(file_id):
-        
-        proj_info = file_id.variables['goes_imager_projection']
-        lon_origin = proj_info.longitude_of_projection_origin
-        H = proj_info.perspective_point_height + proj_info.semi_major_axis
-        r_eq = proj_info.semi_major_axis
-        r_pol = proj_info.semi_minor_axis
+    extent, resolution = area_para_recorte(v_extent)
 
-        # Data info
-        lat_rad_1d = file_id.variables['x'][:]
-        lon_rad_1d = file_id.variables['y'][:]
-
-        # Create meshgrid filled with radian angles
-        lat_rad, lon_rad = np.meshgrid(lat_rad_1d, lon_rad_1d)
-
-        # lat/lon calculus routine from satellite radian angle vectors
-        lambda_0 = (lon_origin * np.pi) / 180.0
-
-        a_var = np.power(np.sin(lat_rad), 2.0) + (np.power(np.cos(lat_rad), 2.0) * (np.power(np.cos(lon_rad), 2.0) + (((r_eq * r_eq) / (r_pol * r_pol)) * np.power(np.sin(lon_rad), 2.0))))
-        b_var = -2.0 * H * np.cos(lat_rad) * np.cos(lon_rad)
-        c_var = (H ** 2.0) - (r_eq ** 2.0)
-
-        r_s = (-1.0 * b_var - np.sqrt((b_var ** 2) - (4.0 * a_var * c_var))) / (2.0 * a_var)
-
-        s_x = r_s * np.cos(lat_rad) * np.cos(lon_rad)
-        s_y = - r_s * np.sin(lat_rad)
-        s_z = r_s * np.cos(lat_rad) * np.sin(lon_rad)
-
-        lat = (180.0 / np.pi) * (np.arctan(((r_eq * r_eq) / (r_pol * r_pol)) * (s_z / np.sqrt(((H - s_x) * (H - s_x)) + (s_y * s_y)))))
-        lon = (lambda_0 - np.arctan(s_y / (H - s_x))) * (180.0 / np.pi)
-
-        return lat, lon
-
-    file_var = 'Mask'
-    
     # Captura a hora para contagem do tempo de processamento da imagem
     processing_start_time = time.time()
     
-    # Area de interesse para recorte
-    extent, resolution = area_para_recorte(v_extent)
-
     # Lendo imagem FDCF
     fire_mask = Dataset(fdcf)
 
     # Coletando do nome da imagem a data/hora
     dtime_fdcf = fdcf[fdcf.find("ABI-L2-FDCF-M6_G16_s") + 20:fdcf.find("_e") - 1]
-    
-    # Formatando data para plotar na imagem e salvar o arquivo
     date = (datetime.strptime(dtime_fdcf, '%Y%j%H%M%S'))
     date_img = date.strftime('%d-%b-%Y')
     date_file = date.strftime('%Y%m%d_%H%M%S')
     
     matriz_pixels_fogo = []
-     
     fire_mask_values = fire_mask.variables['Mask'][:, :]
     selected_fires = (fire_mask_values == 10) | (fire_mask_values == 11) | (fire_mask_values == 13) | (fire_mask_values == 30) | (fire_mask_values == 33)
-    lat, lon = degrees(fire_mask)
 
+    lat, lon = degrees(fire_mask)
+    
     # separando Latitudes e Longitudes dos pontos
     p_lat = lat[selected_fires]
     p_lon = lon[selected_fires]
     
     brasil = list(shpreader.Reader(dir_shapefiles + "divisao_estados/gadm36_BRA_0.shp").geometries())
-    
-    for i in range(len(p_lat)):
-        if brasil[0].covers(Point(p_lon[i], p_lat[i])):
-            p = (p_lat[i], p_lon[i])
-            matriz_pixels_fogo.append(p)
 
+    # Faz a divisão do array em partes para mult processamento
+    num_partes = 12
+    tamanho_parte = len(p_lat) // num_partes
+    resto = len(p_lat) % num_partes
+
+    # Dividir as partes com sobreposição
+    partes = [range(i, i + tamanho_parte + 1) if i < resto else range(i, i + tamanho_parte) for i in range(0, len(p_lat), tamanho_parte)]
+
+    # Criar uma lista compartilhada
+    manager = Manager()
+    matriz_pixels_fogo = manager.list()
+
+    # Processar cada parte
+    processos = []
+    for parte_indices in partes:
+        processo_parte = Process(target=processar_parte, args=(parte_indices.start, parte_indices.stop, p_lat.tolist(), p_lon, brasil, matriz_pixels_fogo))
+        processos.append(processo_parte)
+        processo_parte.start()
+
+    # Aguardar a conclusão dos processos
+    for processo in processos:
+        processo.join()
+
+    # Converter a lista compartilhada para uma lista padrão
+    matriz_pixels_fogo = list(set(matriz_pixels_fogo))
+
+    # Ordenar a matriz
+    matriz_pixels_fogo.sort(reverse=True)
     save_txt(matriz_pixels_fogo, f'fdcf_{date.strftime("%Y%m%d_%H%M%S")}_br')
-    
+
     # Le o arquivo de controle de quantidade de pontos
     try:
         with open(f'{dir_temp}band21_control.txt', 'r') as fo:
             control = fo.readline()
-            logging.info(f'tamanho control withopen: {int(control)}')
     except:
         control = 0
-        logging.info(f'tamanho control except: {int(control)}')
 
     # Verifica se as ocorrencias de pontos é maior que as anteriores, se sim, armazena a quantidade e as imagens para gerar fundo
-    logging.info(f'Len matriz_pixels_fogo:{len(matriz_pixels_fogo)}  int control:  {int(control)}')
+    logging.info(f"Len matriz_pixels_fogo: {len(matriz_pixels_fogo)}")
+    
     date_ini = datetime(date.year, date.month, date.day, int(13), int(00))
     date_end = datetime(date.year, date.month, date.day, int(18), int(1))
     
-    # Pega a imagem com mais incidencia e salva
     if len(matriz_pixels_fogo) > int(control) and date_ini <= date <= date_end:
         copyfile(ch01, f'{dir_in}fdcf/ch01.nc')
         copyfile(ch02, f'{dir_in}fdcf/ch02.nc')
         copyfile(ch03, f'{dir_in}fdcf/ch03.nc')
-        logging.info('Copiando bands 01 a 03 para fdcf')
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
             fo.write(str(len(matriz_pixels_fogo)))
-    
+
     if fdcf_diario:
         # Reiniciar contagem para verificar imagem com maior quantidade de pontos no dia
         with open(f'{dir_temp}band21_control.txt', 'w') as fo:
@@ -1292,15 +1321,13 @@ def process_fdcf(fdcf, ch01, ch02, ch03, v_extent, fdcf_diario):
         # Faz tabela de hot spots
         fdcf_list = fdcf_tabela_hot_spots(date, ax)
         
+        for name in fdcf_list:
+            os.remove(f'{dir_out}fdcf/{name}')
+                
         # Salva imagem
         plt.savefig(f'{dir_out}fdcf/fdcf_{date_file}_br.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
         # Fecha a janela para limpar a memoria
         plt.close()
-
-        # Remove arquivos separados do dia
-        logging.info('Removendo os arquivos fdcf do dia do diretório')
-        for name in fdcf_list:
-            os.remove(f'{dir_out}fdcf/{name}')
 
     # Realiza o log do calculo do tempo de processamento da imagem
     logging.info(f'{fdcf} - {v_extent} - {str(round(time.time() - processing_start_time, 4))} segundos')
@@ -1508,12 +1535,13 @@ def process_lst(file, v_extent):
 
     # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
     img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
-    
+   
     # Criando imagem de fundo Natural Earth 1
     # raster = gdal.Open(f'{dir_maps}HYP_HR_SR_OB_DR.tif')
     # min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
     # raster = gdal.Translate(f'{dir_maps}naturalEarth_sp.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
     
+    # https://www.naturalearthdata.com/features/
     if v_extent == 'sp':
         raster = gdal.Open(f'{dir_maps}naturalEarth_sp.tif')
     else:
@@ -1524,7 +1552,7 @@ def process_lst(file, v_extent):
     R = array[0,:,:].astype(float) / 255
     G = array[1,:,:].astype(float) / 255
     B = array[2,:,:].astype(float) / 255
-    
+ 
     R[R==4] = 0
     G[G==5] = 0
     B[B==15] = 0
@@ -1568,6 +1596,108 @@ def process_lst(file, v_extent):
     logging.info(f'Total processing time: {round((time.time() - start),2)} seconds.')
 
 
+def process_dmw(dmw, truecolor, v_extent):
+    global dir_in, dir_shapefiles, dir_colortables, dir_logos, dir_out
+
+    # Captura a hora para contagem do tempo de processamento da imagem
+    start = time.time()
+
+    # Area de interesse para recorte
+    extent, resolution = area_para_recorte(v_extent)
+
+    # Opening the NetCDF DMW
+    nc = Dataset(dmw)
+
+    # Lê a data do arquivo
+    add_seconds = int(nc.variables['time_bounds'][0])
+    date = datetime(2000,1,1,12) + timedelta(seconds=add_seconds)
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+    
+    # Formatando a descricao a ser plotada na imagem
+    description = f' GOES-16 Derived Motion Winds Band 14  {date_img}'
+    institution = "CEPAGRI - UNICAMP"
+
+    # Definindo tamanho da imagem de saida
+    d_p_i = 150
+    fig = plt.figure(figsize=(2000/ float(d_p_i), 2000/ float(d_p_i)), frameon=True, 
+    dpi=d_p_i, edgecolor='black', facecolor='black')
+
+    # Define the projection
+    proj = ccrs.PlateCarree()
+
+    # Use the PlateCarree projection in cartopy
+    ax = plt.axes([0, 0, 1, 1], projection=proj)
+
+    # Define the image extent
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]
+    ax.set_extent(img_extent, ccrs.PlateCarree())
+
+    # Adicionando fundo como Imagem pronta Truecolor
+    # fname = os.path.join(truecolor)
+    # ax.imshow(imread(fname), origin='upper', transform=ccrs.PlateCarree(), extent=img_extent, zorder=1)
+    
+    # Read the required variables:  
+    pressure = nc.variables['pressure'][:]
+    wind_direction = nc.variables['wind_direction'][:]
+    wind_speed = nc.variables['wind_speed'][:]
+    lats = nc.variables['lat'][:]
+    lons = nc.variables['lon'][:]
+
+    #Calculando as componentes u,v dos vetores
+    u_comp = -(wind_speed * np.sin(np.deg2rad(wind_direction)))
+    v_comp = -(wind_speed * np.cos(np.deg2rad(wind_direction)))
+
+    #Plotando os vetores de acordo com os níveis de pressão
+    #Depois pode tirar esses loggin é so pra ver se vai chegar aqui
+    P = np.multiply(pressure >= 100,pressure <= 249)
+    color = '#0000FF' # Blue 
+    ax.barbs(lons[P],lats[P],u_comp[P],v_comp[P],length=5, barbcolor=color,pivot='middle',transform=ccrs.PlateCarree())
+
+    P = np.multiply(pressure >= 250,pressure <= 399)
+    color = '#309AFF' # Light Blue
+    ax.barbs(lons[P],lats[P],u_comp[P],v_comp[P],length=5, barbcolor=color,pivot='middle',transform=ccrs.PlateCarree())
+
+    P = np.multiply(pressure >= 400,pressure <= 549)
+    color = '#00FF00' # Green
+    ax.barbs(lons[P],lats[P],u_comp[P],v_comp[P],length=5, barbcolor=color,pivot='middle',transform=ccrs.PlateCarree())
+
+    P = np.multiply(pressure >= 550,pressure <= 699)
+    color = '#FFFF00' # Yellow
+    ax.barbs(lons[P],lats[P],u_comp[P],v_comp[P],length=5, barbcolor=color,pivot='middle',transform=ccrs.PlateCarree())
+
+    P = np.multiply(pressure >= 700,pressure <= 849)
+    color = '#FF0000' # Red
+    ax.barbs(lons[P],lats[P],u_comp[P],v_comp[P],length=5, barbcolor=color,pivot='middle',transform=ccrs.PlateCarree())
+
+    P = np.multiply(pressure >= 850,pressure <= 1000)
+    color = '#FF2FCD' # Violet  ,
+    ax.barbs(lons[P],lats[P],u_comp[P],v_comp[P],length=5, barbcolor=color,pivot='middle',transform=ccrs.PlateCarree())
+
+    # Adicionando o shapefile dos estados brasileiros
+    adicionando_shapefile(v_extent, ax)
+
+    # Adicionando  linhas dos litorais
+    adicionando_linhas(ax)
+
+    # Adicionando descricao da imagem
+    adicionando_descricao_imagem(description, institution, ax, fig)
+
+    # Adicionando os logos
+    adicionando_logos(fig)
+
+    #Adicionando legenda - Coloquei separado para não ter que mudar a função toda e o resto do código
+    legenda = plt.imread(dir_logos + 'dmw_legend.png')  # Lendo o arquivo do logo
+    fig.figimage(legenda, 1750, 70, zorder=1, alpha=0.8, origin='upper')  # Plotando legenda
+
+    # Salvando a imagem de saida
+    plt.savefig(f'{dir_out}dmw/dmw_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+
+    # print(f'DMW - Tempo de Processamento: {round((time.time() - start), 2)} segundos.')
+
+    logging.info(f'DMW - Tempo de Processamento: {round((time.time() - start), 2)} segundos.')
+
+
 def iniciar_processo_cmi(p_br, p_sp, bands, new_bands):
     global dir_out
     
@@ -1575,7 +1705,7 @@ def iniciar_processo_cmi(p_br, p_sp, bands, new_bands):
     process_br = []
     # Cria lista vazia para controle processamento paralelo
     process_sp = []
-
+    
     # Checagem se e possivel gerar imagem bandas 1-16
     if p_br:
         logging.info('')
@@ -1725,7 +1855,7 @@ def iniciar_processo_rrqpef(p_br, p_sp, bands, new_bands):
                 os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_sp.nc")}')
 
 
-def iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands):
+def iniciar_processo_glm(p_br, bands, dir_in, new_bands):
     # Pega o nome netCDF da banda 13
     ch13 = new_bands['13']
     # Checagem se e possivel gerar imagem GLM
@@ -1744,31 +1874,20 @@ def iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands):
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_glm, args=(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', glm_list, "br"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_br.append(process)
-                # Inicia o processo
-                process.start()
+                process_glm(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}', glm_list, "br")
+
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except Exception as e:
                 # Realiza o log do erro
                 logging.info(f'Erro {e} Arquivo ')
-                # Remove a imagem com erro de processamento
-                os.remove(f'{dir_in}band13/{ch13.replace(".nc", "_reproj_br.nc")}')
-        
-            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-            for process in process_br:
-                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-                process.join()
-            # Limpa a lista de processos
-            process_br.clear()        
+
     else:
         logging.info(f'')
         logging.info(f'Sem imagens correspondentes a data para glm ')
         logging.info(f'')
 
 
-def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
+def iniciar_processo_ndvi(p_br, bands, dir_in, new_bands):
     # Pega o nome netCDF das bandas 02, 03
     ch02 = new_bands['02']
     ch03 = new_bands['03']
@@ -1797,31 +1916,12 @@ def iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands):
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
-                process = Process(target=process_ndvi, 
-                                  args=(ndvi_diario, 
-                                        f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', 
-                                        f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br"))
-                # Adiciona o processo na lista de controle do processamento paralelo
-                process_br.append(process)
-                # Inicia o processo
-                process.start()
-            
+                process_ndvi(ndvi_diario,f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}', f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}', "br")
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except Exception as e:
                 # Realiza o log do erro
                 logging.info("Erro no processamento do Arquivo NDVI")
                 logging.info(str(e))
-                # Remove a imagem com erro de processamento
-                os.remove(f'{dir_in}band02/{ch02.replace(".nc", "_reproj_br.nc")}')
-                os.remove(f'{dir_in}band03/{ch03.replace(".nc", "_reproj_br.nc")}')
-            
-            # Looping de controle que pausa o processamento principal ate que todos os processos da lista de controle do processamento paralelo sejam finalizados
-            for process in process_br:
-                # Bloqueia a execução do processo principal ate que o processo cujo metodo de join() é chamado termine
-                process.join()
-            
-            # Limpa a lista de processos
-            process_br.clear()
 
 
 def iniciar_processo_fdcf(p_br, bands, dir_in, new_bands):
@@ -1847,7 +1947,7 @@ def iniciar_processo_fdcf(p_br, bands, dir_in, new_bands):
             # Captura a data atual
             date_now = datetime.now()
             # Aponta o horario 23h50 para o dia anterior                           
-            date = datetime(date_now.year, date_now.month, date_now.day, int(8), int(50))
+            date = datetime(date_now.year, date_now.month, date_now.day, int(23), int(40))
                         
             #Checagem para ver se é 23:50 para processamento do acumulado diário
             if date_file.year == date.year and date_file.month == date.month and date_file.day == date.day and date_file >= date:
@@ -1945,54 +2045,77 @@ def iniciar_processo_lst(p_br, p_sp, bands, new_bands):
                 logging.error(f"Erro ao criar processo: {e}")
 
 
+def iniciar_processo_dmw(p_br, p_sp, bands, new_bands):
+    if bands['24']:
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br: 
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS DMW "BR"...')
+            # Pega o nome do arquivo DMW
+            dmw = new_bands['24']
+            
+            truecolor = f'{dir_out}truecolor/truecolor_br.png'
+            
+            # Tenta realizar o processamento da imagem
+            try:
+                # Cria o processo com a funcao de processamento
+                process_dmw(f'{dir_in}dmw/{dmw}', truecolor, 'br')
+            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+            except Exception as e:
+                # Realiza o log do erro
+                logging.info("Erro Arquivo DMW")
+                logging.info(str(e))
+
 # ========================================#     Main     #========================================== #
 
 def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main): 
    
-    # Cria lista vazia para controle do processamento paralelo
-    process_br = []
-    
     new_bands = abrir_old_json(dir_main)
     
-    # try:
-    #     iniciar_processo_cmi(p_br, p_sp, bands, new_bands)
-    # except Exception as e:
-    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
+    try:
+        iniciar_processo_cmi(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
     
-    # try:    
-    #     iniciar_processo_truecolor(p_br, p_sp, bands, new_bands)
-    # except Exception as e:
-    #     logging.info(f'Ocorreu um Erro {e} no Processamento')   
+    try:    
+        iniciar_processo_truecolor(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')   
        
-    # try:
-    #     iniciar_processo_rrqpef(p_br, p_sp, bands, new_bands)
-    # except Exception as e:
-    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
+    try:
+        iniciar_processo_rrqpef(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
         
-    # try:
-    #     iniciar_processo_glm(p_br, bands, process_br, dir_in, new_bands)
-    # except Exception as e:
-    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
+    try:
+        iniciar_processo_glm(p_br, bands, dir_in, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
         
-    # try:    
-    #     iniciar_processo_ndvi(p_br, bands, process_br, dir_in, new_bands)
-    # except Exception as e:
-    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
+    try:    
+        iniciar_processo_ndvi(p_br, bands, dir_in, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
         
     try:    
         iniciar_processo_fdcf(p_br, bands, dir_in, new_bands)
     except Exception as e:
         logging.info(f'Ocorreu um Erro {e} no Processamento')
         
-    # try:    
-    #     iniciar_processo_airmass(p_br, p_sp, bands, new_bands)
-    # except Exception as e:
-    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
+    try:    
+        iniciar_processo_airmass(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
         
-    # try:    
-    #     iniciar_processo_lst(p_br, p_sp, bands, new_bands)
-    # except Exception as e:
-    #     logging.info(f'Ocorreu um Erro {e} no Processamento')
+    try:    
+        iniciar_processo_lst(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
+
+    try:    
+        iniciar_processo_dmw(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
     
     # Realiza log do encerramento do processamento
     logging.info("")

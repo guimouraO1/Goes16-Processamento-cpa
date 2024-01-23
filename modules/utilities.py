@@ -1,5 +1,4 @@
 # Training: Python and GOES-R Imagery: Script 8 - Functions for download data from AWS
-# -----------------------------------------------------------------------------------------------------------
 # Required modules
 import os  # Miscellaneous operating system interfaces
 import numpy as np  # Import the Numpy package
@@ -11,7 +10,6 @@ import math  # Mathematical functions
 from datetime import datetime, timedelta  # Basic Dates and time types
 from osgeo import osr  # Python bindings for GDAL
 from osgeo import gdal  # Python bindings for GDAL
-# -----------------------------------------------------------------------------------------------------------
 
 
 def load_cpt(path):
@@ -83,7 +81,6 @@ def load_cpt(path):
     colorDict = {'red': red, 'green': green, 'blue': blue}
 
     return colorDict
-# -----------------------------------------------------------------------------------------------------------
 
 
 def download_cmi(yyyymmddhhmn, band, path_dest):
@@ -101,14 +98,14 @@ def download_cmi(yyyymmddhhmn, band, path_dest):
 
     # Initializes the S3 client
     s3_client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
-    # -----------------------------------------------------------------------------------------------------------
+
     # File structure
     prefix = f'{product_name}/{year}/{day_of_year}/{hour}/OR_{product_name}-M6C{int(band):02.0f}_G16_s{year}{day_of_year}{hour}{min}'
 
     # Seach for the file on the server
     s3_result = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix, Delimiter="/")
 
-    # -----------------------------------------------------------------------------------------------------------
+
     # Check if there are files available
     if 'Contents' not in s3_result:
         # There are no files
@@ -128,7 +125,6 @@ def download_cmi(yyyymmddhhmn, band, path_dest):
                 print(f'Downloading file {path_dest}/{file_name}.nc')
                 s3_client.download_file(bucket_name, key, f'{path_dest}/{file_name}.nc')
     return f'{file_name}'
-# -----------------------------------------------------------------------------------------------------------
 
 
 def download_prod(yyyymmddhhmn, product_name, path_dest):
@@ -145,14 +141,14 @@ def download_prod(yyyymmddhhmn, product_name, path_dest):
 
     # Initializes the S3 client
     s3_client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
-    # -----------------------------------------------------------------------------------------------------------
+
     # File structure
     prefix = f'{product_name}/{year}/{day_of_year}/{hour}/OR_{product_name}-M6_G16_s{year}{day_of_year}{hour}{min}'
 
     # Seach for the file on the server
     s3_result = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix, Delimiter="/")
 
-    # -----------------------------------------------------------------------------------------------------------
+
     # Check if there are files available
     if 'Contents' not in s3_result:
         # There are no files
@@ -172,7 +168,6 @@ def download_prod(yyyymmddhhmn, product_name, path_dest):
                 # print(f'Downloading file {path_dest}{file_name}.nc')
                 s3_client.download_file(bucket_name, key, f'{path_dest}/{file_name}.nc')
     return f'{file_name}'
-# -----------------------------------------------------------------------------------------------------------
 
 
 def download_glm(yyyymmddhhmnss, path_dest):
@@ -190,7 +185,7 @@ def download_glm(yyyymmddhhmnss, path_dest):
 
     # Initializes the S3 client
     s3_client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
-    # -----------------------------------------------------------------------------------------------------------
+
     # File structure
     product_name = "GLM-L2-LCFA"
     prefix = f'{product_name}/{year}/{day_of_year}/{hour}/OR_{product_name}_G16_s{year}{day_of_year}{hour}{min}{seg}'
@@ -198,7 +193,7 @@ def download_glm(yyyymmddhhmnss, path_dest):
     # Seach for the file on the server
     s3_result = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix, Delimiter="/")
 
-    # -----------------------------------------------------------------------------------------------------------
+
     # Check if there are files available
     if 'Contents' not in s3_result:
         # There are no files
@@ -218,10 +213,8 @@ def download_glm(yyyymmddhhmnss, path_dest):
                 print(f'Downloading file {path_dest}/{file_name}.nc')
                 s3_client.download_file(bucket_name, key, f'{path_dest}/{file_name}.nc')
     return f'{file_name}'
-# -----------------------------------------------------------------------------------------------------------
 
 
-# Function to reproject the data
 def reproject(file_name, ncfile, array, extent, undef):
     # Read the original file projection and configure the output projection
     source_prj = osr.SpatialReference()
@@ -252,7 +245,6 @@ def reproject(file_name, ncfile, array, extent, undef):
     gdal.Warp(file_name, raw, **kwargs)
 
 
-
 def download_cmi_joao(yyyymmddhhmn, band, path_dest, logging):
     os.makedirs(path_dest, exist_ok=True)
 
@@ -268,14 +260,14 @@ def download_cmi_joao(yyyymmddhhmn, band, path_dest, logging):
 
     # Initializes the S3 client
     s3_client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
-    # -----------------------------------------------------------------------------------------------------------
+
     # File structure
     prefix = f'{product_name}/{year}/{day_of_year}/{hour}/OR_{product_name}-M6C{int(band):02.0f}_G16_s{year}{day_of_year}{hour}{min}'
 
     # Seach for the file on the server
     s3_result = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix, Delimiter="/")
 
-    # -----------------------------------------------------------------------------------------------------------
+
     # Check if there are files available
     if 'Contents' not in s3_result:
         # There are no files
@@ -305,21 +297,9 @@ def download_cmi_joao(yyyymmddhhmn, band, path_dest, logging):
             os.rename(old_file, new_file)
 
     return f'{file_name}'
-# -----------------------------------------------------------------------------------------------------------
 
 
 def reprojectBruno(reproj_file, reproj_var, reproj_extent, reproj_resolution, path_dest):
-
-    # test_file = reproj_file.split('\\')
-    # test_file.reverse()
-    # rtest_file = test_file[0].replace('.nc', f'_reproj_.nc')
-
-    # if os.path.exists(f"{path_dest}{rtest_file}"):
-    #     print('Arquivo já Reprojetado')
-    #     caminho = f"{path_dest}{rtest_file}"
-    #     print(caminho)
-    #     return caminho
-    
     
     def get_geot(ex, nlines, ncols):
         # Compute resolution based on data dimension
@@ -421,3 +401,47 @@ def reprojectBruno(reproj_file, reproj_var, reproj_extent, reproj_resolution, pa
     caminho = F'{path_dest}{r_file}'
     
     return caminho
+
+
+def download_dmw(yyyymmddhhmn,Ch,path_dest):
+    product_name = 'ABI-L2-DMWF'
+    os.makedirs(path_dest, exist_ok=True)
+
+    year = datetime.strptime(yyyymmddhhmn, '%Y%m%d%H%M').strftime('%Y')
+    day_of_year = datetime.strptime(yyyymmddhhmn, '%Y%m%d%H%M').strftime('%j')
+    hour = datetime.strptime(yyyymmddhhmn, '%Y%m%d%H%M').strftime('%H')
+    min = datetime.strptime(yyyymmddhhmn, '%Y%m%d%H%M').strftime('%M')
+
+    # AMAZON repository information
+    # https://noaa-goes16.s3.amazonaws.com/index.html
+    bucket_name = 'noaa-goes16'
+
+    # Initializes the S3 client
+    s3_client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
+
+    # File structure
+    prefix = f'{product_name}/{year}/{day_of_year}/{hour}/OR_{product_name}-M6C{int(Ch):02.0f}_G16_s{year}{day_of_year}{hour}{min}'
+
+    # Seach for the file on the server
+    s3_result = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix, Delimiter="/")
+
+
+    # Check if there are files available
+    if 'Contents' not in s3_result:
+        # There are no files
+        print(f'No files found for the date: {yyyymmddhhmn}, Product-{product_name}')
+        return -1
+    else:
+        # There are files
+        for obj in s3_result['Contents']:
+            key = obj['Key']
+            # Print the file name
+            file_name = key.split('/')[-1].split('.')[0]
+
+            # Download the file
+            if os.path.exists(f'{path_dest}/{file_name}.nc'):
+                print(f'File {path_dest}/{file_name}.nc exists')
+            else:
+                print(f'Downloading file {path_dest}/{file_name}.nc')
+                s3_client.download_file(bucket_name, key, f'{path_dest}/{file_name}.nc')
+    return f'{file_name}.nc'

@@ -141,6 +141,19 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
         except:
             logging.info('Não existe imagens para processar GIF lst')
             
+    if g_bands["24"]:
+        try:
+            if g_br:
+                logging.info('')
+                logging.info('CRIANDO GIF ANIMADO dmw "BR"...')
+                create_gif("dmw", "br", dir_out)
+            if g_sp:
+                logging.info('')
+                logging.info('CRIANDO GIF ANIMADO dmw "SP"...')
+                create_gif("dmw", "sp", dir_out)
+        except:
+            logging.info('Não existe imagens para processar GIF lst')
+            
     if g_bands['17']:
         if g_br:
             logging.info('')

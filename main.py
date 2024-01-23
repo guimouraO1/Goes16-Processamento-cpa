@@ -18,55 +18,50 @@ from modules.process_gif import process_gif
 # ===================================# Bibliotecas necessarias #==================================== #
 
 
-#==================================#           Dicionário        #==================================#
-dirs = get_dirs()
-# Importando dirs do modulo dirs.py
+if __name__ == "__main__":
+    
+    # Importando os diretórios do modulo dirs.py
+    dirs = get_dirs()
+    dir_in = dirs['dir_in']
+    dir_out = dirs['dir_out']
+    arq_log = dirs['arq_log']
+    dir_main = dirs['dir_main']
 
-dir_in = dirs['dir_in']
-dir_out = dirs['dir_out']
-arq_log = dirs['arq_log']
-dir_main = dirs['dir_main']
-#==================================#           Dicionário        #==================================#
+    # Dicionarios das bandas json   key : value
+    bands = {}
+    # Todas as bandas da 01 a 24 recebem False
+    for num in range(1, 25):
+        b = str(num).zfill(2)
+        bands[f'{b}'] = False
+        
+    # Br e Sp representam se terá imagens para SP e BR
+    br = True
+    sp = True
 
+    # configura o log
+    conf_log(arq_log)
 
-#==================================#     Dicionário das bandas   #==================================#
-# Dicionarios das bandas key : value
-bands = {}
-# Todas as bandas da 01 a 21 recebem False      bands = {"01": False, "02": False......
-for num in range(1, 24):
-    b = str(num).zfill(2)
-    bands[f'{b}'] = False
-br = True
-sp = True
-#==================================#     Dicionário das bandas   #==================================#
+    # Log start time
+    start = time.time()
 
+    try:
+        # Chama a função checarImagens para verificar a existência de novas imagens.
+        bands = checar_imagens(bands, dir_in, dir_main)
+        # Se tiver novas imagens para processamento:
+        if any(bands[key] for key in bands):
+            # Processa as imagens
+            processamento_das_imagens(bands, br, sp, dir_in, dir_main)
+            # Remove os arquivos .nc que já foram processados
+            remover_imagens(bands, dir_in)
+            # A função é chamada para controlar a quantidade de produtos (imagens) a serem mantidos para a produção de um GIF animado.
+            quantity_products(dir_out)
+            # Processa o gif
+            process_gif(bands, br, sp, dir_out)
+            # Envia produtos para o site
+            # send_products(br, sp, dir_out)
+        else:
+            logging.info('Sem arquivos para processamento. \n')
+    except Exception as error:
+        logging.info('ERROR : ' + str(error))
 
-# ========================================#     Main     #========================================== #
-# configura o log
-conf_log(arq_log)
-
-# Log start time
-start = time.time()
-
-try:
-    # Chama a função checarImagens para verificar a existência de novas imagens.
-    bands = checar_imagens(bands, dir_in, dir_main)
-    # Se tiver novas imagens para processamento:
-    if any(bands[key] for key in bands):
-        # Processa as imagens
-        processamento_das_imagens(bands, br, sp, dir_in, dir_main)
-        # Remove os arquivos .nc que já foram processados
-        #remover_imagens(bands, dir_in)
-        # A função é chamada para controlar a quantidade de produtos (imagens) a serem mantidos para a produção de um GIF animado.
-        #quantity_products(dir_out)
-        # Processa o gif
-        #process_gif(bands, br, sp, dir_out)
-        # Envia produtos para o site
-        #send_products(br, sp, dir_out)
-    else:
-        logging.info('Sem arquivos para processamento. \n')
-except Exception as error:
-    logging.info('ERROR : ' + str(error))
-
-finalize_log_time(start)
-# ========================================#     Main     #========================================== #
+    finalize_log_time(start)
