@@ -259,11 +259,11 @@ def checar_imagens(bands, dir_in, dir_main):
     
     logging.info("VERIFICANDO NOVAS IMAGENS")
 
-    # checar_bandas(bands, dir_in, dir_main)
+    checar_bandas(bands, dir_in, dir_main)
 
     new_bands = abrir_old_json(dir_main)
     
-    # checar_truecolor(bands)
+    checar_truecolor(bands)
     
     # checar_rrqpef(bands, dir_in, new_bands)
     

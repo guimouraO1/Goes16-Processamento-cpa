@@ -36,8 +36,8 @@ if __name__ == "__main__":
 
     # Produtos de 10 em 10 minutos
 
-    """ # Download das 16 bandas
-    for x in range(1, 17):
+   # Download das 16 bandas
+    for x in range(1, 4):
         # Transforma o inteiro contador em string e com 2 digitos
         b = str(x).zfill(2)
         # Download band
@@ -47,7 +47,20 @@ if __name__ == "__main__":
             download_cmi_joao(data_hora_download_file, x, dir_in + f'band{b}', logging)
         except Exception as e:
             print(f'{e}')
-            continue """
+            continue
+        
+    for x in range(13, 14):
+        # Transforma o inteiro contador em string e com 2 digitos
+        b = str(x).zfill(2)
+        # Download band
+        logging.info("")
+        logging.info(f'Tentando download Band{b}...')
+        try:
+            download_cmi_joao(data_hora_download_file, x, dir_in + f'band{b}', logging)
+        except Exception as e:
+            print(f'{e}')
+            continue
+
 
 
     # download_glm(data_hora_download_file, dir_in + f'glm')
@@ -63,6 +76,6 @@ if __name__ == "__main__":
 
     # Donwload do produto DMW
     logging.info(f'Downloading file UTC dmw_{data_1h}.nc')
-    download_dmw(data_1h, 2, f'{dir_in}dmw')
+    download_dmw(data_1h, 14, f'{dir_in}dmw')
 
     finalize_log_time_D(start)

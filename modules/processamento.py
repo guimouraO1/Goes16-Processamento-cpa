@@ -699,6 +699,9 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
 
     # Plotando a imagem  # TrueColor
     ax.imshow(RGB, origin='upper', extent=img_extent)
+    
+    if(v_extent == 'br'):
+        plt.savefig(f'{dir_out}dmw/truecolor.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
 
     # Adicionando o shapefile dos estados brasileiros
     adicionando_shapefile(v_extent, ax)
@@ -1634,8 +1637,8 @@ def process_dmw(dmw, truecolor, v_extent):
     ax.set_extent(img_extent, ccrs.PlateCarree())
 
     # Adicionando fundo como Imagem pronta Truecolor
-    # fname = os.path.join(truecolor)
-    # ax.imshow(imread(fname), origin='upper', transform=ccrs.PlateCarree(), extent=img_extent, zorder=1)
+    fname = os.path.join(truecolor)
+    ax.imshow(imread(fname), origin='upper', transform=ccrs.PlateCarree(), extent=img_extent, zorder=1)
     
     # Read the required variables:  
     pressure = nc.variables['pressure'][:]
@@ -2054,7 +2057,7 @@ def iniciar_processo_dmw(p_br, p_sp, bands, new_bands):
             # Pega o nome do arquivo DMW
             dmw = new_bands['24']
             
-            truecolor = f'{dir_out}truecolor/truecolor_br.png'
+            truecolor = f'{dir_out}dmw/truecolor.png'
             
             # Tenta realizar o processamento da imagem
             try:
