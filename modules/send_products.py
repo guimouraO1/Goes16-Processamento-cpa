@@ -251,6 +251,19 @@ def send_products(s_br, s_sp, dir_out):
             scp_client.put(f'{dir_out}lst/{ultima_sp[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/lst/lst_sp.png')
             # Envia o arquivo "gif" para o site
             scp_client.put(f'{dir_out}lst/lst_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/lst/lst_sp.gif')
+            
+            
+            # Envio Derived Motion Winds
+            # Cria uma lista com os itens no diretorio dos produtos dmw que sao arquivos e se encaixa na expressao regular "^dmw_.+_.+_br.png$"
+            ultima_sp = [name for name in os.listdir(f'{dir_out}dmw') if os.path.isfile(os.path.join(f'{dir_out}dmw', name)) and re.match('^dmw_.+_.+_sp.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_sp.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_sp.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}dmw/{ultima_sp[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/dmw/dmw_sp.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}dmw/dmw_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/dmw/dmw_sp.gif')
 
 
     except TimeoutError as e_timeout:

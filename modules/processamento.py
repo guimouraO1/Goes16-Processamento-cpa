@@ -700,9 +700,14 @@ def process_truecolor(rgb_type, v_extent, ch01, ch02, ch03, ch13):
     # Plotando a imagem  # TrueColor
     ax.imshow(RGB, origin='upper', extent=img_extent)
     
+    
+    # Salva fundo DMW
     if(v_extent == 'br'):
-        plt.savefig(f'{dir_out}dmw/truecolor.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+        plt.savefig(f'{dir_out}dmw/truecolor_br.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
 
+    if(v_extent == 'sp'):
+        plt.savefig(f'{dir_out}dmw/truecolor_sp.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+    
     # Adicionando o shapefile dos estados brasileiros
     adicionando_shapefile(v_extent, ax)
 
@@ -1691,6 +1696,7 @@ def process_dmw(dmw, truecolor, v_extent):
 
     #Adicionando legenda - Coloquei separado para não ter que mudar a função toda e o resto do código
     legenda = plt.imread(dir_logos + 'dmw_legend.png')  # Lendo o arquivo do logo
+    
     fig.figimage(legenda, 1750, 70, zorder=1, alpha=0.8, origin='upper')  # Plotando legenda
 
     # Salvando a imagem de saida
@@ -2057,12 +2063,23 @@ def iniciar_processo_dmw(p_br, p_sp, bands, new_bands):
             # Pega o nome do arquivo DMW
             dmw = new_bands['24']
             
-            truecolor = f'{dir_out}dmw/truecolor.png'
+            truecolor = f'{dir_out}dmw/truecolor_br.png'
+            truecolor_sp = f'{dir_out}dmw/truecolor_sp.png'
             
             # Tenta realizar o processamento da imagem
             try:
                 # Cria o processo com a funcao de processamento
                 process_dmw(f'{dir_in}dmw/{dmw}', truecolor, 'br')
+            # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
+            except Exception as e:
+                # Realiza o log do erro
+                logging.info("Erro Arquivo DMW")
+                logging.info(str(e))
+            
+            # Tenta realizar o processamento da imagem DMW SP
+            try:
+                # Cria o processo com a funcao de processamento
+                process_dmw(f'{dir_in}dmw/{dmw}', truecolor_sp, 'sp')
             # Caso seja retornado algum erro do processamento, realiza o log e remove a imagem com erro de processamento
             except Exception as e:
                 # Realiza o log do erro
