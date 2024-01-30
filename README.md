@@ -222,6 +222,8 @@ The code processes the images:
 
 - **Rainfall Rate (Quantitative Precipitation Estimate)**: This product is produced every 10 minutes and shows the rate of rainfall on the Earth's surface.
 
+- **Derived Motion Winds** : This product is produced every 1 hour and shows Derived Motion Winds.
+
 <br>
 
  ### Features include:

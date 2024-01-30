@@ -33,11 +33,11 @@ def create_gif_resized(band, roi, dir_out, resize_factor=0.3):
             img = img.resize(new_size, resample=Image.BICUBIC)  # Use BICUBIC as the default resampling filter
             images.append(img)
         # Save as a GIF
-        images[0].save(f"{dir_out}index_gif/{band}_{roi}.gif", save_all=True, append_images=images[1:], duration=400, loop=0,optimize=True)
+        images[0].save(f"{dir_out}index_gifs/{band}_{roi}.gif", save_all=True, append_images=images[1:], duration=400, loop=0, optimize=True)
     except Exception as e:
         logging.error(f'Error creating GIF: {str(e)}')
-
-
+        
+        
 def process_gif(g_bands, g_br, g_sp, dir_out):
         
     start = time.time()  

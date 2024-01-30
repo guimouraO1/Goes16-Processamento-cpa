@@ -265,17 +265,17 @@ def checar_imagens(bands, dir_in, dir_main):
     
     checar_truecolor(bands)
     
-    # checar_rrqpef(bands, dir_in, new_bands)
+    checar_rrqpef(bands, dir_in, new_bands)
     
-    # checar_glm(bands, dir_in, new_bands)   
+    checar_glm(bands, dir_in, new_bands)   
     
-    # checar_ndvi(bands, dir_in, new_bands)
+    checar_ndvi(bands, dir_in, new_bands)
 
-    # checar_fdcf(bands, dir_in, new_bands)
+    checar_fdcf(bands, dir_in, new_bands)
     
-    # checar_airmass(bands)
+    checar_airmass(bands)
     
-    # checar_lst(bands, dir_in, new_bands)
+    checar_lst(bands, dir_in, new_bands)
     
     checar_dmw(bands, dir_in, new_bands)
     
