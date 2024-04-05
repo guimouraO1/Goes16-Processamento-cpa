@@ -154,11 +154,25 @@ def process_gif(g_bands, g_br, g_sp, dir_out):
         except:
             logging.info('Não existe imagens para processar GIF lst')
             
+    if g_bands["25"]:
+        try:
+            if g_br:
+                logging.info('')
+                logging.info('CRIANDO GIF ANIMADO sst "BR"...')
+                create_gif("sst", "br", dir_out)
+            if g_sp:
+                logging.info('')
+                logging.info('CRIANDO GIF ANIMADO sst "SP"...')
+                create_gif("sst", "sp", dir_out)
+        except:
+            logging.info('Não existe imagens para processar GIF sst')
+            
     if g_bands['17']:
         if g_br:
             logging.info('')
             logging.info('CRIANDO GIF ANIMADO LOW QUALITY TRUECOLOR "BR"...')
             create_gif_resized("truecolor", "br", dir_out)
+
 
     if g_bands["22"]:
         try:

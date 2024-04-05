@@ -71,6 +71,9 @@ def quantity_products(dir_out):
 
         if remove_excess_products(dir_out, 'dmw'):
             aux = True
+            
+        if remove_excess_products(dir_out, 'sst'):
+            aux = True
 
         # Registra se produtos em excesso foram removidos com sucesso ou não.
         if aux:

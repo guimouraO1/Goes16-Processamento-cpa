@@ -251,6 +251,30 @@ def checar_dmw(bands, dir_in, new_bands):
     else:
         bands['24'] = False
         logging.info(f'Sem novas imagens DMW')
+
+
+# Checa se há o Produto Sea Sarface Temperature
+def checar_sst(bands, dir_in, old_bands):
+    # Obtém uma lista de imagens que correspondem a um padrão específico na pasta.
+    imagens = [f for f in os.listdir(f'{dir_in}sst/') if os.path.isfile(os.path.join(f'{dir_in}sst/', f)) and re.match('^OR_ABI-L2-SSTF-M[0-9]_G16_s.+_e.+_c.+[0-9].nc$', f)]
+    # Se houver imagens na pasta e a imagem mais recente for diferente da ultimo processamento                           
+    if imagens and max(imagens) != old_bands['25']:
+        logging.info(f'Novas imagens para Sea Surface Temperature')
+        # latestBand recebe a nova imagem
+        latestSst = max(imagens)
+        # Se houver mais de uma imagem na pasta:
+        if len(imagens) > 1:
+            # Remove os arquivos netCDF menos o mais atual
+            remover_todos_exceto(latestSst, f'{dir_in}sst/')
+        # Modifica o arquivo JSON com a imagem mais recente.               
+        modificar_chave_old_bands('old_bands.json', '25', latestSst)
+        # Atualiza o dicionário "bands" com true para novas imagens.
+        bands['25'] = True
+    else:
+        logging.info(f'Sem imagens para Sea Surface Temperature') 
+        # Atualiza o dicionário "bands" com false sem novas imagens.
+        bands['25'] = False
+        
         
 # ========================================#     Main     #========================================== #
 
@@ -278,6 +302,8 @@ def checar_imagens(bands, dir_in, dir_main):
     checar_lst(bands, dir_in, new_bands)
     
     checar_dmw(bands, dir_in, new_bands)
+    
+    checar_sst(bands, dir_in, new_bands)
     
     print(bands)
 

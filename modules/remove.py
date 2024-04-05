@@ -100,11 +100,20 @@ def remover_imagens(bands, dir_in):
         except FileNotFoundError as e:
             logging.info(str(e))
  
-     #Remover DMW
+    #Remover DMW
     if bands['24']:    
         ch24 = oldBands['24']
         logging.info(f'Removendo imagens DMW')
         try:
             os.remove(f'{dir_in}dmw/{ch24}')
+        except FileNotFoundError as e:
+            logging.info(str(e))
+            
+    #Remover SST
+    if bands['25']:    
+        ch25 = oldBands['25']
+        logging.info(f'Removendo imagens DMW')
+        try:
+            os.remove(f'{dir_in}sst/{ch25}')
         except FileNotFoundError as e:
             logging.info(str(e))

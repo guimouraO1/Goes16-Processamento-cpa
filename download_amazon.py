@@ -34,7 +34,7 @@ if __name__ == "__main__":
     #Correção para poder fazer download em qualquer horário
     data_hora_download_file = data_10_min[0:11]+ '0'
 
-    # Produtos de 10 em 10 minutos
+#     # Produtos de 10 em 10 minutos
 
    # Download das 16 bandas
     for x in range(1, 17):
@@ -65,5 +65,10 @@ if __name__ == "__main__":
     logging.info("")
     logging.info(f'Downloading file UTC dmw_{data_1h}.nc')
     download_dmw(data_1h, 14, f'{dir_in}dmw')
+    
+    # Donwload do produto SST
+    logging.info("")
+    logging.info(f'Downloading file UTC dmw_{data_1h}.nc')
+    download_prod(data_1h,'ABI-L2-SSTF',f'{dir_in}sst/')
 
     finalize_log_time_D(start)

@@ -1,0 +1,144 @@
+21/03/2024 12:18:01 INFO 
+21/03/2024 12:18:01 INFO 
+21/03/2024 12:18:01 INFO ===========================================================================================
+21/03/2024 12:18:01 INFO =                         DOWNLOAD IMAGENS GOES AS 21/03/2024-12:18:01                         =
+21/03/2024 12:18:01 INFO ===========================================================================================
+21/03/2024 12:18:01 INFO 
+21/03/2024 12:18:01 INFO 
+21/03/2024 12:18:01 INFO Downloading file UTC dmw_202403211400.nc
+21/03/2024 12:18:17 INFO 
+21/03/2024 12:18:17 INFO Tempo gasto 16.0139 segundos
+21/03/2024 12:18:17 INFO 
+21/03/2024 12:18:17 INFO ==========================================================================================
+21/03/2024 12:18:17 INFO =                         DOWNLOAD ENCERRADO GOES AS 21/03/2024-12:18:17                         =
+21/03/2024 12:18:17 INFO ==========================================================================================
+21/03/2024 12:18:17 INFO 
+21/03/2024 12:18:17 INFO 
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO ==============================================================================================
+21/03/2024 12:18:34 INFO =                         PROCESSANDO IMAGENS GOES AS 21/03/2024-12:18:34                         =
+21/03/2024 12:18:34 INFO ==============================================================================================
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO VERIFICANDO NOVAS IMAGENS
+21/03/2024 12:18:34 INFO Novas imagens para Sea Surface Temperature
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO PROCESSANDO IMAGENS "BR"...
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO PROCESSANDO IMAGENS "SP"...
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO Sem imagens correspondentes a data para glm 
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "BR"...
+21/03/2024 12:18:34 ERROR Erro ao criar processo: cannot access local variable 'data_lst' where it is not associated with a value
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "SP"...
+21/03/2024 12:18:34 ERROR Erro ao criar processo: cannot access local variable 'data_lst' where it is not associated with a value
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO PROCESSAMENTO ENCERRADO
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO REMOVENDO IMAGENS PROCESSADAS
+21/03/2024 12:18:34 INFO Removendo imagens DMW
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO VERIFICANDO NUMERO DE PRODUTOS...
+21/03/2024 12:18:34 INFO Quantidade de produtos dentro do limite
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO CRIANDO GIF ANIMADO "BR"...
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO CRIANDO GIF ANIMADO "SP"...
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO CRIANDO GIF ANIMADO sst "BR"...
+21/03/2024 12:18:34 ERROR Erro ao criar GIF: list index out of range
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO CRIANDO GIF ANIMADO sst "SP"...
+21/03/2024 12:18:34 ERROR Erro ao criar GIF: list index out of range
+21/03/2024 12:18:34 INFO Tempo de Processamento Gifs: 0.0 segundos.
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO Tempo gasto 0.6924 segundos
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO ===============================================================================================
+21/03/2024 12:18:34 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 21/03/2024-12:18:34                         =
+21/03/2024 12:18:34 INFO ===============================================================================================
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:18:34 INFO 
+21/03/2024 12:20:32 INFO 
+21/03/2024 12:20:32 INFO 
+21/03/2024 12:20:32 INFO ===========================================================================================
+21/03/2024 12:20:32 INFO =                         DOWNLOAD IMAGENS GOES AS 21/03/2024-12:20:32                         =
+21/03/2024 12:20:32 INFO ===========================================================================================
+21/03/2024 12:20:32 INFO 
+21/03/2024 12:20:32 INFO 
+21/03/2024 12:20:32 INFO Downloading file UTC dmw_202403211400.nc
+21/03/2024 12:20:44 INFO 
+21/03/2024 12:20:44 INFO Tempo gasto 12.2507 segundos
+21/03/2024 12:20:44 INFO 
+21/03/2024 12:20:44 INFO ==========================================================================================
+21/03/2024 12:20:44 INFO =                         DOWNLOAD ENCERRADO GOES AS 21/03/2024-12:20:44                         =
+21/03/2024 12:20:44 INFO ==========================================================================================
+21/03/2024 12:20:44 INFO 
+21/03/2024 12:20:44 INFO 
+21/03/2024 12:20:52 INFO 
+21/03/2024 12:20:52 INFO 
+21/03/2024 12:20:52 INFO ==============================================================================================
+21/03/2024 12:20:52 INFO =                         PROCESSANDO IMAGENS GOES AS 21/03/2024-12:20:52                         =
+21/03/2024 12:20:52 INFO ==============================================================================================
+21/03/2024 12:20:52 INFO 
+21/03/2024 12:20:52 INFO VERIFICANDO NOVAS IMAGENS
+21/03/2024 12:20:52 INFO Sem imagens para Sea Surface Temperature
+21/03/2024 12:20:52 INFO Sem arquivos para processamento. 
+
+21/03/2024 12:20:52 INFO 
+21/03/2024 12:20:52 INFO Tempo gasto 0.0006 segundos
+21/03/2024 12:20:52 INFO 
+21/03/2024 12:20:52 INFO ===============================================================================================
+21/03/2024 12:20:52 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 21/03/2024-12:20:52                         =
+21/03/2024 12:20:52 INFO ===============================================================================================
+21/03/2024 12:20:52 INFO 
+21/03/2024 12:20:52 INFO 
+21/03/2024 12:21:06 INFO 
+21/03/2024 12:21:06 INFO 
+21/03/2024 12:21:06 INFO ==============================================================================================
+21/03/2024 12:21:06 INFO =                         PROCESSANDO IMAGENS GOES AS 21/03/2024-12:21:06                         =
+21/03/2024 12:21:06 INFO ==============================================================================================
+21/03/2024 12:21:06 INFO 
+21/03/2024 12:21:06 INFO VERIFICANDO NOVAS IMAGENS
+21/03/2024 12:21:06 INFO Novas imagens para Sea Surface Temperature
+21/03/2024 12:21:06 INFO 
+21/03/2024 12:21:06 INFO PROCESSANDO IMAGENS "BR"...
+21/03/2024 12:21:06 INFO 
+21/03/2024 12:21:06 INFO PROCESSANDO IMAGENS "SP"...
+21/03/2024 12:21:06 INFO 
+21/03/2024 12:21:06 INFO Sem imagens correspondentes a data para glm 
+21/03/2024 12:21:06 INFO 
+21/03/2024 12:21:06 INFO 
+21/03/2024 12:21:06 INFO PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "BR"...
+21/03/2024 12:21:17 INFO Total processing time: 11.01 seconds.
+21/03/2024 12:21:17 INFO 
+21/03/2024 12:21:17 INFO PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "SP"...
+21/03/2024 12:21:22 INFO Total processing time: 4.82 seconds.
+21/03/2024 12:21:22 INFO 
+21/03/2024 12:21:22 INFO PROCESSAMENTO ENCERRADO
+21/03/2024 12:21:22 INFO 
+21/03/2024 12:21:22 INFO REMOVENDO IMAGENS PROCESSADAS
+21/03/2024 12:21:22 INFO Removendo imagens DMW
+21/03/2024 12:21:22 INFO 
+21/03/2024 12:21:22 INFO VERIFICANDO NUMERO DE PRODUTOS...
+21/03/2024 12:21:22 INFO Quantidade de produtos dentro do limite
+21/03/2024 12:21:22 INFO 
+21/03/2024 12:21:22 INFO CRIANDO GIF ANIMADO "BR"...
+21/03/2024 12:21:22 INFO 
+21/03/2024 12:21:22 INFO CRIANDO GIF ANIMADO "SP"...
+21/03/2024 12:21:22 INFO 
+21/03/2024 12:21:22 INFO CRIANDO GIF ANIMADO sst "BR"...
+21/03/2024 12:21:22 INFO 
+21/03/2024 12:21:22 INFO CRIANDO GIF ANIMADO sst "SP"...
+21/03/2024 12:21:23 INFO Tempo de Processamento Gifs: 0.35 segundos.
+21/03/2024 12:21:23 INFO 
+21/03/2024 12:21:23 INFO Tempo gasto 16.2281 segundos
+21/03/2024 12:21:23 INFO 
+21/03/2024 12:21:23 INFO ===============================================================================================
+21/03/2024 12:21:23 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 21/03/2024-12:21:23                         =
+21/03/2024 12:21:23 INFO ===============================================================================================
+21/03/2024 12:21:23 INFO 
+21/03/2024 12:21:23 INFO 

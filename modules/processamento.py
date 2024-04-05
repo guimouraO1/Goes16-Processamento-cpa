@@ -1054,7 +1054,12 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
                 NDVI_fmax = np.fmax(NDVI_fmax, NDVI_file_fmax)
 
             else:
+                try:
+                    os.remove(f'{dir_in}ndvi/{ndvi_list_fmax[f]}')
+                except Exception as e:
+                    logging.info(f"Ocorreu um erro ao remover o arquivo: {e}")
                 continue
+
 
         NDVI_fmax.dump(f'{dir_in}ndvi/ndvi_{date_ini.strftime("%Y%m%d")}_{date_end.strftime("%Y%m%d")}_br.npy')
 
@@ -1105,8 +1110,11 @@ def process_ndvi(ndvi_diario, ch02, ch03, v_extent):
         # Salvando a imagem de saida
         # plt.savefig(f'{dir_out}ndvi/ndvi_{date_end.strftime("%Y%m%d_%H%M%S")}_br.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
         plt.savefig(f'{dir_out}ndvi/ndvi_{date_end.strftime("%Y%m%d_%H%M%S")}_br.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+        
         # Fecha a janela para limpar a memoria
         plt.close()
+        
+        
         
     #   Cria o arquivo sem ser a imagem 
     elif ndvi_diario:
@@ -1707,6 +1715,112 @@ def process_dmw(dmw, truecolor, v_extent):
     logging.info(f'DMW - Tempo de Processamento: {round((time.time() - start), 2)} segundos.')
 
 
+def process_sst(file, v_extent):
+    global dir_maps, dir_in, dir_out
+    # Captura a hora para contagem do tempo de processamento da imagem
+    start = time.time()
+
+    # Area de interesse para recorte
+    extent, resolution = area_para_recorte(v_extent)
+    satellite = '16'
+    variable = 'SST'
+    
+    # Reprojetando
+    grid = remap(file, variable, extent, resolution)
+
+    # Lê o retorno da função
+    data_sst = grid.ReadAsArray()- 273.15
+
+    # Abrindo imagem com a biblioteca GDAL
+    raw = gdal.Open(f'NETCDF:{file}:' + 'SST', gdal.GA_ReadOnly)
+    metadata = raw.GetMetadata()
+    dtime = metadata.get('NC_GLOBAL#time_coverage_start')
+    date = (datetime.strptime(dtime, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    date_img = date.strftime('%d-%b-%Y %H:%M UTC')
+    date_file = date.strftime('%Y%m%d_%H%M%S')
+
+    # Define a temperatura minima
+    min_temp = -26
+    
+    # Mask values less than -20 degrees
+    data_sst = np.ma.masked_where((data_sst < min_temp), data_sst)
+
+    # Formatando a descricao a ser plotada na imagem
+    description = f' GOES-{satellite} Sea Surface Temperature (°C) {date_img}'
+    institution = "CEPAGRI - UNICAMP"
+
+    # Definindo tamanho da imagem de saida
+    d_p_i = 150
+    fig = plt.figure(figsize=(2000 / float(d_p_i), 2000 / float(d_p_i)), frameon=True, dpi=d_p_i, edgecolor='black', facecolor='black')
+
+    # Utilizando projecao geoestacionaria no cartopy
+    ax = plt.axes(projection=ccrs.PlateCarree())
+
+    # Formatando a extensao da imagem, modificando ordem de minimo e maximo longitude e latitude
+    img_extent = [extent[0], extent[2], extent[1], extent[3]]  # Min lon, Max lon, Min lat, Max lat
+   
+    # Criando imagem de fundo Natural Earth 1
+    # raster = gdal.Open(f'{dir_maps}HYP_HR_SR_OB_DR.tif')
+    # min_lon = extent[0]; max_lon = extent[2]; min_lat = extent[1]; max_lat = extent[3]
+    # raster = gdal.Translate(f'{dir_maps}naturalEarth_sp.tif', raster, projWin = [min_lon, max_lat, max_lon, min_lat])
+    
+    # https://www.naturalearthdata.com/features/
+    if v_extent == 'sp':
+        raster = gdal.Open(f'{dir_maps}naturalEarth_sp.tif')
+    else:
+        raster = gdal.Open(f'{dir_maps}naturalEarth_br.tif')
+    
+    # Lendo o RGB 
+    array = raster.ReadAsArray()
+    R = array[0,:,:].astype(float) / 255
+    G = array[1,:,:].astype(float) / 255
+    B = array[2,:,:].astype(float) / 255
+ 
+    R[R==4] = 0
+    G[G==5] = 0
+    B[B==15] = 0
+    rgb = np.stack([R, G, B], axis=2)
+    
+    # PLotando imagem de fundo
+    ax.imshow(rgb, extent=img_extent)
+    
+    # Plotando a imagem Spectral_r
+    img = ax.imshow(data_sst, origin='upper',vmin=-25, vmax=60, extent=img_extent, zorder=2, cmap='jet')
+    
+    ax.set_axis_off()
+
+    # Adicionando barra da paleta de cores de acordo com o canal
+    cax0 = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.01325, ax.get_position().width, 0.0125])
+    cb = plt.colorbar(img, orientation="horizontal", cax=cax0, ticks=[-10, 10, 30, 50])
+    cb.ax.set_xticklabels(['-10', '10', '30','50'])
+    cb.ax.tick_params(axis='x', colors='black', labelsize=8)  # Alterando cor e tamanho dos rotulos da barra da paleta de cores
+    cb.outline.set_visible(False)  # Removendo contorno da barra da paleta de cores
+    cb.ax.tick_params(width=0)  # Removendo ticks da barra da paleta de cores
+    cb.ax.xaxis.set_tick_params(pad=-13)  # Colocando os rotulos dentro da barra da paleta de coreses
+
+    # Adicionando o shapefile dos estados brasileiros
+    adicionando_shapefile(v_extent, ax, colors='dimgray')
+    
+    # Adicionando  linhas dos litorais
+    adicionando_linhas(ax, colors='dimgray')
+
+    # Adicionando descricao da imagem
+    adicionando_descricao_imagem(description, institution, ax, fig)
+
+    # Adicionando os logos
+    adicionando_logos(fig)
+
+    type_sst = 'sst'
+    
+    # Salvando a imagem de saida
+    plt.savefig(f'{dir_out}{type_sst}/{type_sst}_{date_file}_{v_extent}.png', bbox_inches='tight', pad_inches=0, dpi=d_p_i)
+
+    # Fecha a janela para limpar a memoria
+    plt.close()
+    
+    logging.info(f'Total processing time: {round((time.time() - start),2)} seconds.')
+
+
 def iniciar_processo_cmi(p_br, p_sp, bands, new_bands):
     global dir_out
     
@@ -1810,7 +1924,7 @@ def iniciar_processo_truecolor(p_br, p_sp, bands, new_bands):
         # Se a variavel de controle de processamento do brasil for True, realiza o processamento
         if p_sp:
             logging.info("")
-            logging.info('PROCESSANDO IMAGENS TRUECOLOR WITH NIGHT "BR"...')
+            logging.info('PROCESSANDO IMAGENS TRUECOLOR WITH NIGHT "SP"...')
             # Tenta realizar o processamento da imagem
             try:
                 # Inicia a funcao de processamento
@@ -2086,6 +2200,42 @@ def iniciar_processo_dmw(p_br, p_sp, bands, new_bands):
                 logging.info("Erro Arquivo DMW")
                 logging.info(str(e))
 
+
+def iniciar_processo_sst(p_br, p_sp, bands, new_bands):
+    # Checagem se e possivel gerar imagem Sea Surface Temperature
+    if bands['25']:
+        
+        # Pega o nome do produto SSTF 
+        sst = new_bands['25']
+        # Pega o local do produto 
+        file = f'{dir_in}sst/{sst}'
+
+        # Se a variavel de controle de processamento do brasil for True, realiza o processamento
+        if p_br:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "BR"...')
+            try:
+                # Inicia o Processamento
+                process_sst(file, 'br')
+            # Caso seja retornado algum erro do processamento, realiza o log 
+            except Exception as e:
+                # Registra detalhes da exceção, como mensagem e tipo
+                logging.error(f"Erro ao criar processo: {e}")
+                
+        if p_sp:
+            logging.info("")
+            logging.info('PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "SP"...')
+            try:
+                # Inicia o Processamento
+                process_sst(file, 'sp')
+            # Caso seja retornado algum erro do processamento, realiza o log 
+            except Exception as e:
+                # Registra detalhes da exceção, como mensagem e tipo
+                logging.error(f"Erro ao criar processo: {e}")
+
+
+
+
 # ========================================#     Main     #========================================== #
 
 def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main): 
@@ -2134,6 +2284,11 @@ def processamento_das_imagens(bands, p_br, p_sp, dir_in, dir_main):
 
     try:    
         iniciar_processo_dmw(p_br, p_sp, bands, new_bands)
+    except Exception as e:
+        logging.info(f'Ocorreu um Erro {e} no Processamento')
+        
+    try:    
+        iniciar_processo_sst(p_br, p_sp, bands, new_bands)
     except Exception as e:
         logging.info(f'Ocorreu um Erro {e} no Processamento')
     

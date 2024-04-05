@@ -1,0 +1,64 @@
+07/02/2024 09:44:08 INFO 
+07/02/2024 09:44:08 INFO 
+07/02/2024 09:44:08 INFO ===========================================================================================
+07/02/2024 09:44:08 INFO =                         DOWNLOAD IMAGENS GOES AS 07/02/2024-09:44:08                         =
+07/02/2024 09:44:08 INFO ===========================================================================================
+07/02/2024 09:44:08 INFO 
+07/02/2024 09:44:08 INFO 
+07/02/2024 09:44:08 INFO Downloading file UTC sst_202402071100.nc
+07/02/2024 09:44:29 INFO 
+07/02/2024 09:44:29 INFO Tempo gasto 20.94 segundos
+07/02/2024 09:44:29 INFO 
+07/02/2024 09:44:29 INFO ==========================================================================================
+07/02/2024 09:44:29 INFO =                         DOWNLOAD ENCERRADO GOES AS 07/02/2024-09:44:29                         =
+07/02/2024 09:44:29 INFO ==========================================================================================
+07/02/2024 09:44:29 INFO 
+07/02/2024 09:44:29 INFO 
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO ==============================================================================================
+07/02/2024 09:58:58 INFO =                         PROCESSANDO IMAGENS GOES AS 07/02/2024-09:58:58                         =
+07/02/2024 09:58:58 INFO ==============================================================================================
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO VERIFICANDO NOVAS IMAGENS
+07/02/2024 09:58:58 INFO Sem imagens para o dia band01
+07/02/2024 09:58:58 INFO Sem imagens para o dia band02
+07/02/2024 09:58:58 INFO Sem imagens para o dia band03
+07/02/2024 09:58:58 INFO Sem imagens para o dia band04
+07/02/2024 09:58:58 INFO Sem imagens para o dia band05
+07/02/2024 09:58:58 INFO Sem imagens para o dia band06
+07/02/2024 09:58:58 INFO Sem imagens para o dia band07
+07/02/2024 09:58:58 INFO Sem imagens para o dia band08
+07/02/2024 09:58:58 INFO Sem imagens para o dia band09
+07/02/2024 09:58:58 INFO Sem imagens para o dia band10
+07/02/2024 09:58:58 INFO Sem imagens para o dia band11
+07/02/2024 09:58:58 INFO Sem imagens para o dia band12
+07/02/2024 09:58:58 INFO Sem imagens para o dia band13
+07/02/2024 09:58:58 INFO Sem imagens para o dia band14
+07/02/2024 09:58:58 INFO Sem imagens para o dia band15
+07/02/2024 09:58:58 INFO Sem imagens para o dia band16
+07/02/2024 09:58:58 INFO Sem novas imagens TRUECOLOR
+07/02/2024 09:58:58 INFO Sem novas imagens RRQPEF
+07/02/2024 09:58:58 INFO Sem novas imagens GLM
+07/02/2024 09:58:58 INFO Sem novas imagens FDCF
+07/02/2024 09:58:58 INFO Sem novas imagens AIRMASS
+07/02/2024 09:58:58 INFO Sem imagens para Land Surface Temperature
+07/02/2024 09:58:58 INFO Sem novas imagens DMW
+07/02/2024 09:58:58 INFO Novas imagens para Land Surface Temperature
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO PROCESSANDO IMAGENS "BR"...
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO PROCESSANDO IMAGENS "SP"...
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO Sem imagens correspondentes a data para glm 
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO PROCESSAMENTO ENCERRADO
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO Tempo gasto 0.006 segundos
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO ===============================================================================================
+07/02/2024 09:58:58 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 07/02/2024-09:58:58                         =
+07/02/2024 09:58:58 INFO ===============================================================================================
+07/02/2024 09:58:58 INFO 
+07/02/2024 09:58:58 INFO 

@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # Dicionarios das bandas json   key : value
     bands = {}
     # Todas as bandas da 01 a 24 recebem False
-    for num in range(1, 25):
+    for num in range(1, 26):
         b = str(num).zfill(2)
         bands[f'{b}'] = False
         

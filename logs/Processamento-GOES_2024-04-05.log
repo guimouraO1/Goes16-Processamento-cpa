@@ -1,0 +1,124 @@
+05/04/2024 11:30:47 INFO 
+05/04/2024 11:30:47 INFO 
+05/04/2024 11:30:47 INFO ===========================================================================================
+05/04/2024 11:30:47 INFO =                         DOWNLOAD IMAGENS GOES AS 05/04/2024-11:30:47                         =
+05/04/2024 11:30:47 INFO ===========================================================================================
+05/04/2024 11:30:47 INFO 
+05/04/2024 11:30:47 INFO 
+05/04/2024 11:30:47 INFO Downloading file UTC dmw_202404051300.nc
+05/04/2024 11:30:54 INFO 
+05/04/2024 11:30:54 INFO Tempo gasto 6.9356 segundos
+05/04/2024 11:30:54 INFO 
+05/04/2024 11:30:54 INFO ==========================================================================================
+05/04/2024 11:30:54 INFO =                         DOWNLOAD ENCERRADO GOES AS 05/04/2024-11:30:54                         =
+05/04/2024 11:30:54 INFO ==========================================================================================
+05/04/2024 11:30:54 INFO 
+05/04/2024 11:30:54 INFO 
+05/04/2024 11:31:05 INFO 
+05/04/2024 11:31:05 INFO 
+05/04/2024 11:31:05 INFO ==============================================================================================
+05/04/2024 11:31:05 INFO =                         PROCESSANDO IMAGENS GOES AS 05/04/2024-11:31:05                         =
+05/04/2024 11:31:05 INFO ==============================================================================================
+05/04/2024 11:31:05 INFO 
+05/04/2024 11:31:05 INFO VERIFICANDO NOVAS IMAGENS
+05/04/2024 11:31:05 INFO Novas imagens para Sea Surface Temperature
+05/04/2024 11:31:05 INFO 
+05/04/2024 11:31:05 INFO PROCESSANDO IMAGENS "BR"...
+05/04/2024 11:31:05 INFO 
+05/04/2024 11:31:05 INFO PROCESSANDO IMAGENS "SP"...
+05/04/2024 11:31:05 INFO 
+05/04/2024 11:31:05 INFO Sem imagens correspondentes a data para glm 
+05/04/2024 11:31:05 INFO 
+05/04/2024 11:31:05 INFO 
+05/04/2024 11:31:05 INFO PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "BR"...
+05/04/2024 11:31:18 INFO Total processing time: 12.99 seconds.
+05/04/2024 11:31:18 INFO 
+05/04/2024 11:31:18 INFO PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "SP"...
+05/04/2024 11:31:24 INFO Total processing time: 5.15 seconds.
+05/04/2024 11:31:24 INFO 
+05/04/2024 11:31:24 INFO PROCESSAMENTO ENCERRADO
+05/04/2024 11:31:24 INFO 
+05/04/2024 11:31:24 INFO REMOVENDO IMAGENS PROCESSADAS
+05/04/2024 11:31:24 INFO Removendo imagens DMW
+05/04/2024 11:31:24 INFO 
+05/04/2024 11:31:24 INFO VERIFICANDO NUMERO DE PRODUTOS...
+05/04/2024 11:31:24 INFO Quantidade de produtos dentro do limite
+05/04/2024 11:31:24 INFO 
+05/04/2024 11:31:24 INFO CRIANDO GIF ANIMADO "BR"...
+05/04/2024 11:31:24 INFO 
+05/04/2024 11:31:24 INFO CRIANDO GIF ANIMADO "SP"...
+05/04/2024 11:31:24 INFO 
+05/04/2024 11:31:24 INFO CRIANDO GIF ANIMADO sst "BR"...
+05/04/2024 11:31:24 INFO 
+05/04/2024 11:31:24 INFO CRIANDO GIF ANIMADO sst "SP"...
+05/04/2024 11:31:25 INFO Tempo de Processamento Gifs: 1.13 segundos.
+05/04/2024 11:31:25 INFO 
+05/04/2024 11:31:25 INFO Tempo gasto 19.4847 segundos
+05/04/2024 11:31:25 INFO 
+05/04/2024 11:31:25 INFO ===============================================================================================
+05/04/2024 11:31:25 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 05/04/2024-11:31:25                         =
+05/04/2024 11:31:25 INFO ===============================================================================================
+05/04/2024 11:31:25 INFO 
+05/04/2024 11:31:25 INFO 
+05/04/2024 11:33:27 INFO 
+05/04/2024 11:33:27 INFO 
+05/04/2024 11:33:27 INFO ===========================================================================================
+05/04/2024 11:33:27 INFO =                         DOWNLOAD IMAGENS GOES AS 05/04/2024-11:33:27                         =
+05/04/2024 11:33:27 INFO ===========================================================================================
+05/04/2024 11:33:27 INFO 
+05/04/2024 11:33:27 INFO 
+05/04/2024 11:33:27 INFO Downloading file UTC dmw_202404051300.nc
+05/04/2024 11:33:35 INFO 
+05/04/2024 11:33:35 INFO Tempo gasto 7.8708 segundos
+05/04/2024 11:33:35 INFO 
+05/04/2024 11:33:35 INFO ==========================================================================================
+05/04/2024 11:33:35 INFO =                         DOWNLOAD ENCERRADO GOES AS 05/04/2024-11:33:35                         =
+05/04/2024 11:33:35 INFO ==========================================================================================
+05/04/2024 11:33:35 INFO 
+05/04/2024 11:33:35 INFO 
+05/04/2024 11:33:39 INFO 
+05/04/2024 11:33:39 INFO 
+05/04/2024 11:33:39 INFO ==============================================================================================
+05/04/2024 11:33:39 INFO =                         PROCESSANDO IMAGENS GOES AS 05/04/2024-11:33:39                         =
+05/04/2024 11:33:39 INFO ==============================================================================================
+05/04/2024 11:33:39 INFO 
+05/04/2024 11:33:39 INFO VERIFICANDO NOVAS IMAGENS
+05/04/2024 11:33:39 INFO Novas imagens para Sea Surface Temperature
+05/04/2024 11:33:39 INFO 
+05/04/2024 11:33:39 INFO PROCESSANDO IMAGENS "BR"...
+05/04/2024 11:33:39 INFO 
+05/04/2024 11:33:39 INFO PROCESSANDO IMAGENS "SP"...
+05/04/2024 11:33:39 INFO 
+05/04/2024 11:33:39 INFO Sem imagens correspondentes a data para glm 
+05/04/2024 11:33:39 INFO 
+05/04/2024 11:33:39 INFO 
+05/04/2024 11:33:39 INFO PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "BR"...
+05/04/2024 11:33:50 INFO Total processing time: 11.29 seconds.
+05/04/2024 11:33:50 INFO 
+05/04/2024 11:33:50 INFO PROCESSANDO IMAGENS SEA SURFACE TEMPERATURE "SP"...
+05/04/2024 11:33:55 INFO Total processing time: 4.63 seconds.
+05/04/2024 11:33:55 INFO 
+05/04/2024 11:33:55 INFO PROCESSAMENTO ENCERRADO
+05/04/2024 11:33:55 INFO 
+05/04/2024 11:33:55 INFO REMOVENDO IMAGENS PROCESSADAS
+05/04/2024 11:33:55 INFO Removendo imagens DMW
+05/04/2024 11:33:55 INFO 
+05/04/2024 11:33:55 INFO VERIFICANDO NUMERO DE PRODUTOS...
+05/04/2024 11:33:55 INFO Quantidade de produtos dentro do limite
+05/04/2024 11:33:55 INFO 
+05/04/2024 11:33:55 INFO CRIANDO GIF ANIMADO "BR"...
+05/04/2024 11:33:55 INFO 
+05/04/2024 11:33:55 INFO CRIANDO GIF ANIMADO "SP"...
+05/04/2024 11:33:55 INFO 
+05/04/2024 11:33:55 INFO CRIANDO GIF ANIMADO sst "BR"...
+05/04/2024 11:33:56 INFO 
+05/04/2024 11:33:56 INFO CRIANDO GIF ANIMADO sst "SP"...
+05/04/2024 11:33:56 INFO Tempo de Processamento Gifs: 0.87 segundos.
+05/04/2024 11:33:56 INFO 
+05/04/2024 11:33:56 INFO Tempo gasto 16.8376 segundos
+05/04/2024 11:33:56 INFO 
+05/04/2024 11:33:56 INFO ===============================================================================================
+05/04/2024 11:33:56 INFO =                         PROCESSAMENTO ENCERRADO GOES AS 05/04/2024-11:33:56                         =
+05/04/2024 11:33:56 INFO ===============================================================================================
+05/04/2024 11:33:56 INFO 
+05/04/2024 11:33:56 INFO 

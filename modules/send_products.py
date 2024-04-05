@@ -176,6 +176,22 @@ def send_products(s_br, s_sp, dir_out):
             # Envia o arquivo "gif" para o site
             scp_client.put(f'{dir_out}dmw/dmw_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/dmw/dmw_br.gif')
             
+            # Envio Sea Surface Temparature
+            # Cria uma lista com os itens no diretorio dos produtos sst que sao arquivos e se encaixa na expressao regular "^sst_.+_.+_br.png$"
+            ultima_br = [name for name in os.listdir(f'{dir_out}sst') if os.path.isfile(os.path.join(f'{dir_out}sst', name)) and re.match('^sst_.+_.+_br.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_br.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_br.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}sst/{ultima_br[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/sst/sst_br.png')
+            # Cria um arquivo menor do arquivo "png" mais recente
+            os.system(f'/usr/bin/ffmpeg -y -v warning -i {dir_out}sst/{ultima_br[0]} -vf scale=448:321 {dir_out}sst/sst.png')
+            # Envia o arquivo menor do "png" mais recente para o site
+            scp_client.put(f'{dir_out}sst/sst.png', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/sst/sst.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}sst/sst_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/sst/sst_br.gif')
+            
             # Envia os arquivos "gifs" low quality para o site
             scp_client.put(f'{dir_out}index_gifs/truecolor_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/index_gifs/truecolor_br.gif')
             scp_client.put(f'{dir_out}index_gifs/airmass_br.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/index_gifs/airmass_br.gif')
@@ -265,7 +281,18 @@ def send_products(s_br, s_sp, dir_out):
             # Envia o arquivo "gif" para o site
             scp_client.put(f'{dir_out}dmw/dmw_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/dmw/dmw_sp.gif')
 
-
+            # Envio Sea Surface Temperature
+            # Cria uma lista com os itens no diretorio dos produtos sst que sao arquivos e se encaixa na expressao regular "^sst_.+_.+_br.png$"
+            ultima_sp = [name for name in os.listdir(f'{dir_out}sst') if os.path.isfile(os.path.join(f'{dir_out}sst', name)) and re.match('^sst_.+_.+_sp.png$', name)]
+            # Ordena de forma alfabetica a lista, ficando assim os arquivos mais antigos no comeco
+            ultima_sp.sort()
+            # Realiza a inversao da lista, ficando assim os arquivos mais recentes no comeco
+            ultima_sp.reverse()
+            # Envia o arquivo "png" mais recente para o site, renomeando no destino
+            scp_client.put(f'{dir_out}sst/{ultima_sp[0]}', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/sst/sst_sp.png')
+            # Envia o arquivo "gif" para o site
+            scp_client.put(f'{dir_out}sst/sst_sp.gif', f'/var/www/html/cepagri/atualizacoes-regulares/goes16/sst/sst_sp.gif')
+            
     except TimeoutError as e_timeout:
         logging.info('')
         logging.info(f'FALHA AO ENVIAR PRODUTOS PARA O SITE - {e_timeout}')
