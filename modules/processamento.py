@@ -31,8 +31,6 @@ from matplotlib.colors import LinearSegmentedColormap, to_rgba
 from datetime import timedelta, datetime
 from modules.remap import remap
 from shapely.geometry import Point
-import shapely.speedups
-shapely.speedups.enable()
 
 # Configurar o NumPy para ignorar os avisos
 np.seterr(invalid='ignore')

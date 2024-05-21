@@ -4,7 +4,7 @@ from osgeo import gdal
 from modules.logs import conf_log_D, finalize_log_time_D 
 from modules.utilities import download_dmw, download_glm, download_prod, download_cmi_joao
 from modules.dirs import get_dirs
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 import logging
 import os
 import time
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     conf_log_D(arq_log)
 
     # Captura hora atual em UTC para download no site da Amazon
-    data_hora_atual = datetime.utcnow()
+    data_hora_atual = datetime.now(timezone.utc)
 
     # Atrasa 10 min para entrar em conformidade com Amazon
     data_10_min = datetime.strftime(data_hora_atual-timedelta(minutes=10),'%Y%m%d%H%M')
